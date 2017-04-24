@@ -13,18 +13,27 @@ from mrbait_menu import parseArgs
 
 #Parse Command line arguments
 params = parseArgs()
-#print("Cov is",params.cov," and maf is ",params.maf)
 
+#Intiate database connection
+sqlite_file = params.db
+conn = sqlite3.connect(sqlite_file)
+
+#Parse MAF file
 for aln in AlignIO.parse(params.maf, "maf"):
+	#Skip if too few individuals in alignment
 	if len(aln) < params.cov:
 		print("Alignment only has coverage of ", len(aln), ", skipping")
 		continue
+	#Skip if alignment length too low
 	elif aln.get_alignment_length() < params.minlen or aln.get_alignment_length() < params.bmin:
 		print("Alignment only has length of ", aln.get_alignment_length(), ", skipping")
 		continue
+	#for
 	#for seq in aln:
 		#print("starts at %s on the %s strand of seq %s in length, and runs for %s bp" % \
 			#(seq.annotations["start"],
 			#seq.annotations["strand"],
 			#seq.annotations["srcSize"],
 			#seq.annotations["size"]))
+			
+conn.close()
