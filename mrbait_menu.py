@@ -7,15 +7,21 @@ def display_help(message=None):
     if message is not None:
         print (message)
     print ("\nMrBait is a program for developing baits for targeted enrichment NGS methods\n")
-    print ("Author: Tyler K. Chafin")
-    print ("Contact: tkchafin@uark.edu")
-    print ("Last updated: ")
+    print ("Author:		Tyler K. Chafin")
+    print ("Contact:	tkchafin@uark.edu")
+    print ("Version:	0.01")
     print ("\nUsage: ", sys.argv[0], "-m=</path/to/MAF>")
-    print ("\nNOTE: SQLite databases are currently remade from scratch with each instance of the program. Support for opening and editing older database files will come soon.")
+    print ("\nNOTE: SQLite databases are currently remade from scratch with each", \
+    "instance of the program. Support for opening and editing older database files will come soon.")
+    print ("\nNOTE: Loci failing the <--cov> and <--len> filters are not included in ",\
+    "the database and thus cannot be salvaged, even if subsequent processing of the", \
+    "database applies less stringent filtering. Changes in these parameters will require", \
+    "re-running the program")
     print ("\nMandatory arguments:")
     print ("	-i, --in	: Input format- currently only MAF supported [More input methods to come later]")
     print ("	-m, --maf	: Input multiple alignment [More input methods to come later]")
     print ("\nOptional arguments:")
+    print ("	-t,--thresh	: Minimum proportion for a variant to be incorporated into consensus sequence [default=0.1]")
     print ("	-b,--bait	: Desired bait length range [default=\"80,80\"]")
     print ("	-c,--cov	: Minimum number of sequences in each alignment [default=1]")
     print ("	-l,--len	: Minimum alignment length [default=1]")
@@ -41,6 +47,7 @@ class parseArgs():
 		self.bmax=80
 		self.bmin=80
 		self.minlen=80
+		self.thresh=0.1
 		self.db="./mrbait.sqlite"
 		for opt, arg in options:
 			if opt in ('-m', '--maf'):
@@ -53,6 +60,8 @@ class parseArgs():
 				self.minlen = int(arg)
 			elif opt in ('-d', '--db'):
 				self.db = arg
+			elif opt in ('-t', '--thresh'):
+				self.thresh = float(arg)
 			elif opt in ('-b', '--bait'):
 				temp = arg.strip().split(',')
 				self.bmax = int(temp[1])

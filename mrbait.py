@@ -9,6 +9,7 @@ from Bio.AlignIO import MafIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 import manage_bait_db as m
+import alignment_tools as a
 
 ############################### MAIN ###################################
 
@@ -45,7 +46,7 @@ for aln in AlignIO.parse(params.maf, "maf"):
 		continue
 	
 	#Add each locus to database
-	
+	consensus = a.make_consensus(aln, threshold=params.thresh)
 	#for
 	#for seq in aln:
 		#print("starts at %s on the %s strand of seq %s in length, and runs for %s bp" % \
