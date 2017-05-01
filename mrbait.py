@@ -10,6 +10,7 @@ from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import alignment_tools as a
+import pandas as p
 
 ############################### MAIN ###################################
 
@@ -21,32 +22,38 @@ import alignment_tools as a
 #       --Could then filter by coverage
 #
 
-
 #Parse Command line arguments
 params = parseArgs()
 
 #Intiate database connection
-sqlite_file = params.db
-conn = sqlite3.connect(sqlite_file)
+conn = m.create_connection(params.db)
 c = conn.cursor()
 
 #Initialize empty databases
 #if conn.empty() or something like that 
-m.init_new_db(c, conn)
+m.init_new_db(conn)
 
 #Parse MAF file
 for aln in AlignIO.parse(params.maf, "maf"):
+	cov = len(aln)
+	alen = aln.get_alignment_length()
 	#Skip if too few individuals in alignment
-	if len(aln) < params.cov:
-		print("Alignment only has coverage of ", len(aln), ", skipping")
+	if cov < params.cov:
+		print("Alignment only has coverage of ", cov, ", skipping")
 		continue
 	#Skip if alignment length too low
-	elif aln.get_alignment_length() < params.minlen or aln.get_alignment_length() < params.bmin:
-		print("Alignment only has length of ", aln.get_alignment_length(), ", skipping")
+	elif alen < params.minlen or alen < params.blen:
+		print("Alignment only has length of ", alen, ", skipping")
 		continue
 	
 	#Add each locus to database
-	consensus = a.make_consensus(aln, threshold=params.thresh)
+	locus = a.consensAlign(aln, threshold=params.thresh)
+	#consensus = str(a.make_consensus(aln, threshold=params.thresh))
+	m.add_locus_record(conn, cov, locus.conSequence, 0)
+	
+	#Extract variable positions for database
+	
+	
 	#for
 	#for seq in aln:
 		#print("starts at %s on the %s strand of seq %s in length, and runs for %s bp" % \
@@ -54,6 +61,10 @@ for aln in AlignIO.parse(params.maf, "maf"):
 			#seq.annotations["strand"],
 			#seq.annotations["srcSize"],
 			#seq.annotations["size"]))
+			
+#c.execute("SELECT * FROM loci")
+print (p.read_sql_query("SELECT * FROM loci", conn))
+#print (c.fetchall())
 			
 conn.commit()
 conn.close()
