@@ -10,7 +10,36 @@ class consensAlign():
 	#Default constructor
 	def __init__(self, alignment, threshold=0.1):
 		self.conSequence = make_consensus(alignment, threshold)
-		#self.alnVars = 
+		self.alnVars = self.get_vars(self.conSequence, alignment)
+		
+	@staticmethod
+	def get_vars(con, aln):
+		print("Parsing: ", con)
+		var_objects = [] #empty list for holding var objects
+		#For each position
+		for i in range(len(con)):
+			#print(i, " is ", con[i])
+			#If monomorphic, skip to next column
+			if con[i] in {"A", "G", "T", "C"}:
+				continue
+			#For each sequence
+			for c in range(len(aln[:,i])): 
+				#print(aln[c,i], end='', flush=True)
+				ref = con[i].upper()
+				var = aln[c,i].upper()
+				#ref.upper()
+				#var.upper()
+				#print("Var is ",var, " and Ref is ", ref)
+				if var == "-" and ref == "-":
+					continue
+				elif var == "N" and ref == "N":
+					continue
+				else:
+					#print(var, end='', flush=True)
+					#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
+					var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
+
+				
 
 class variablePosition():
 	'Object to hold information about a variable position'
@@ -19,6 +48,8 @@ class variablePosition():
 		self.name = name
 		self.position = pos
 		self.value = val
+		#print("Addind new: Name=",name,"; Pos=",pos,"; Val=",val)
+
 		
 	@classmethod
 	def from_list(cls, data):
@@ -74,7 +105,7 @@ def make_consensus(alignment, threshold=0.1):
 			#print(temp)
 			consensus+=reverse_iupac(temp)
 	return(consensus)
-		
+	
 #Function to split character to IUPAC codes, assuing diploidy
 def get_iupac(char):
 	iupac = {

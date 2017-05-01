@@ -40,3 +40,9 @@ def add_locus_record(conn, depth, consensus, passed=0):
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
 	return cur.lastrowid
+
+#Code to add to 'annotations' table
+def add_annotation_record(conn, name, pos, val):
+	stuff = [name,pos,val]
+	sql = ''' INSERT INTO annotations(depth, length, consensus, pass) 
+			VALUES(?,?,?,?) '''

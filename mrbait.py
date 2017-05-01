@@ -64,6 +64,8 @@ for aln in AlignIO.parse(params.maf, "maf"):
 			
 #c.execute("SELECT * FROM loci")
 print (p.read_sql_query("SELECT * FROM loci", conn))
+print (p.read_sql_query("SELECT * FROM loci", conn))
+
 #print (c.fetchall())
 			
 conn.commit()
