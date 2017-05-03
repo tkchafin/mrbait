@@ -33,7 +33,7 @@ c = conn.cursor()
 #if conn.empty() or something like that 
 m.init_new_db(conn)
 
-#Parse MAF file
+#Parse MAF file and create database
 for aln in AlignIO.parse(params.maf, "maf"):
 	cov = len(aln)
 	alen = aln.get_alignment_length()
@@ -65,6 +65,7 @@ for aln in AlignIO.parse(params.maf, "maf"):
 			
 #c.execute("SELECT * FROM loci")
 print (p.read_sql_query("SELECT * FROM loci", conn))
+print (p.read_sql_query("SELECT * FROM positions", conn))
 print (p.read_sql_query("SELECT * FROM annotations", conn))
 
 #print (c.fetchall())
