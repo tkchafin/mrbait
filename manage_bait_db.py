@@ -23,8 +23,10 @@ def init_new_db(connection):
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL)
 	''')
 	cursor.execute('''
-		CREATE TABLE annotations(id INTEGER PRIMARY KEY, ref, 
-			length INTEGER, sequence TEXT)
+		CREATE TABLE annotations(ref INTEGER NOT NULL, name TEXT NOT NULL, 
+			position INTEGER NOT NULL, value TEXT NOT NULL, 
+			FOREIGN KEY (ref) REFERENCES loci(id), 
+			PRIMARY KEY(ref, name, position))
 	''')
 	connection.commit()
 
@@ -42,7 +44,20 @@ def add_locus_record(conn, depth, consensus, passed=0):
 	return cur.lastrowid
 
 #Code to add to 'annotations' table
-def add_annotation_record(conn, name, pos, val):
-	stuff = [name,pos,val]
-	sql = ''' INSERT INTO annotations(depth, length, consensus, pass) 
+def add_annotation_record(conn, loc, name, pos, val):
+	stuff = [loc, name,pos,val]
+	sql = ''' INSERT INTO annotations(ref, name, position, value) 
 			VALUES(?,?,?,?) '''
+	cur = conn.cursor()
+	cur.execute(sql, stuff)
+	
+
+
+
+
+
+
+
+
+
+

@@ -48,12 +48,13 @@ for aln in AlignIO.parse(params.maf, "maf"):
 	
 	#Add each locus to database
 	locus = a.consensAlign(aln, threshold=params.thresh)
-	#consensus = str(a.make_consensus(aln, threshold=params.thresh))
-	m.add_locus_record(conn, cov, locus.conSequence, 0)
+	#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+	locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
 	
 	#Extract variable positions for database
-	
-	
+	for var in locus.alnVars:
+		m.add_annotation_record(conn, locid, var.name, var.position, var.value)
+
 	#for
 	#for seq in aln:
 		#print("starts at %s on the %s strand of seq %s in length, and runs for %s bp" % \
@@ -64,7 +65,7 @@ for aln in AlignIO.parse(params.maf, "maf"):
 			
 #c.execute("SELECT * FROM loci")
 print (p.read_sql_query("SELECT * FROM loci", conn))
-print (p.read_sql_query("SELECT * FROM loci", conn))
+print (p.read_sql_query("SELECT * FROM annotations", conn))
 
 #print (c.fetchall())
 			

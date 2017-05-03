@@ -9,6 +9,7 @@ class consensAlign():
 	'Consensus alignment object'
 	#Default constructor
 	def __init__(self, alignment, threshold=0.1):
+		self.alnVars = []
 		self.conSequence = make_consensus(alignment, threshold)
 		self.alnVars = self.get_vars(self.conSequence, alignment)
 		
@@ -38,7 +39,7 @@ class consensAlign():
 					#print(var, end='', flush=True)
 					#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
 					var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
-
+		return var_objects
 				
 
 class variablePosition():
@@ -47,7 +48,7 @@ class variablePosition():
 	def __init__(self, name=None, pos=None, val=None):
 		self.name = name
 		self.position = pos
-		self.value = val
+		self.value = val.upper()
 		#print("Addind new: Name=",name,"; Pos=",pos,"; Val=",val)
 
 		
