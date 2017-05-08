@@ -21,24 +21,26 @@ class consensAlign():
 		for i in range(len(con)):
 			#print(i, " is ", con[i])
 			#If monomorphic, skip to next column
-			if con[i] in {"A", "G", "T", "C"}:
-				continue
-			#For each sequence
-			for c in range(len(aln[:,i])): 
-				#print(aln[c,i], end='', flush=True)
-				ref = con[i].upper()
-				var = aln[c,i].upper()
-				#ref.upper()
-				#var.upper()
-				#print("Var is ",var, " and Ref is ", ref)
-				if var == "-" and ref == "-":
-					continue
-				elif var == "N" and ref == "N":
-					continue
-				else:
-					#print(var, end='', flush=True)
-					#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
-					var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
+			#if con[i] in {"A", "G", "T", "C"}:
+				#continue
+			#else:
+				#For each sequence
+				for c in range(len(aln[:,i])): 
+					#print(aln[c,i], end='', flush=True)
+					ref = con[i].upper()
+					var = aln[c,i].upper()
+					#ref.upper()
+					#var.upper()
+					#print("Var is ",var, " and Ref is ", ref)
+					if var == ref:
+					#if var == "-" and ref == "-":
+						continue
+					#elif var == "N" and ref == "N":
+						continue
+					else:
+						#print(var, end='', flush=True)
+						#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
+						var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
 		return var_objects
 				
 

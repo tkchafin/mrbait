@@ -38,13 +38,13 @@ for aln in AlignIO.parse(params.maf, "maf"):
 	cov = len(aln)
 	alen = aln.get_alignment_length()
 	#Skip if too few individuals in alignment
-	if cov < params.cov:
-		print("Alignment only has coverage of ", cov, ", skipping")
-		continue
+	#if cov < params.cov:
+		#print("Alignment only has coverage of ", cov, ", skipping")
+		#continue
 	#Skip if alignment length too low
-	elif alen < params.minlen or alen < params.blen:
-		print("Alignment only has length of ", alen, ", skipping")
-		continue
+	#elif alen < params.minlen or alen < params.blen:
+		#print("Alignment only has length of ", alen, ", skipping")
+		#continue
 	
 	#Add each locus to database
 	locus = a.consensAlign(aln, threshold=params.thresh)
@@ -53,20 +53,15 @@ for aln in AlignIO.parse(params.maf, "maf"):
 	
 	#Extract variable positions for database
 	for var in locus.alnVars:
-		m.add_annotation_record(conn, locid, var.name, var.position, var.value)
+		m.add_variant_record(conn, locid, var.name, var.position, var.value)
 
-	#for
-	#for seq in aln:
-		#print("starts at %s on the %s strand of seq %s in length, and runs for %s bp" % \
-			#(seq.annotations["start"],
-			#seq.annotations["strand"],
-			#seq.annotations["srcSize"],
-			#seq.annotations["size"]))
-			
+#First-pass bait design on loci passing pre-filters
+	#Pre-filters: Length, alignment depth 
+	
 #c.execute("SELECT * FROM loci")
 print (p.read_sql_query("SELECT * FROM loci", conn))
 print (p.read_sql_query("SELECT * FROM positions", conn))
-print (p.read_sql_query("SELECT * FROM annotations", conn))
+print (p.read_sql_query("SELECT * FROM variants", conn))
 
 #print (c.fetchall())
 			

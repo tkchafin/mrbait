@@ -18,20 +18,25 @@ def create_connection(db):
 def init_new_db(connection):
 	cursor = connection.cursor()
 	cursor.execute('''DROP TABLE IF EXISTS loci''')
-	cursor.execute('''DROP TABLE IF EXISTS annotations''')
+	cursor.execute('''DROP TABLE IF EXISTS variants''')
 	cursor.execute('''DROP TABLE IF EXISTS positions''')
+	#Table holding records for each locus
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL, 
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL)
 	''')
+	#Table holding position identifiers given to each variant column in a locus
 	cursor.execute('''
 		CREATE TABLE positions(posid INTEGER NOT NULL, locid INTEGER NOT NULL, 
 			column INTGER NOT NULL, 
 			FOREIGN KEY (locid) REFERENCES loci(id), 
 			PRIMARY KEY(posid))
 	''')
+	
+	#cursor
+	#Table holding extracted variants from each alignment 
 	cursor.execute('''
-		CREATE TABLE annotations(posid INTEGER NOT NULL, name TEXT NOT NULL, 
+		CREATE TABLE variants(posid INTEGER NOT NULL, name TEXT NOT NULL, 
 			value TEXT NOT NULL, 
 			FOREIGN KEY (posid) REFERENCES positions(posid), 
 			PRIMARY KEY(posid, name))
@@ -49,8 +54,8 @@ def add_locus_record(conn, depth, consensus, passed=0):
 	cur.execute(sql, stuff)
 	return cur.lastrowid
 
-#Code to add to 'annotations' table
-def add_annotation_record(conn, loc, name, pos, val):
+#Code to add to 'variants' table
+def add_variant_record(conn, loc, name, pos, val):
 	#Establish cursor 
 	cur = conn.cursor()
 	#Check if position has a posid
@@ -68,7 +73,7 @@ def add_annotation_record(conn, loc, name, pos, val):
 		posid = int(res["posid"].values)
 	#Using posid, submit to annotations
 	stuff = [posid, name, val]
-	sql = ''' INSERT INTO annotations(posid, name, value) 
+	sql = ''' INSERT INTO variants(posid, name, value) 
 			VALUES(?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
