@@ -10,7 +10,8 @@ from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import alignment_tools as a
-import pandas as p
+import pandas as pd
+import numpy as np
 
 ############################### MAIN ###################################
 
@@ -48,16 +49,16 @@ for aln in AlignIO.parse(params.maf, "maf"):
 		m.add_variant_record(conn, locid, var.name, var.position, var.value)
 
 #First-pass bait design on loci passing pre-filters
-	#Pre-filters: Length, alignment depth 
-print(p.read_sql_query("""SELECT id, consensus FROM loci WHERE 
-	length >= %s AND depth >= %s """%(params.minlen,params.cov), conn))
+#Pre-filters: Length, alignment depth 
+c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
+passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
+
+	#print(cons)
 	
 #c.execute("SELECT * FROM loci")
-#print (p.read_sql_query("SELECT * FROM loci", conn))
-#print (p.read_sql_query("SELECT * FROM positions", conn))
-#print (p.read_sql_query("SELECT * FROM variants", conn))
-
-#print (c.fetchall())
+#print (pd.read_sql_query("SELECT * FROM loci", conn))
+#print (pd.read_sql_query("SELECT * FROM positions", conn))
+#print (pd.read_sql_query("SELECT * FROM variants", conn))
 			
 conn.commit()
 conn.close()
