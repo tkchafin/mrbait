@@ -57,11 +57,13 @@ for aln in AlignIO.parse(params.maf, "maf"):
 
 #First-pass bait design on loci passing pre-filters
 	#Pre-filters: Length, alignment depth 
+print(p.read_sql_query("""SELECT id, consensus FROM loci WHERE 
+	length >= %s AND depth >= %s """%(params.minlen,params.cov), conn))
 	
 #c.execute("SELECT * FROM loci")
-print (p.read_sql_query("SELECT * FROM loci", conn))
-print (p.read_sql_query("SELECT * FROM positions", conn))
-print (p.read_sql_query("SELECT * FROM variants", conn))
+#print (p.read_sql_query("SELECT * FROM loci", conn))
+#print (p.read_sql_query("SELECT * FROM positions", conn))
+#print (p.read_sql_query("SELECT * FROM variants", conn))
 
 #print (c.fetchall())
 			

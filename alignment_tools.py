@@ -15,7 +15,7 @@ class consensAlign():
 		
 	@staticmethod
 	def get_vars(con, aln):
-		print("Parsing: ", con)
+		#print("Parsing: ", con)
 		var_objects = [] #empty list for holding var objects
 		#For each position
 		for i in range(len(con)):

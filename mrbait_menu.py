@@ -69,7 +69,8 @@ class parseArgs():
 				self.blen = int(arg)
 			else: 
 				assert False, "unhandled option"
-   
+		if self.blen > self.minlen:
+			self.minlen = self.blen
 		#Call help menu if prompted
 		if call_help is 1:
 			display_help("Exiting because help menu was called.")
