@@ -37,14 +37,6 @@ m.init_new_db(conn)
 for aln in AlignIO.parse(params.maf, "maf"):
 	cov = len(aln)
 	alen = aln.get_alignment_length()
-	#Skip if too few individuals in alignment
-	#if cov < params.cov:
-		#print("Alignment only has coverage of ", cov, ", skipping")
-		#continue
-	#Skip if alignment length too low
-	#elif alen < params.minlen or alen < params.blen:
-		#print("Alignment only has length of ", alen, ", skipping")
-		#continue
 	
 	#Add each locus to database
 	locus = a.consensAlign(aln, threshold=params.thresh)
