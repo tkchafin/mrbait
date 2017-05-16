@@ -35,7 +35,7 @@ c = conn.cursor()
 m.init_new_db(conn)
 
 #Parse MAF file and create database
-for aln in AlignIO.parse(params.maf, "maf"):
+for aln in AlignIO.parse(params.alignment, "maf"):
 	cov = len(aln)
 	alen = aln.get_alignment_length()
 	
@@ -52,7 +52,7 @@ for aln in AlignIO.parse(params.maf, "maf"):
 #Pre-filters: Length, alignment depth 
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
-
+print(passedLoci)
 	#print(cons)
 	
 #c.execute("SELECT * FROM loci")
