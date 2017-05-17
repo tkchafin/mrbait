@@ -19,7 +19,7 @@ import numpy as np
 #  To Do:
 #    -Input .loci
 #    -Input VCF?
-#    -Input raw read map
+#    -Input mpileup
 #       --Could then filter by coverage
 #
 
@@ -54,7 +54,11 @@ c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.min
 passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
 print(passedLoci)
 	#print(cons)
-	
+
+#NOTE: parallelize bait discovery in future!!
+
+#Next:
+#	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
 #print (pd.read_sql_query("SELECT * FROM loci", conn))
 #print (pd.read_sql_query("SELECT * FROM positions", conn))
