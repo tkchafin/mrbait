@@ -112,17 +112,18 @@ Bait Selection/ Optimization options:
 
 	print("""
 Running options/ shortcuts:
-	-X,--tile_all	: Ignore target region selection and tile baits across all loci
+	-W,--tile_all	: Ignore target region selection and tile baits across all loci
 			  --Relevant arguments to set: -b, -O, -v, -n, -g
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout 
 			  --Errors and assertions are not affected""")
+	print("""
+Output options:
+	-X,--expand	: In output bait table, expand all ambiguities
+	-o,--out	: Prefix for outputs [\"mrbait\"]""")
+	print("""
+Output options:
+	-h,--help	: Displays this help menu """)
 
-	print ("\nOutput options:")
-	print ("	-X,--expand	: In output bait table, expand all ambiguities")
-	print ("	-o,--out	: Prefix for outputs [default=\"./mrbait\"]")
-
-	print ("\nGeneral options:")
-	print ("	-h,--help	: Displays this help menu [boolean]")
 	print()
 
 #Object to parse command-line arguments
