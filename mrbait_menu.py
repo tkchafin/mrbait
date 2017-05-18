@@ -23,9 +23,9 @@ def display_help(message=None):
 	print("""
 Input options:
 
-	-M,--maf	: Input multiple alignment MAF file [more input options to come later]
+	-M,--maf	: Input multiple alignment MAF file [more to come later]
 	-e,--gff	: GFF file containing annotation information [NOT WORKING YET]
-	-L,--loci	: For RAD-data, input locus alignment formatted as the \".loci\" output of pyRAD
+	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
 	-A,--assembly	: Input whole genome assembly as FASTA [NOT WORKING YET]""")
 	
 	print("""
@@ -39,80 +39,84 @@ Locus filtering/ consensus options:
 General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
-	-w, --win_shift	: Shift distance for sliding window discovery of bait regions/baits [1]
+	-w, --win_shift	: Sliding window shift distance [1]
 			  --Increasing will speed up program but could lower accuracy
 			  --Cannot be longer than bait length <-b,--bait>
 	-R,--mult_reg	: Allow multiple target regions per locus [false]
 			  --See \"Target Region options\" below
-	-m,--min_mult	: Minimum alignment length to allow multiple target region [1000]
-			  --By default is set to the value of <-l,--len>. Only applies when <-R>
-			  --When -R and -T are turned off, only one bait is selected per locus
+	-m,--min_mult	: Minimum alignment length to allow multiple regions [1000]
+			  --By default is set to the value of <-l>. Only applies when <-R>
+			  --When -R and -T are off, only one bait is selected per locus
 	-v,--var_max	: Maximum number of SNP columns to be included in a bait [0]
 			  --These will be coded as the appropriate IUPAC ambiguity code
 			  --Can be expanded in final output using the <--expand> flag
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
 			  --These will be inserted as \"N\" unless <-N> is used
-	-N,--callN	: For Ns in bait sequence, call as majority nucleotide if possible
+	-N,--callN	: For Ns in bait sequence, call majority nucleotide if possible
 	-g,--numG	: Number of consensus gaps (\"-\") allowed in bait [0]
 			  --These will be inserted as \"N\" unless <-G> is used
 	-G,--callG	: For gaps in bait, call as majority nucleotide if possible
-	-E,--gff_type	: Constrain bait design to within element type of provided GFF
+	-E,--gff_type	: Constrain bait design to within element type of GFF
 			  --COMING SOON, NOT WORKING YET""")
 
 	print("""
 Target Region options:
 
-	-T,--tiling	: Turn on tiling to design multiple baits per bait region [false]
-			  --When tiling is off, see Bait Selection options below for sampling baits
+	-T,--tiling	: Turn on tiling to design multiple baits per bait region 
+			  --When tiling is off, see Bait Selection options below 
 	-O,--overlap	: Overlap for tiled baits within target regions [40]
 			  --By default will be set to 1/2 of the bait length <-b>
 			  --Asserts <-T> is turned on	  
 	-x,--max_r	: Maximum length of target region to retain baits [500]
 	-y,--min_r	: Minimum length of target region to retain baits [80]
 			  --Default will be set to bait length <-b,--bait>
-	-V,--vmax_r	: Maximumum number of SNPs in a target region to throw out all baits [0]
+	-V,--vmax_r	: Maximumum SNPs in a target region to throw out baits [0]
 			  --Individual baits are constrained by <-s>
 	-D,--dist_r	: Minimum distance between disjunct target regions [100]
 	-t,--tile_min	: Minimum bait region size to allow tiling 
 			  --By default will be set to bait length <-b> + overlap <-O>
 			  --Asserts <-T> is turned on
-	-S, --select_r	: Which criterion to select which target region to use when w/in <-D> 
-			  --Options (Ex: -S s=100 to choose region with most SNPs within 100 bases)
-				s=/snp=[d]   : Most SNPs within \"d\" bases (replace [d] with value)
+	-S, --select_r	: Which criterion to select target regions w/in <-D> 
+			  --Options 
+				s=/snp=[d]   : Most SNPs within \"d\" bases
 				b=/bad=[d]   : Least Ns and gaps within \"d\" bases
 				c=/cons=[d]  : Most conserved \"d\" bases
-				m/min        : Least non-conserved (SNP,N,gap) bases in bait region
-				r/rand       : Randomly choose a bait region to retain [default]
+				m/min        : Least SNP, N, or gap bases in bait region
+				r/rand       : Randomly choose a bait region [default]
+				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>	
-			  --Options (Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases)
+			  --Options
 				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
 				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=/rand=[x]  : Randomly retain \"x\" target regions and their baits""")
+				r=/rand=[x]  : Randomly retain \"x\" target regions w/ baits
+				Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 	#Need -s option for picking baits within bait regions and for picking bait regions within loci
 	print("""
 Bait Selection/ Optimization options:
 	-a,--balign	: Maximum allowable alignment length between baits [40]
 			  --By default is set to 1/2 bait length
 	-s,--select_b	: Which criterion to select a bait for target region 
-			  --NOTE: This option is ignored when <-T/--tiling> or <-X/--tile_all>
-			  --Options (Ex: -S s=100 to choose region with most SNPs within 100 bases)
-				s=/snp=[d]   : Most SNPs within \"d\" bases (replace [d] with value)
+			  --NOTE: This option is ignored when <-T> or <-X>
+			  --Options 
+				s=/snp=[d]   : Most SNPs within \"d\" bases 
 				b=/bad=[d]   : Least Ns and gaps within \"d\" bases
 				c=/cons=[d]  : Most conserved \"d\" bases
-				m/min        : Least non-conserved (SNP,N,gap) bases in bait region
-				r/rand       : Randomly choose a bait region to retain [default]
+				m/min        : Least SNP, N, or gap bases in bait region
+				r/rand       : Randomly choose a bait [default]
+				Ex: -S s=100 to choose region with most SNPs within 100 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 			  --Warning: May mask selections made using <-S> or <-F>	
-			  --Options (Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases)
+			  --Options 
 				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
 				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=/rand=[x]  : Randomly retain \"x\" baits OVERALL""")
+				r=/rand=[x]  : Randomly retain \"x\" baits OVERALL
+				Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 
 
 	print("""
 Running options/ shortcuts:
-	-W,--tile_all	: Ignore target region selection and tile baits across all loci
+	-W,--tile_all	: Ignore target regions and tile baits across all loci
 			  --Relevant arguments to set: -b, -O, -v, -n, -g
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout 
 			  --Errors and assertions are not affected""")
