@@ -126,6 +126,7 @@ Output options:
 	-o,--out	: Prefix for outputs [\"mrbait\"]""")
 	print("""
 Output options:
+	-Z,--split	: Split large file and read into memory piece-meal
 	-h,--help	: Displays this help menu """)
 
 	print()
