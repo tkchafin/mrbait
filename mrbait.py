@@ -5,7 +5,6 @@ import sqlite3
 import getopt
 import Bio
 from Bio import AlignIO
-from Bio.AlignIO import MafIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 import manage_bait_db as m
