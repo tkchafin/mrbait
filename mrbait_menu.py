@@ -129,8 +129,8 @@ Output options:
 	print("""
 Output options:
 	-Z,--split	: Split large file and read into memory piece-meal
-	-h,--help	: Displays this help menu """)
-
+	-h,--help	: Displays this help menu 
+	-P,--plot_all	: Plot variable positions for all baits/bait regions""")
 	print()
 
 #Object to parse command-line arguments
@@ -138,12 +138,13 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try: 
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:P', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","tiling","overlap=","max_r",
 			"min_r=","vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
-			"balign=","select_b=","filter_b=","tile_all","queit","expand","out="])
+			"balign=","select_b=","filter_b=","tile_all","queit","expand","out=",
+			"plot_all"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("Exiting because getopt returned non-zero exit status.")
