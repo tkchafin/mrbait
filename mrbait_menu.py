@@ -73,7 +73,7 @@ Target Region options:
 	-V,--vmax_r	: Maximumum SNPs in a target region to throw out baits [0]
 			  --Individual baits are constrained by <-s>
 	-D,--dist_r	: Minimum distance between disjunct target regions [100]
-	-t,--tile_min	: Minimum bait region size to allow tiling 
+	-p,--tile_min	: Minimum bait region size to allow tiling 
 			  --By default will be set to bait length <-b> + overlap <-O>
 			  --Asserts <-T> is turned on
 	-S, --select_r	: Which criterion to select target regions w/in <-D> 
@@ -124,6 +124,8 @@ Running options/ shortcuts:
 Output options:
 	-X,--expand	: In output bait table, expand all ambiguities
 	-o,--out	: Prefix for outputs [\"mrbait\"]""")
+	
+	#SPLIT option not figured out yet
 	print("""
 Output options:
 	-Z,--split	: Split large file and read into memory piece-meal
@@ -136,8 +138,12 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try: 
-			options, remainder = getopt.getopt(sys.argv[1:], 't:l:b:c:a:h', \
-			['thresh=','len=','bait=','cov=','alignment=','help'])
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:', \
+			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
+			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
+			"callN","numG=","callG","gff_type=","tiling","overlap=","max_r",
+			"min_r=","vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
+			"balign=","select_b=","filter_b=","tile_all","queit","expand","out="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("Exiting because getopt returned non-zero exit status.")
