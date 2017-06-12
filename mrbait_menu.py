@@ -2,6 +2,12 @@
 
 import getopt
 import sys
+import re
+
+def string_containsAny(str, set): 
+	for c in set: 
+		if c in str: return 0;
+	return 1;
 
 def display_help(message=None):
 	if message is not None:
@@ -23,7 +29,7 @@ def display_help(message=None):
 	print("""
 Input options:
 
-	-M,--maf	: Input multiple alignment MAF file [more to come later]
+	-M,--maf	: Input multiple alignment MAF file 
 	-e,--gff	: GFF file containing annotation information [NOT WORKING YET]
 	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
 	-A,--assembly	: Input whole genome assembly as FASTA [NOT WORKING YET]""")
@@ -117,7 +123,7 @@ Bait Selection/ Optimization options:
 	print("""
 Running options/ shortcuts:
 	-W,--tile_all	: Ignore target regions and tile baits across all loci
-			  --Relevant arguments to set: -b, -O, -v, -n, -g
+			  --Relevant arguments to set: -b, -O, -v, -n, -g, -f
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout 
 			  --Errors and assertions are not affected""")
 	print("""
@@ -133,6 +139,13 @@ Output options:
 	-P,--plot_all	: Plot variable positions for all baits/bait regions""")
 	print()
 
+#Sub-object for holding filtering options
+class subArg():
+	def __init__(self, o1, o2, o3=None):
+		self.o1 = o1
+		self.o2 = o2
+		self.o3 = o3
+
 #Object to parse command-line arguments
 class parseArgs():
 	def __init__(self):
@@ -147,39 +160,169 @@ class parseArgs():
 			"plot_all"])
 		except getopt.GetoptError as err:
 			print(err)
-			display_help("Exiting because getopt returned non-zero exit status.")
+			display_help("\nExiting because getopt returned non-zero exit status.")
 			sys.exit(2)
 		#Default values for params
-		call_help=0
+		call_help=0 #boolean
+		
+		#Input params
 		self.alignment=None
+		self.gff=None
+		self.loci=None
+		self.assembly=None
+		
+		#Locus filtering params
 		self.cov=1
-		self.blen=80
 		self.minlen=80
 		self.thresh=0.1
+		
+		#Bait params
+		self.blen=80
+		self.win_shift=1
+		self.mult_reg=0 #boolean
+		self.min_mult=1000
+		self.var_max=0
+		self.numN=0
+		self.callN=0 #boolean
+		self.numG=0
+		self.callG=0 #boolean
+		self.anchor=None
+		
+		#target region options
+		self.tiling=0 #bool
+		self.overlap=40
+		self.max_r=500
+		self.min_r=None 
+		self.vmax_r=0
+		self.dist_r=100
+		self.tile_min=None
+		self.select_r="r"
+		self.select_r_dist=None
+		self.filter_r=0 #bool
+		self.filter_r_objects=[]
+		
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
 				#Parse through arguments and set params 
 		for opt, arg in options:
-			if opt in ('-a', '--alignment'):
+			arg = arg.replace(" ","")
+			if opt in ('-M', '--maf'):
 				self.alignment = arg
 			elif opt in ('-h', '--help'):
-				call_help=1
+				call_help = 1
+			
+			#Input params
+			elif opt in ('-e', '--gff'):
+				self.gff = arg
+			elif opt in ('-L', '--loci'):
+				self.loci = arg
+			elif opt in ('-A', '--assembly'):
+				self.assembly = arg
+			
+			#Locus filtering params
 			elif opt in ('-c', '--cov'):
 				self.cov = int(arg)
 			elif opt in ('-l', '--len'):
 				self.minlen = int(arg)
 			elif opt in ('-t', '--thresh'):
 				self.thresh = float(arg)
+			
+			#Bait general params
 			elif opt in ('-b', '--bait'):
 				self.blen = int(arg)
+			elif opt in ('-w', '--win_shift'):
+				self.win_shift = int(arg)
+			elif opt in ('-R', '--mult_reg'):
+				self.mult_reg = 1
+			elif opt in ('-m', '--min_mult'):
+				self.win_shift = int(arg)
+			elif opt in ('-v', '--var_max'):
+				self.var_max = int(arg)
+			elif opt in ('-n', '--numN'):
+				self.numN = int(arg)
+			elif opt in ('-N', '--callN'):
+				self.callN = 1
+			elif opt in ('-g', '--numG'):
+				self.numG = int(arg)
+			elif opt in ('-G', '--callG'):
+				self.callG = 1	
+			elif opt in ('-E', '--gff_type'):
+				self.anchor = arg
+			
+			#target region opts
+			elif opt in ('-T', '--tiling'):
+				self.tiling = 1	
+			elif opt in ('-O', '--overlap'):
+				self.overlap = int(arg)
+			elif opt in ('-x', '--max_r'):
+				self.max_r = int(arg)
+			elif opt in ('-y', '--min_r'):
+				self.min_r = int(arg)
+			elif opt in ('-V', '--vmax_r'):
+				self.vmax_r = int(arg)
+			elif opt in ('-D', '--dist_r'):
+				self.dist_r = int(arg)
+			elif opt in ('-p', '--tile_min'):
+				self.tile_min = int(arg)
+				self.tiling = 1
+			elif opt in ('-S', '--select_r'):
+				temp = arg.split('=')
+				self.select_r = (temp[0]).lower()
+				chars = (['s','b','c','m','r'])
+				assert (string_containsAny(self.select_r, chars)) == 0, "Invalid option \"%r\" for <--select_r>" % self.select_r
+				subchars = (['s','b','c'])
+				if string_containsAny(self.select_r, subchars) == 0:
+					if (len(temp) > 1):
+						self.select_r_dist = int(temp[1])
+						assert self.select_r_dist >= 0, "select_r_dist must be an integer greater than zero!"
+					else:
+						self.select_r_dist = 100
+				else:
+					self.select_r_dist = None
+				print("select_r is %r" %self.select_r)
+				print("select_r_dist is %r"%self.select_r_dist)
+			elif opt in ('-F', '--filter_r'):
+				self.filter_r = 1 #turn on region filtering
+				temp = arg.split('/') #parse region filtering options
+				for sub in temp: 
+					subopts = re.split('=|,',sub)
+					if subopts[0] in ('m','M'):
+						assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
+						self.filter_r_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
+					elif (subopts[0] is 'r'):
+						assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
+						self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
+					else: 
+						"Invalid option %r for --filter_r!" %subopts[0]
+						sys.exit(1)
+				for subopt in self.filter_r_objects:
+					print("Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
+					
 			else: 
-				assert False, "unhandled option"
+				assert False, "unhandled option %r"%opt
+				
 		#Assertions and conditional changes to params
+		if (self.alignment is None) and (self.loci is None) and (self.assembly is None): 
+			display_help("Input not specified!")
+			sys.exit(0)
+		
+		assert self.blen > 0, "Bait length cannot be less than or equal to zero!"
+		
 		#Assert that win_shift cannot be larger than blen
 		if self.blen > self.minlen:
 			self.minlen = self.blen
+			
+		#Set minimum target region size 
+		if self.min_r is None: 
+			self.min_r = self.blen
+		
+		#Set tile_min default if not given	
+		if (self.tiling == 1) and (self.tile_min is None): 
+			self.tile_min = self.blen + self.overlap
+		
 		#Call help menu if prompted
 		if call_help is 1:
 			display_help("Exiting because help menu was called.")
 			sys.exit(0)
+			
 		
