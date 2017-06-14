@@ -9,6 +9,11 @@ def string_containsAny(str, set):
 		if c in str: return 0;
 	return 1;
 
+def bad_opts(message=""):
+	print(message)
+	print("Invalid options: Exiting program. Please see manual or use <--help>\n")
+	sys.exit(1)
+
 def display_help(message=None):
 	if message is not None:
 		print (message)
@@ -96,7 +101,7 @@ Target Region options:
 				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
 				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
 				r=/rand=[x]  : Randomly retain \"x\" target regions w/ baits
-				Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+				Ex: -F m=100,1 -F M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 	#Need -s option for picking baits within bait regions and for picking bait regions within loci
 	print("""
 Bait Selection/ Optimization options:
@@ -117,7 +122,7 @@ Bait Selection/ Optimization options:
 				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
 				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
 				r=/rand=[x]  : Randomly retain \"x\" baits OVERALL
-				Ex: m=100,1/M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+				Ex: -f m=100,1 -f M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 
 
 	print("""
@@ -199,7 +204,9 @@ class parseArgs():
 		self.select_r="r"
 		self.select_r_dist=None
 		self.filter_r=0 #bool
+		self.filter_t_whole=None
 		self.filter_r_objects=[]
+		self.balign=None
 		
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
@@ -283,23 +290,26 @@ class parseArgs():
 				print("select_r_dist is %r"%self.select_r_dist)
 			elif opt in ('-F', '--filter_r'):
 				self.filter_r = 1 #turn on region filtering
-				temp = arg.split('/') #parse region filtering options
-				for sub in temp: 
-					subopts = re.split('=|,',sub)
-					if subopts[0] in ('m','M'):
-						assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-						self.filter_r_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
-					elif (subopts[0] is 'r'):
-						assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-						self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
-					else: 
-						"Invalid option %r for --filter_r!" %subopts[0]
-						sys.exit(1)
-				for subopt in self.filter_r_objects:
-					print("Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
-					
+				#temp = arg.split('/') #parse region filtering options
+				self.filter_r_whole = arg
+				#for sub in temp: 
+				subopts = re.split('=|,',arg)
+				if subopts[0] in ('m','M'):
+					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
+					self.filter_r_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
+				elif (subopts[0] is 'r'):
+					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
+					self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
+				else: 
+					bad_opts("Invalid option %r for --filter_r!" %subopts[0])
+
 			else: 
-				assert False, "unhandled option %r"%opt
+				assert False, "Unhandled option %r"%opt
+		
+		#DEBUG PRINTS
+		for subopt in self.filter_r_objects:
+			print("Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
+		
 				
 		#Assertions and conditional changes to params
 		if (self.alignment is None) and (self.loci is None) and (self.assembly is None): 
@@ -311,6 +321,10 @@ class parseArgs():
 		#Assert that win_shift cannot be larger than blen
 		if self.blen > self.minlen:
 			self.minlen = self.blen
+		
+		#Set default value for balign
+		if self.balign is None: 
+			self.balign = self.blen / 2
 			
 		#Set minimum target region size 
 		if self.min_r is None: 
