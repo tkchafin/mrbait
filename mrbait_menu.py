@@ -72,7 +72,7 @@ General Bait Design options:
 
 	print("""
 Target Region options:
-
+	
 	-T,--tiling	: Turn on tiling to design multiple baits per bait region 
 			  --When tiling is off, see Bait Selection options below 
 	-O,--overlap	: Overlap for tiled baits within target regions [40]
@@ -89,9 +89,9 @@ Target Region options:
 			  --Asserts <-T> is turned on
 	-S, --select_r	: Which criterion to select target regions w/in <-D> 
 			  --Options 
-				s=/snp=[d]   : Most SNPs within \"d\" bases
-				b=/bad=[d]   : Least Ns and gaps within \"d\" bases
-				c=/cons=[d]  : Most conserved \"d\" bases
+				s=/snp=[d]   : Most SNPs w/in \"d\" bases
+				b=/bad=[d]   : Least Ns and gaps w/n \"d\" bases
+				c=/cons=[d]  : Most conserved w/in \"d\" bases
 				m/min        : Least SNP, N, or gap bases in bait region
 				r/rand       : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
@@ -108,11 +108,11 @@ Bait Selection/ Optimization options:
 	-a,--balign	: Maximum allowable alignment length between baits [40]
 			  --By default is set to 1/2 bait length
 	-s,--select_b	: Which criterion to select a bait for target region 
-			  --NOTE: This option is ignored when <-T> or <-X>
+			  --NOTE: This option is ignored when <-T> or <-W>
 			  --Options 
-				s=/snp=[d]   : Most SNPs within \"d\" bases 
-				b=/bad=[d]   : Least Ns and gaps within \"d\" bases
-				c=/cons=[d]  : Most conserved \"d\" bases
+				s=/snp=[d]   : Most SNPs w/in \"d\" bases 
+				b=/bad=[d]   : Least Ns and gaps w/in \"d\" bases
+				c=/cons=[d]  : Most conserved w/in \"d\" bases
 				m/min        : Least SNP, N, or gap bases in bait region
 				r/rand       : Randomly choose a bait [default]
 				Ex: -S s=100 to choose region with most SNPs within 100 bases
@@ -127,7 +127,7 @@ Bait Selection/ Optimization options:
 
 	print("""
 Running options/ shortcuts:
-	-W,--tile_all	: Ignore target regions and tile baits across all loci
+	-W,--tile_all	: Tile baits across all target regions
 			  --Relevant arguments to set: -b, -O, -v, -n, -g, -f
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout 
 			  --Errors and assertions are not affected""")
@@ -206,7 +206,14 @@ class parseArgs():
 		self.filter_r=0 #bool
 		self.filter_t_whole=None
 		self.filter_r_objects=[]
+		
+		#Bait selection options
 		self.balign=None
+		self.select_b="r"
+		self.select_b_dist=None
+		self.filter_b=0 #bool
+		self.filter_b_whole=None
+		self.filter_b_objects=[]
 		
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
@@ -301,15 +308,50 @@ class parseArgs():
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
 				else: 
-					bad_opts("Invalid option %r for --filter_r!" %subopts[0])
+					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
+					
+			#Bait selection options 
+			elif opt in ('-a', '--balign'):
+				self.balign = int(arg)
+			elif opt in ('-s', '--select_b'):
+				temp = arg.split('=')
+				self.select_b = (temp[0]).lower()
+				chars = (['s','b','c','m','r'])
+				assert (string_containsAny(self.select_b, chars)) == 0, "Invalid option \"%r\" for <--select_b>" % self.select_b
+				subchars = (['s','b','c'])
+				if string_containsAny(self.select_b, subchars) == 0:
+					if (len(temp) > 1):
+						self.select_b_dist = int(temp[1])
+						assert self.select_b_dist >= 0, "select_b_dist must be an integer greater than zero!"
+					else:
+						self.select_b_dist = 100
+				else:
+					self.select_b_dist = None
+				print("select_b is %r" %self.select_b)
+				print("select_b_dist is %r"%self.select_b_dist)
+			elif opt in ('-f', '--filter_b'):
+				self.filter_b = 1 #turn on region filtering
+				#temp = arg.split('/') #parse region filtering options
+				self.filter_b_whole = arg
+				#for sub in temp: 
+				subopts = re.split('=|,',arg)
+				if subopts[0] in ('m','M'):
+					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
+					self.filter_b_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
+				elif (subopts[0] is 'r'):
+					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
+					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))
+				else: 
+					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
 			else: 
 				assert False, "Unhandled option %r"%opt
 		
 		#DEBUG PRINTS
 		for subopt in self.filter_r_objects:
-			print("Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
-		
+			print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
+		for subopt in self.filter_b_objects:
+			print("filter_b: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 	
 				
 		#Assertions and conditional changes to params
 		if (self.alignment is None) and (self.loci is None) and (self.assembly is None): 
