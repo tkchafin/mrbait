@@ -56,12 +56,21 @@ print(passedLoci)
 
 #NOTE: parallelize bait discovery in future!!
 
+
+
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
 print (pd.read_sql_query("SELECT * FROM loci", conn))
-#print (pd.read_sql_query("SELECT * FROM positions", conn))
-#print (pd.read_sql_query("SELECT * FROM variants", conn))
-			
+print (pd.read_sql_query("SELECT * FROM variants", conn))
+print (pd.read_sql_query("SELECT * FROM samples", conn))			
 conn.commit()
 conn.close()
+
+
+
+
+
+
+
+

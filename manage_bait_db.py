@@ -2,7 +2,7 @@
 
 import sys
 import sqlite3
-import pandas as p
+import pandas as pd
 
 #Function to create database connection
 #Add code later to enable re-running from existing database
@@ -20,28 +20,29 @@ def init_new_db(connection):
 	cursor.execute('''DROP TABLE IF EXISTS loci''')
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
 	cursor.execute('''DROP TABLE IF EXISTS positions''')
+	cursor.execute('''DROP TABLE IF EXISTS samples''')
 	#Table holding records for each locus
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL, 
-			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL)
+			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
+			UNIQUE(id))
 	''')
-	#Table holding position identifiers given to each variant column in a locus
+	#Table holding variant information
 	cursor.execute('''
-		CREATE TABLE positions(posid INTEGER NOT NULL, locid INTEGER NOT NULL, 
-			column INTGER NOT NULL, 
+		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL, 
+			sampid INTEGER, column INTGER NOT NULL, value TEXT NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id), 
-			PRIMARY KEY(posid))
+			FOREIGN KEY (sampid) REFERENCES samples(sampid),
+			PRIMARY KEY(varid), 
+			UNIQUE(varid))
 	''')
 	
-	#cursor
-	#Table holding extracted variants from each alignment 
+	#Table holding records for each locus
 	cursor.execute('''
-		CREATE TABLE variants(posid INTEGER NOT NULL, name TEXT NOT NULL, 
-			value TEXT NOT NULL, 
-			FOREIGN KEY (posid) REFERENCES positions(posid), 
-			PRIMARY KEY(posid, name))
+		CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL, 
+			PRIMARY KEY (sampid),
+			UNIQUE(name))
 	''')
-	
 	
 	connection.commit()
 
@@ -58,25 +59,22 @@ def add_locus_record(conn, depth, consensus, passed=0):
 def add_variant_record(conn, loc, name, pos, val):
 	#Establish cursor 
 	cur = conn.cursor()
-	#Check if position has a posid
-	check = "SELECT posid, COUNT(posid) FROM positions WHERE locid=%s AND column= %s"%(loc,pos)
-	res = p.read_sql_query(check, conn)
-	posid = None
-	#If not, submit into positions table
-	if (res["COUNT(posid)"].values) == 0:
-		stuff = [loc, pos] 
-		sql = '''INSERT INTO positions(locid, column) VALUES(?,?)'''
-		cur.execute(sql, stuff)
-		posid = cur.lastrowid
-	#If present, use that posid
-	else:
-		posid = int(res["posid"].values)
-	#Using posid, submit to annotations
-	stuff = [posid, name, val]
-	sql = ''' INSERT INTO variants(posid, name, value) 
-			VALUES(?,?,?) '''
-	cur = conn.cursor()
-	cur.execute(sql, stuff)
+	
+	#Check if sample has a sampid, fetch if it exists
+	sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
+	cur.execute(sql)
+	fetch = "SELECT sampid FROM samples WHERE name = %r"%name
+	cur.execute(fetch)
+	sampid = cur.fetchone()[0] #fecth the sample id
+	
+	#Check if position has a posid, fetch if it exists
+	sql2 = '''INSERT OR IGNORE INTO variants(locid, sampid, column, value) VALUES(?,?,?,?)'''
+	stuff = [loc, sampid, pos, val]
+	cur.execute(sql2,stuff)
+
+	
+	#cur = conn.cursor()
+	#cur.execute(sql, stuff)
 	
 
 
