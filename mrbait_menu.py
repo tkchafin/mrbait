@@ -138,10 +138,9 @@ Output options:
 	
 	#SPLIT option not figured out yet
 	print("""
-Output options:
-	-Z,--split	: Split large file and read into memory piece-meal
+General options:
 	-h,--help	: Displays this help menu 
-	-P,--plot_all	: Plot variable positions for all baits/bait regions""")
+	""")
 	print()
 
 #Sub-object for holding filtering options
@@ -178,7 +177,7 @@ class parseArgs():
 		
 		#Locus filtering params
 		self.cov=1
-		self.minlen=80
+		self.minlen=None
 		self.thresh=0.1
 		
 		#Bait params
@@ -214,6 +213,15 @@ class parseArgs():
 		self.filter_b=0 #bool
 		self.filter_b_whole=None
 		self.filter_b_objects=[]
+		
+		#Running options/ shortcuts
+		self.tile_all = 0
+		self.stfu = 0
+		
+		#Output options 
+		self.expand = 0
+		self.out = "mrbait"
+		
 		
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
@@ -344,6 +352,18 @@ class parseArgs():
 				else: 
 					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
+			#Running options
+			elif opt in ('-W', '--tile_all'):
+				self.tile_all = 1
+			elif opt in ('-Q', '--quiet'):
+				self.stfu = 1
+
+			#output options 
+			elif opt in ('-X', '--expand'):
+				self.expand = 1
+			elif opt in ('-o', '--out'):
+				self.out = arg
+
 			else: 
 				assert False, "Unhandled option %r"%opt
 		
@@ -361,7 +381,9 @@ class parseArgs():
 		assert self.blen > 0, "Bait length cannot be less than or equal to zero!"
 		
 		#Assert that win_shift cannot be larger than blen
-		if self.blen > self.minlen:
+		if self.minlen is None:
+			self.minlen = self.blen
+		elif self.blen > self.minlen:
 			self.minlen = self.blen
 		
 		#Set default value for balign
