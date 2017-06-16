@@ -40,6 +40,18 @@ def seqCounterLoop(seq):
 	d['VAR'] = d['R'] + d['Y'] + d['S'] + d['W'] \
 	+ d['K'] + d['M'] + d['B'] + d['D'] + d['H'] + d['V']
 
+def seqCounterLoopSimplified(seq):
+	d = {}
+	d = {
+		'.':0,
+		'N':0,
+		'-':0,
+		'*':0
+	}	
+	for c in seq:
+		if c in d:
+			d[c] += 1
+
 
 #Options: Count for each sliding window, or first convert string to simplified chars
 #This generator slices substrings using the islice function from itertools
@@ -76,12 +88,12 @@ def windowSub(seq, shift, width=2):
 		if j==seqlen: break	
 
 @time_me	
-def countSlidingWindowSubstring(seq, num):
+def countSlidingWindowSubstring(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
 	print("Using substrings:")
 	seq_norm = seq.upper()
 	for j in range(num):
-		for i in windowSub(seq_norm, 1, 10):
+		for i in windowSub(seq_norm, shift, width):
 			#print(i)
 			window_seq = "".join(i)
 			seqCounterLoop(window_seq)
@@ -89,7 +101,7 @@ def countSlidingWindowSubstring(seq, num):
 @time_me	
 def countSlidingWindowSubstring2(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
-	print("Using substrings:")
+	print("Using substrings, no generator function:")
 	seq_norm = seq.upper()
 	seqlen = len(seq_norm)
 	for j in range(num):
@@ -102,6 +114,17 @@ def countSlidingWindowSubstring2(seq, num, shift, width):
 			seqCounterLoop(window_seq)
 			if j==seqlen: break	
 
+@time_me	
+def countSlidingWindowSubstringSimple(seq, num):
+	"""This option does a sliding window manually by caalculating start/stop of substrings"""
+	print("Using substrings, simplified consensus:")
+	seq_norm = (seq.upper()).translate(str.maketrans("ATGCRYSWKMBDHV", "....**********"))
+	for j in range(num):
+		for i in windowSub(seq_norm, 1, 10):
+			#print(i)
+			window_seq = "".join(i)
+			seqCounterLoop(window_seq)
+
 #Conclusions: 
 # - No real difference across methods. countSlidingWindowSubstring2 seems a bit 
 #   faster but probably just because of not having the function calls. I like 
@@ -111,11 +134,12 @@ def countSlidingWindowSubstring2(seq, num, shift, width):
 
 seq = "ATGTGTAA-NRATTYRR-NNNAtattgygygwrttsgstttyn--agagg--gwtrrcacacccncacncgcc-ay-accdhaaca-vhVaaccannNNN"
 
-reps = 10000
+reps = 1000
 countSlidingWindow(seq, reps)
-countSlidingWindowSubstring(seq, reps)
+countSlidingWindowSubstring(seq, reps, 1, 10)
 countSlidingWindowSubstring2(seq, reps, 1, 10)
-
+#Now trying by converting all chars to simplified version: 
+countSlidingWindowSubstring(seq, reps, 1, 10)
 
 
 
