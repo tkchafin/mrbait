@@ -9,18 +9,11 @@ from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import alignment_tools as a
+import sequence_tools as s
 import pandas as pd
 import numpy as np
 
 ############################### MAIN ###################################
-
-
-#  To Do:
-#    -Input .loci
-#    -Input VCF?
-#    -Input mpileup
-#       --Could then filter by coverage
-#
 
 #Parse Command line arguments
 params = parseArgs()

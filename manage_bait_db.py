@@ -19,7 +19,6 @@ def init_new_db(connection):
 	cursor = connection.cursor()
 	cursor.execute('''DROP TABLE IF EXISTS loci''')
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
-	cursor.execute('''DROP TABLE IF EXISTS positions''')
 	cursor.execute('''DROP TABLE IF EXISTS samples''')
 	#Table holding records for each locus
 	cursor.execute('''
@@ -72,9 +71,6 @@ def add_variant_record(conn, loc, name, pos, val):
 	stuff = [loc, sampid, pos, val]
 	cur.execute(sql2,stuff)
 
-	
-	#cur = conn.cursor()
-	#cur.execute(sql, stuff)
 	
 
 
