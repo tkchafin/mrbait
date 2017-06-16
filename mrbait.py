@@ -50,7 +50,6 @@ print(passedLoci)
 #NOTE: parallelize bait discovery in future!!
 
 
-
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
