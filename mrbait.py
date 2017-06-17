@@ -48,14 +48,40 @@ passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", co
 #returns pandas dataframe
 
 
+print("Gs allowed: ",params.numG)
+print("Ns allowed: ", params.numN)
 #Target region discovery according to params set 
 for seq in passedLoci.itertuples():
-	for window_seq in s.seqSlidingWindow(seq[1], params.win_shift, params.win_width):
-		print(window_seq)
-		#seq_temp = re.sub('[ACGT]', '', (window_seq).upper())
-		#seq_norm = seq_temp.translate(str.maketrans("RYSWKMBDHV", "**********"))
-		#print(window_seq, ": ", seq_norm)
-	#for i in windowSub(seq_norm, shift, width):
+	start = 0
+	totalVars = 0
+	stop = 0
+	print("Consensus: ", seq[1])
+	generator = s.slidingWindowGenerator(seq[1], params.win_shift, params.win_width)
+	for window_seq in generator():
+		#print()
+		seq_temp = re.sub('[ACGT]', '', (window_seq[0]).upper())
+		seq_norm = seq_temp.translate(str.maketrans("RYSWKMBDHV", "**********"))
+		#print(window_seq[0], ": ", seq_norm)
+		counts = s.seqCounterSimple(seq_norm)
+		
+		#If window passes filters, extend current bait region
+		print("Start is ", start, " and stop is ",stop, end=' -- ')
+		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
+			totalVars += counts['*']
+			stop = window_seq[2]	
+		else:
+			#If window fails, check if previous bait region passes to submit to DB
+			#print (stop-start)
+			if (stop - start) > params.blen :
+				totalVars = 0
+				print("	Target region: ", (seq[1])[start:stop])
+				generator.setI(stop)
+				start = generator.getI()
+				#print("	--Bait failed.", end='')
+			#Current window fails, update start to 
+			#print("Window fails")
+
+			
 
 
 

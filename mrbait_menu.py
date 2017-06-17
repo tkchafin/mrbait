@@ -50,9 +50,6 @@ Locus filtering/ consensus options:
 General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
-	-d, --win_width	: Sliding window width [80]
-	-w, --win_shift	: Sliding window shift distance [1]
-			  --By default set to bait length
 	-w, --win_shift	: Sliding window shift distance [1]
 			  --Increasing will speed up program but could lower accuracy
 			  --Cannot be longer than bait length <-b,--bait>
@@ -81,11 +78,12 @@ Target Region options:
 	-O,--overlap	: Overlap for tiled baits within target regions [40]
 			  --By default will be set to 1/2 of the bait length <-b>
 			  --Asserts <-T> is turned on	  
-	-x,--max_r	: Maximum length of target region to retain baits [500]
-	-y,--min_r	: Minimum length of target region to retain baits [80]
+	-x,--max_r	: Maximum length of target region to retain [500]
+	-y,--min_r	: Minimum length of target region to retain [80]
 			  --Default will be set to bait length <-b,--bait>
-	-V,--vmax_r	: Maximumum SNPs in a target region to throw out baits [0]
-			  --Individual baits are constrained by <-s>
+	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
+			  --Individual baits are constrained by <-v>
+			  --By default set to the value of <-v, --var_max>
 	-D,--dist_r	: Minimum distance between disjunct target regions [100]
 	-p,--tile_min	: Minimum bait region size to allow tiling 
 			  --By default will be set to bait length <-b> + overlap <-O>
@@ -201,7 +199,7 @@ class parseArgs():
 		self.overlap=40
 		self.max_r=500
 		self.min_r=None 
-		self.vmax_r=0
+		self.vmax_r=None
 		self.dist_r=100
 		self.tile_min=None
 		self.select_r="r"
@@ -261,6 +259,7 @@ class parseArgs():
 			elif opt in ('-R', '--mult_reg'):
 				self.mult_reg = 1
 			elif opt in ('-d', '--win_width'):
+				print("Warning: You are setting a hidden option <-d/--win_width>")
 				self.win_width = int(arg)
 			elif opt in ('-m', '--min_mult'):
 				self.win_shift = int(arg)
@@ -389,6 +388,11 @@ class parseArgs():
 		#Set default win_width
 		if self.win_width is None:
 			self.win_width = self.blen
+		
+		#Default vmax_r
+		if self.vmax_r is None:
+			self.vmax_r = self.var_max
+		
 		
 		#Assert that win_shift cannot be larger than blen
 		if self.minlen is None:
