@@ -50,6 +50,9 @@ Locus filtering/ consensus options:
 General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
+	-d, --win_width	: Sliding window width
+	-w, --win_shift	: Sliding window shift distance [80]
+			  --By default set to bait length
 	-w, --win_shift	: Sliding window shift distance [1]
 			  --Increasing will speed up program but could lower accuracy
 			  --Cannot be longer than bait length <-b,--bait>
@@ -155,13 +158,13 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try: 
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:P', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:Pd:', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","tiling","overlap=","max_r",
 			"min_r=","vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
 			"balign=","select_b=","filter_b=","tile_all","queit","expand","out=",
-			"plot_all"])
+			"plot_all", "win_width="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -182,6 +185,7 @@ class parseArgs():
 		
 		#Bait params
 		self.blen=80
+		seld.win_width=None
 		self.win_shift=1
 		self.mult_reg=0 #boolean
 		self.min_mult=1000
@@ -256,6 +260,8 @@ class parseArgs():
 				self.win_shift = int(arg)
 			elif opt in ('-R', '--mult_reg'):
 				self.mult_reg = 1
+			elif opt in ('-d', '--win_width'):
+				self.win_width = int(arg)
 			elif opt in ('-m', '--min_mult'):
 				self.win_shift = int(arg)
 			elif opt in ('-v', '--var_max'):
@@ -379,6 +385,10 @@ class parseArgs():
 			sys.exit(0)
 		
 		assert self.blen > 0, "Bait length cannot be less than or equal to zero!"
+		
+		#Set default win_width
+		if self.win_width is None:
+			self.win_width = self.blen
 		
 		#Assert that win_shift cannot be larger than blen
 		if self.minlen is None:
