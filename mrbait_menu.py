@@ -50,8 +50,8 @@ Locus filtering/ consensus options:
 General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
-	-d, --win_width	: Sliding window width
-	-w, --win_shift	: Sliding window shift distance [80]
+	-d, --win_width	: Sliding window width [80]
+	-w, --win_shift	: Sliding window shift distance [1]
 			  --By default set to bait length
 	-w, --win_shift	: Sliding window shift distance [1]
 			  --Increasing will speed up program but could lower accuracy
@@ -185,7 +185,7 @@ class parseArgs():
 		
 		#Bait params
 		self.blen=80
-		seld.win_width=None
+		self.win_width=None
 		self.win_shift=1
 		self.mult_reg=0 #boolean
 		self.min_mult=1000

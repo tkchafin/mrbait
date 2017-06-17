@@ -4,6 +4,7 @@ import sys
 import sqlite3
 import getopt
 import Bio
+import re
 from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
@@ -44,8 +45,19 @@ for aln in AlignIO.parse(params.alignment, "maf"):
 #Pre-filters: Length, alignment depth 
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
-print(passedLoci)
-	#print(cons)
+#returns pandas dataframe
+
+
+#Target region discovery according to params set 
+for seq in passedLoci.itertuples():
+	for window_seq in s.seqSlidingWindow(seq[1], params.win_shift, params.win_width):
+		print(window_seq)
+		#seq_temp = re.sub('[ACGT]', '', (window_seq).upper())
+		#seq_norm = seq_temp.translate(str.maketrans("RYSWKMBDHV", "**********"))
+		#print(window_seq, ": ", seq_norm)
+	#for i in windowSub(seq_norm, shift, width):
+
+
 
 #NOTE: parallelize bait discovery in future!!
 
@@ -53,9 +65,9 @@ print(passedLoci)
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
-print (pd.read_sql_query("SELECT * FROM loci", conn))
-print (pd.read_sql_query("SELECT * FROM variants", conn))
-print (pd.read_sql_query("SELECT * FROM samples", conn))			
+#print (pd.read_sql_query("SELECT * FROM loci", conn))
+#print (pd.read_sql_query("SELECT * FROM variants", conn))
+#print (pd.read_sql_query("SELECT * FROM samples", conn))			
 conn.commit()
 conn.close()
 
