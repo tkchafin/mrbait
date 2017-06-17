@@ -43,7 +43,7 @@ def seqCounterSimple(seq):
 	return d
 
 #generator to create sliding windows by slicing out substrings
-def seqSlidingWindow(seq, shift, width=2):
+def seqSlidingWindowString(seq, shift, width=2):
 	seqlen = len(seq)
 	for i in range(0,seqlen,shift):
 		if i+width > seqlen:
@@ -53,7 +53,8 @@ def seqSlidingWindow(seq, shift, width=2):
 		yield seq[i:j]
 		if j==seqlen: break	
 		
-#generator to create sliding windows by slicing out substrings, only returns substring indices
+#generator to create sliding windows by slicing out substrings, returns substring indices
+
 def seqSlidingWindow(seq, shift, width=2):
 	seqlen = len(seq)
 	for i in range(0,seqlen,shift):
@@ -61,9 +62,9 @@ def seqSlidingWindow(seq, shift, width=2):
 			j = seqlen
 		else:
 			j = i + width
-		yield [i, j]
+		yield [seq[i:j], i, j]
 		if j==seqlen: break	
-		
+	
 
 #Function to simplify a sequence to SNP, gaps, and Ns and get counts of sliding windows
 def countSlidingWindow(seq, shift, width):
@@ -73,6 +74,50 @@ def countSlidingWindow(seq, shift, width):
 		#print(i)
 		window_seq = "".join(i)
 		seqCounterSimple(window_seq)
+
+#Object for creating an iterable slidinw window sampling			
+class slidingWindowGenerator():
+	def __init__(self, seq, shift, width):
+		self.__seq = seq
+		self.__seqlen = len(self.__seq)
+		self.__shift = shift
+		self.__width = width
+		self.__i = 0
+		
+	def __call__(self):
+		self.__seqlen
+		while self.__i < self.__seqlen: 
+			print("i is ", self.__i, " : Base is ", self.__seq[self.__i])
+			if self.__i+self.__width > self.__seqlen:
+				j = self.__seqlen
+			else:
+				j = self.__i + self.__width
+			yield [self.__seq[self.__i:j], self.__i, j]
+			if j==self.__seqlen: break	
+			self.__i += self.__shift
+	@classmethod
+	def setI(self, value):
+		self.__i = value
+		
+	@classmethod
+	def getI(self):
+		return self.__i	
+	
+	def __getattr__(self, name):
+		return getattr(self.__class__, name)
+	def __setattr__(self, name, val):
+		return setattr(self.__class__, name, val)
+	
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			
 			
 			
