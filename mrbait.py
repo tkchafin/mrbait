@@ -53,9 +53,8 @@ print("Ns allowed: ", params.numN)
 #Target region discovery according to params set 
 for seq in passedLoci.itertuples():
 	start = 0
-	totalVars = 0
 	stop = 0
-	print("Consensus: ", seq[1])
+	print("\nConsensus: ", seq[1], "\n")
 	generator = s.slidingWindowGenerator(seq[1], params.win_shift, params.win_width)
 	for window_seq in generator():
 		#print()
@@ -65,21 +64,25 @@ for seq in passedLoci.itertuples():
 		counts = s.seqCounterSimple(seq_norm)
 		
 		#If window passes filters, extend current bait region
-		print("Start is ", start, " and stop is ",stop, end=' -- ')
+		#print("Start is ", start, " and stop is ",stop) #debug print
 		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
-			totalVars += counts['*']
 			stop = window_seq[2]	
 		else:
 			#If window fails, check if previous bait region passes to submit to DB
 			#print (stop-start)
-			if (stop - start) > params.blen :
-				totalVars = 0
-				print("	Target region: ", (seq[1])[start:stop])
+			if (stop - start) > params.blen:
+				target = (seq[1])[start:stop]
+				print("	Target region: ", target)
+				#Submit target region to database
+				#If target region selected, set start of next window to end of current TR
 				generator.setI(stop)
-				start = generator.getI()
+				
+			#If bait fails, set start to start point of next window
+			start = generator.getI()+1
 				#print("	--Bait failed.", end='')
 			#Current window fails, update start to 
 			#print("Window fails")
+print()
 
 			
 

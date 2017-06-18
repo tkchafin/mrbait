@@ -87,7 +87,7 @@ class slidingWindowGenerator():
 	def __call__(self):
 		self.__seqlen
 		while self.__i < self.__seqlen: 
-			print("i is ", self.__i, " : Base is ", self.__seq[self.__i])
+			#print("i is ", self.__i, " : Base is ", self.__seq[self.__i]) #debug print
 			if self.__i+self.__width > self.__seqlen:
 				j = self.__seqlen
 			else:
