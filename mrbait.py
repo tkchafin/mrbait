@@ -21,6 +21,8 @@ import numpy as np
 
 ############################### MAIN ###################################
 
+#BELOW IS WORKFLOW FOR UCE DESIGN, FINISH AND THEN CONVERT TO FUNCTIONS
+
 #Parse Command line arguments
 params = parseArgs()
 
@@ -84,14 +86,18 @@ for seq in passedLoci.itertuples():
 				generator.setI(stop)
 				
 			#If bait fails, set start to start point of next window
-			start = generator.getI()+1
+			start = generator.getI()+params.win_shift
 				#print("	--Bait failed.", end='')
 			#Current window fails, update start to 
 			#print("Window fails")
 print()
 
-			
-
+#Filter target regions 
+#If multiple regions NOT allowed, need to choose which to keep
+if params.mult_reg == 0:	
+	print("Multiple regions allowed")	
+	#Apply --select_r filters 
+#Either way, need to apply --filter_r filters
 
 
 #NOTE: parallelize bait discovery in future!!
