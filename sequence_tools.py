@@ -1,5 +1,12 @@
 #!/usr/bin/python
 
+import re
+
+#Function to simplify a sequence
+def simplifySeq(seq):
+	temp = re.sub('[ACGT]', '', (seq).upper())
+	return temp.translate(str.maketrans("RYSWKMBDHV", "**********"))
+
 #returns dict of character counts
 def seqCounter(seq):
 	d = {}
