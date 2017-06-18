@@ -4,7 +4,6 @@ import sys
 import sqlite3
 import getopt
 import Bio
-import re
 from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
@@ -13,6 +12,12 @@ import alignment_tools as a
 import sequence_tools as s
 import pandas as pd
 import numpy as np
+
+############################# FUNCTIONS ################################
+
+
+
+
 
 ############################### MAIN ###################################
 
@@ -48,19 +53,16 @@ passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", co
 #returns pandas dataframe
 
 
-print("Gs allowed: ",params.numG)
-print("Ns allowed: ", params.numN)
 #Target region discovery according to params set 
+#looping through passedLoci only
 for seq in passedLoci.itertuples():
 	start = 0
 	stop = 0
 	print("\nConsensus: ", seq[1], "\n")
 	generator = s.slidingWindowGenerator(seq[1], params.win_shift, params.win_width)
 	for window_seq in generator():
-		#print()
-		seq_temp = re.sub('[ACGT]', '', (window_seq[0]).upper())
-		seq_norm = seq_temp.translate(str.maketrans("RYSWKMBDHV", "**********"))
-		#print(window_seq[0], ": ", seq_norm)
+
+		seq_norm = s.simplifySeq(window_seq[0])
 		counts = s.seqCounterSimple(seq_norm)
 		
 		#If window passes filters, extend current bait region
@@ -72,9 +74,13 @@ for seq in passedLoci.itertuples():
 			#print (stop-start)
 			if (stop - start) > params.blen:
 				target = (seq[1])[start:stop]
-				print("	Target region: ", target)
-				#Submit target region to database
-				#If target region selected, set start of next window to end of current TR
+				tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+				#Check that there aren't too many SNPs
+				if tr_counts["*"] <= params.vmax_r:
+					print("	Target region: ", target)
+					#Submit target region to database
+					
+				#set start of next window to end of current TR
 				generator.setI(stop)
 				
 			#If bait fails, set start to start point of next window
