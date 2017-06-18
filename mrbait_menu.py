@@ -65,7 +65,6 @@ General Bait Design options:
 			  --These will be inserted as \"N\" unless <-N> is used
 	-N,--callN	: For Ns in bait sequence, call majority nucleotide if possible
 	-g,--numG	: Number of consensus gaps (\"-\") allowed in bait [0]
-			  --These will be inserted as \"N\" unless <-G> is used
 	-G,--callG	: For gaps in bait, call as majority nucleotide if possible
 	-E,--gff_type	: Constrain bait design to within element type of GFF
 			  --COMING SOON, NOT WORKING YET""")
@@ -135,6 +134,8 @@ Running options/ shortcuts:
 	print("""
 Output options:
 	-X,--expand	: In output bait table, expand all ambiguities
+			  --Gaps are expanded as [ACGT] and absent
+			  --\"N\"s are expanded as [ACGT]		  
 	-o,--out	: Prefix for outputs [\"mrbait\"]""")
 	
 	#SPLIT option not figured out yet
