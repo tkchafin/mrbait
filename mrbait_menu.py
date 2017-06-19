@@ -98,6 +98,8 @@ Target Region options:
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>	
 			  --Options
+				g=/gap=[x]   : Maximum of \"x\" gaps in target region
+				n=/bad=[x]   : Maximum of \"x\" Ns in target region
 				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
 				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
 				r=/rand=[x]  : Randomly retain \"x\" target regions w/ baits
@@ -307,8 +309,8 @@ class parseArgs():
 						self.select_r_dist = 100
 				else:
 					self.select_r_dist = None
-				print("select_r is %r" %self.select_r)
-				print("select_r_dist is %r"%self.select_r_dist)
+				#print("select_r is %r" %self.select_r)
+				#print("select_r_dist is %r"%self.select_r_dist)
 			elif opt in ('-F', '--filter_r'):
 				self.filter_r = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
@@ -318,7 +320,7 @@ class parseArgs():
 				if subopts[0] in ('m','M'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
-				elif (subopts[0] is 'r'):
+				elif subopts[0] in ('r','g','n'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
 				else: 
