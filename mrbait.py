@@ -95,7 +95,7 @@ print()
 #Filter target regions 
 #If multiple regions NOT allowed, need to choose which to keep
 if params.mult_reg == 0:	
-	print("Multiple regions allowed")	
+	print("Multiple regions NOT allowed")	
 	#Apply --select_r filters 
 #Either way, need to apply --filter_r filters
 
