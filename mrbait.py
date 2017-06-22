@@ -60,7 +60,7 @@ passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", co
 for seq in passedLoci.itertuples():
 	start = 0
 	stop = 0
-	print("\nConsensus: ", seq[1], "\n")
+	print("\nConsensus: ", seq[1], "ID is: ", seq[0], "\n")
 	generator = s.slidingWindowGenerator(seq[1], params.win_shift, params.win_width)
 	for window_seq in generator():
 
@@ -78,10 +78,10 @@ for seq in passedLoci.itertuples():
 				target = (seq[1])[start:stop]
 				tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 				#Check that there aren't too many SNPs
-				if tr_counts["*"] <= params.vmax_r:
-					print("	Target region: ", target)
-					#Submit target region to database
-					
+				#if tr_counts["*"] <= params.vmax_r:
+				print("	Target region: ", target)
+				#Submit target region to database
+				m.add_region_record(conn, int(seq[0]), start, stop, target, tr_counts)	
 				#set start of next window to end of current TR
 				generator.setI(stop)
 				
@@ -99,6 +99,9 @@ if params.mult_reg == 0:
 	#Apply --select_r filters 
 #Either way, need to apply --filter_r filters
 
+#Pre-filters: Length, alignment depth 
+#c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
+#passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
 
 #NOTE: parallelize bait discovery in future!!
 
@@ -106,6 +109,7 @@ if params.mult_reg == 0:
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
+print (pd.read_sql_query("SELECT * FROM regions", conn))
 #print (pd.read_sql_query("SELECT * FROM loci", conn))
 #print (pd.read_sql_query("SELECT * FROM variants", conn))
 #print (pd.read_sql_query("SELECT * FROM samples", conn))			
