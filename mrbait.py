@@ -13,6 +13,9 @@ import sequence_tools as s
 import pandas as pd
 import numpy as np
 
+import functools
+print = functools.partial(print, flush=True)
+
 ############################# FUNCTIONS ################################
 
 
@@ -51,8 +54,7 @@ for aln in AlignIO.parse(params.alignment, "maf"):
 #First-pass bait design on loci passing pre-filters
 #Pre-filters: Length, alignment depth 
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
-passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
-#returns pandas dataframe
+passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
 
 
 #Target region discovery according to params set 
@@ -87,9 +89,6 @@ for seq in passedLoci.itertuples():
 				
 			#If bait fails, set start to start point of next window
 			start = generator.getI()+params.win_shift
-				#print("	--Bait failed.", end='')
-			#Current window fails, update start to 
-			#print("Window fails")
 print()
 
 #Filter target regions 
@@ -98,13 +97,29 @@ if params.mult_reg == 0:
 	print("Multiple regions NOT allowed")	
 	#Apply --select_r filters 
 #Either way, need to apply --filter_r filters
+for option in params.filter_r_objects: 
+	print("Select Region Option: ", option.o1)
+	rand = 0 #false
+	rand_num = 0
+	if option.o1 is "r":
+		rand = 1
+		rand_num = option.o2
+	elif option.o1 is "g": 
+		c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
+	elif option.o1 is "n":
+		c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
+	elif option.o1 is "m": 
+		m.regionFilterMinVar(conn, val, flank)
+	elif option.os is "M":
+		m.regionFilterMaxVar(conn, val, flank)
+		
 
 #Pre-filters: Length, alignment depth 
 #c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 #passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
 
 #NOTE: parallelize bait discovery in future!!
-
+#NOTE: Add option for end-trimming off of baits/regions to remove Ns, gaps, etc
 
 #Next:
 #	Find all possible bait regions: Contiguous bases

@@ -64,6 +64,7 @@ def add_locus_record(conn, depth, consensus, passed=0):
 				VALUES(?,?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
+	conn.commit()
 	return cur.lastrowid
 
 #Code to add to 'variants' table
@@ -82,6 +83,7 @@ def add_variant_record(conn, loc, name, pos, val):
 	sql2 = '''INSERT OR IGNORE INTO variants(locid, sampid, column, value) VALUES(?,?,?,?)'''
 	stuff = [loc, sampid, pos, val]
 	cur.execute(sql2,stuff)
+	conn.commit()
 
 #Function to add region to regions table
 def add_region_record(conn, locid, start, stop, seq, counts):
@@ -96,11 +98,19 @@ def add_region_record(conn, locid, start, stop, seq, counts):
 	
 	#insert
 	cur.execute(sql, stuff)
+	conn.commit()
 
+#Function to filter regions relation by minimum flanking SNPs 
+def regionFilterMinVar(conn, val, flank):
+	cur = conn.cursor()
+	print()
+	conn.commit()
 
-
-
-
+#Function to filter regions relation by maximum flanking SNPs 
+def regionFilterMaxVar(conn, val, flank):
+	cur = conn.cursor()
+	print()
+	conn.commit()
 
 
 
