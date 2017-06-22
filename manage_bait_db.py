@@ -19,13 +19,25 @@ def init_new_db(connection):
 	cursor = connection.cursor()
 	cursor.execute('''DROP TABLE IF EXISTS loci''')
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
+	cursor.execute('''DROP TABLE IF EXISTS regions''')
 	cursor.execute('''DROP TABLE IF EXISTS samples''')
+	
 	#Table holding records for each locus
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL, 
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
 			UNIQUE(id))
 	''')
+	
+	#Table holding records for each locus
+	cursor.execute('''
+		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL, 
+			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER, 
+			bad INTEGER, gap INTEGER, start INTEGER NOT NULL, stop INTEGER NOT NULL, 
+			pass INTEGER NOT NULL,
+			FOREIGN KEY (locid) REFERENCES loci(id))
+	''')
+	
 	#Table holding variant information
 	cursor.execute('''
 		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL, 
@@ -71,7 +83,19 @@ def add_variant_record(conn, loc, name, pos, val):
 	stuff = [loc, sampid, pos, val]
 	cur.execute(sql2,stuff)
 
+#Function to add region to regions table
+def add_region_record(conn, locid, start, stop, seq, counts):
+	#Establish cursor 
+	cur = conn.cursor()
 	
+	#build sql and pack values to insert
+	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap,
+		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,0)'''
+	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop] 
+	cur
+	
+	#insert
+	cur.execute(sql, stuff)
 
 
 
