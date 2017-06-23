@@ -13,8 +13,6 @@ import sequence_tools as s
 import pandas as pd
 import numpy as np
 
-import functools
-print = functools.partial(print, flush=True)
 
 ############################# FUNCTIONS ################################
 
@@ -54,7 +52,7 @@ for aln in AlignIO.parse(params.alignment, "maf"):
 #First-pass bait design on loci passing pre-filters
 #Pre-filters: Length, alignment depth 
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
-passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
+passedLoci = pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
 
 
 #Target region discovery according to params set 
@@ -62,8 +60,8 @@ passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", co
 for seq in passedLoci.itertuples():
 	start = 0
 	stop = 0
-	print("\nConsensus: ", seq[1], "ID is: ", seq[0], "\n")
-	generator = s.slidingWindowGenerator(seq[1], params.win_shift, params.win_width)
+	print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
+	generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
 	for window_seq in generator():
 
 		seq_norm = s.simplifySeq(window_seq[0])
@@ -77,13 +75,13 @@ for seq in passedLoci.itertuples():
 			#If window fails, check if previous bait region passes to submit to DB
 			#print (stop-start)
 			if (stop - start) > params.blen:
-				target = (seq[1])[start:stop]
+				target = (seq[2])[start:stop]
 				tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 				#Check that there aren't too many SNPs
 				#if tr_counts["*"] <= params.vmax_r:
 				print("	Target region: ", target)
 				#Submit target region to database
-				m.add_region_record(conn, int(seq[0]), start, stop, target, tr_counts)	
+				m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)	
 				#set start of next window to end of current TR
 				generator.setI(stop)
 				
@@ -109,9 +107,11 @@ for option in params.filter_r_objects:
 	elif option.o1 is "n":
 		c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
 	elif option.o1 is "m": 
-		m.regionFilterMinVar(conn, val, flank)
-	elif option.os is "M":
-		m.regionFilterMaxVar(conn, val, flank)
+		m.regionFilterMinVar(conn, option.o3, option.o2)
+	elif option.o1 is "M":
+		m.regionFilterMaxVar(conn, option.o3, option.o2)
+	else: 
+		assert False, "Unhandled option %r"%option 
 		
 
 #Pre-filters: Length, alignment depth 

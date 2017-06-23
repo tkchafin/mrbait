@@ -34,7 +34,7 @@ def init_new_db(connection):
 		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL, 
 			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER, 
 			bad INTEGER, gap INTEGER, start INTEGER NOT NULL, stop INTEGER NOT NULL, 
-			pass INTEGER NOT NULL,
+			pass INTEGER NOT NULL, 
 			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
 	
@@ -94,7 +94,6 @@ def add_region_record(conn, locid, start, stop, seq, counts):
 	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap,
 		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,0)'''
 	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop] 
-	cur
 	
 	#insert
 	cur.execute(sql, stuff)
@@ -103,13 +102,65 @@ def add_region_record(conn, locid, start, stop, seq, counts):
 #Function to filter regions relation by minimum flanking SNPs 
 def regionFilterMinVar(conn, val, flank):
 	cur = conn.cursor()
-	print()
+	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is less than minimum
+	sql = ''' 
+		UPDATE regions 
+		SET pass = 1 
+		WHERE regid in 
+			(SELECT regid FROM
+			(SELECT 
+				regid, 
+				COUNT(DISTINCT column) as counts 
+			FROM 
+				regions INNER JOIN variants ON regions.locid = variants.locid 
+			WHERE 
+				value != "N" AND value != "-"
+			AND 
+				((column < (stop+%s)) AND (column > start-%s))
+			GROUP BY regid)
+			WHERE counts < %s);
+
+	'''%(flank, flank, val)
+	cur.execute(sql)
 	conn.commit()
 
 #Function to filter regions relation by maximum flanking SNPs 
 def regionFilterMaxVar(conn, val, flank):
 	cur = conn.cursor()
-	print()
+	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is greater than maximum
+	sql = ''' 
+		UPDATE regions 
+		SET pass = 1 
+		WHERE regid in 
+			(SELECT regid FROM
+			(SELECT 
+				regid, 
+				COUNT(DISTINCT column) as counts 
+			FROM 
+				regions INNER JOIN variants ON regions.locid = variants.locid 
+			WHERE 
+				value != "N" AND value != "-"
+			AND 
+				((column < (stop+%s)) AND (column > start-%s))
+			GROUP BY regid)
+			WHERE counts > %s);
+
+	'''%(flank, flank, val)
+	#FOR TESTING/DEBUGGING
+	#sql2 = ''' 
+	#SELECT 
+	#	regid, 
+	#	COUNT(DISTINCT column) as counts 
+	#FROM 
+	#	regions INNER JOIN variants ON regions.locid = variants.locid 
+	#WHERE 
+	#	value != "N" AND value != "-"
+	#AND 
+	#	((column < (stop+%s)) AND (column > start-%s))
+	#GROUP BY regid
+	#'''%(flank, flank)
+	#print (pd.read_sql_query(sql2, conn))
+	cur.execute(sql)
 	conn.commit()
 
 
