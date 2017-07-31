@@ -16,8 +16,21 @@ import numpy as np
 
 ############################# FUNCTIONS ################################
 
-
-
+def loadMAF(conn, params):
+	#Parse MAF file and create database
+	for aln in AlignIO.parse(params.alignment, "maf"):
+		#NOTE: Add error handling, return error code
+		cov = len(aln)
+		alen = aln.get_alignment_length()
+		
+		#Add each locus to database
+		locus = a.consensAlign(aln, threshold=params.thresh)
+		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
+		
+		#Extract variable positions for database
+		for var in locus.alnVars:
+			m.add_variant_record(conn, locid, var.name, var.position, var.value)
 
 
 ############################### MAIN ###################################
@@ -35,19 +48,14 @@ c = conn.cursor()
 #if conn.empty() or something like that 
 m.init_new_db(conn)
 
-#Parse MAF file and create database
-for aln in AlignIO.parse(params.alignment, "maf"):
-	cov = len(aln)
-	alen = aln.get_alignment_length()
-	
-	#Add each locus to database
-	locus = a.consensAlign(aln, threshold=params.thresh)
-	#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-	locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
-	
-	#Extract variable positions for database
-	for var in locus.alnVars:
-		m.add_variant_record(conn, locid, var.name, var.position, var.value)
+#load alignment to database 
+if params.alignment:
+	print("Loading MAF file:",params.alignment)
+	loadMAF(conn, params)
+else:
+	#Option to load .loci alignment goes here!
+	print("No alignment input found. .loci and .fasta support not added yet!")
+
 
 #First-pass bait design on loci passing pre-filters
 #Pre-filters: Length, alignment depth 
