@@ -41,19 +41,18 @@ def init_new_db(connection):
 	#Table holding variant information
 	cursor.execute('''
 		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL, 
-			sampid INTEGER, column INTGER NOT NULL, value TEXT NOT NULL,
+			column INTGER NOT NULL, value TEXT NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id), 
-			FOREIGN KEY (sampid) REFERENCES samples(sampid),
 			PRIMARY KEY(varid), 
 			UNIQUE(varid))
 	''')
 	
 	#Table holding records for each locus
-	cursor.execute('''
-		CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL, 
-			PRIMARY KEY (sampid),
-			UNIQUE(name))
-	''')
+	#cursor.execute('''
+	#	CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL, 
+	#		PRIMARY KEY (sampid),
+	#		UNIQUE(name))
+	#''')
 	
 	connection.commit()
 
@@ -68,20 +67,20 @@ def add_locus_record(conn, depth, consensus, passed=0):
 	return cur.lastrowid
 
 #Code to add to 'variants' table
-def add_variant_record(conn, loc, name, pos, val):
+def add_variant_record(conn, loc, pos, val):
 	#Establish cursor 
 	cur = conn.cursor()
 	
 	#Check if sample has a sampid, fetch if it exists
-	sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
-	cur.execute(sql)
-	fetch = "SELECT sampid FROM samples WHERE name = %r"%name
-	cur.execute(fetch)
-	sampid = cur.fetchone()[0] #fecth the sample id
+	#sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
+	#cur.execute(sql)
+	#fetch = "SELECT sampid FROM samples WHERE name = %r"%name
+	#cur.execute(fetch)
+	#sampid = cur.fetchone()[0] #fecth the sample id
 	
 	#Check if position has a posid, fetch if it exists
-	sql2 = '''INSERT OR IGNORE INTO variants(locid, sampid, column, value) VALUES(?,?,?,?)'''
-	stuff = [loc, sampid, pos, val]
+	sql2 = '''INSERT OR IGNORE INTO variants(locid, column, value) VALUES(?,?,?)'''
+	stuff = [loc, pos, val]
 	cur.execute(sql2,stuff)
 	conn.commit()
 

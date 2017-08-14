@@ -31,7 +31,7 @@ def loadMAF(conn, params):
 		
 		#Extract variable positions for database
 		for var in locus.alnVars:
-			m.add_variant_record(conn, locid, var.name, var.position, var.value)
+			m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load .loci file into database. 
 def loadLOCI(conn, params):
@@ -43,12 +43,12 @@ def loadLOCI(conn, params):
 
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh)
-		consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
 		
 		#Extract variable positions for database
 		for var in locus.alnVars:
-			m.add_variant_record(conn, locid, var.name, var.position, var.value)
+			m.add_variant_record(conn, locid, var.position, var.value)
 			
 
 #Generator function by ZDZ to parse a .loci file
@@ -75,6 +75,7 @@ def read_loci(infile):
 
 #BELOW IS WORKFLOW FOR UCE DESIGN, FINISH AND THEN CONVERT TO FUNCTIONS
 #ADD GFF FUNCTIONALITY LATER
+#Add multithreading support later... Each thread will need its own db conn
 
 #Parse Command line arguments
 params = parseArgs()
@@ -176,7 +177,7 @@ for option in params.filter_r_objects:
 #c.execute("SELECT * FROM loci")
 print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
-#print (pd.read_sql_query("SELECT * FROM variants", conn))
+print (pd.read_sql_query("SELECT * FROM variants", conn))
 #print (pd.read_sql_query("SELECT * FROM samples", conn))			
 conn.commit()
 conn.close()

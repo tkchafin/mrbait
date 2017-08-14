@@ -20,46 +20,46 @@ class consensAlign():
 		#For each position
 		for i in range(len(con)):
 			#print(i, " is ", con[i])
-			#If monomorphic, skip to next column
-			#if con[i] in {"A", "G", "T", "C"}:
+			#If not monomorphic
+			if con[i] not in {"A", "G", "T", "C"}:
+				var_objects.append(variablePosition(i, con[i]))
 				#continue
 			#else:
-				#For each sequence
-				for c in range(len(aln[:,i])): 
-					#print(aln[c,i], end='', flush=True)
-					ref = con[i].upper()
-					var = aln[c,i].upper()
-					#ref.upper()
-					#var.upper()
-					#print("Var is ",var, " and Ref is ", ref)
-					if var == ref:
-					#if var == "-" and ref == "-":
-						continue
-					#elif var == "N" and ref == "N":
-						continue
-					else:
-						#print(var, end='', flush=True)
-						#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
-						var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
+			'''
+			#For each sequence
+			for c in range(len(aln[:,i])): 
+				#print(aln[c,i], end='', flush=True)
+				ref = con[i].upper()
+				var = aln[c,i].upper()
+				#ref.upper()
+				#var.upper()
+				#print("Var is ",var, " and Ref is ", ref)
+				if var == ref:
+				#if var == "-" and ref == "-":
+					continue
+				#elif var == "N" and ref == "N":
+					continue
+				else:
+					#print(var, end='', flush=True)
+					#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
+					var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
+			'''
 		return var_objects
 				
 
 class variablePosition():
 	'Object to hold information about a variable position'
 	#Default constructor
-	def __init__(self, name=None, pos=None, val=None):
-		self.name = name
+	def __init__(self, pos=None, val=None):
 		self.position = pos
 		self.value = val.upper()
-		#print("Addind new: Name=",name,"; Pos=",pos,"; Val=",val)
 
 		
 	@classmethod
 	def from_list(cls, data):
-		name = str(data[0])
-		pos = int(data[1])
-		val = str(data[2])
-		new = cls(name, pos, val)
+		pos = int(data[0])
+		val = str(data[1])
+		new = cls(pos, val)
 		return new
 		
 	
