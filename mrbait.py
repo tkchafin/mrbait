@@ -29,6 +29,8 @@ def loadMAF(conn, params):
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
 		
+		print("Loading Locus #:",locid)
+		
 		#Extract variable positions for database
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
@@ -45,6 +47,8 @@ def loadLOCI(conn, params):
 		locus = a.consensAlign(aln, threshold=params.thresh)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
+		
+		print("Loading Locus #:",locid)
 		
 		#Extract variable positions for database
 		for var in locus.alnVars:
@@ -177,8 +181,7 @@ for option in params.filter_r_objects:
 #c.execute("SELECT * FROM loci")
 print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
-print (pd.read_sql_query("SELECT * FROM variants", conn))
-#print (pd.read_sql_query("SELECT * FROM samples", conn))			
+#print (pd.read_sql_query("SELECT * FROM variants", conn))	
 conn.commit()
 conn.close()
 
