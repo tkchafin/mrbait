@@ -32,6 +32,42 @@ def loadMAF(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.name, var.position, var.value)
 
+def loadLOCI(conn, params):
+	#Parse LOCI file and create database
+	for aln in read_loci(params.loci):
+		#NOTE: Add error handling, return error code
+		cov = len(aln)
+		alen = aln.get_alignment_length()
+		
+		#Add each locus to database
+		locus = a.consensAlign(aln, threshold=params.thresh)
+		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
+		
+		#Extract variable positions for database
+		for var in locus.alnVars:
+			m.add_variant_record(conn, locid, var.name, var.position, var.value)
+
+#Function by ZDZ
+def read_loci(infile):
+	# make emptyp dictionary
+	loci = Bio.Align.MultipleSeqAlignment([])
+
+	# read file from command line
+	with open(infile) as file_object:	
+		
+		for line in file_object:
+			
+			if line[0] == ">":
+				identifier = line.split()[0]
+				sequence = line.split()[1]
+				loci.add_sequence(identifier, sequence)
+
+			else:
+				yield(loci)
+				loci = Bio.Align.MultipleSeqAlignment([])
+				break
+
 
 ############################### MAIN ###################################
 
