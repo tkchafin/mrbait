@@ -16,6 +16,7 @@ import numpy as np
 
 ############################# FUNCTIONS ################################
 
+#Function to load a MAF file into database
 def loadMAF(conn, params):
 	#Parse MAF file and create database
 	for aln in AlignIO.parse(params.alignment, "maf"):
@@ -32,23 +33,25 @@ def loadMAF(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.name, var.position, var.value)
 
+#Function to load .loci file into database. 
 def loadLOCI(conn, params):
 	#Parse LOCI file and create database
 	for aln in read_loci(params.loci):
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
-		
+
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh)
-		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+		consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
 		
 		#Extract variable positions for database
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.name, var.position, var.value)
+			
 
-#Function by ZDZ
+#Generator function by ZDZ to parse a .loci file
 def read_loci(infile):
 	# make emptyp dictionary
 	loci = Bio.Align.MultipleSeqAlignment([])
@@ -66,12 +69,12 @@ def read_loci(infile):
 			else:
 				yield(loci)
 				loci = Bio.Align.MultipleSeqAlignment([])
-				break
 
 
 ############################### MAIN ###################################
 
 #BELOW IS WORKFLOW FOR UCE DESIGN, FINISH AND THEN CONVERT TO FUNCTIONS
+#ADD GFF FUNCTIONALITY LATER
 
 #Parse Command line arguments
 params = parseArgs()
@@ -88,9 +91,12 @@ m.init_new_db(conn)
 if params.alignment:
 	print("Loading MAF file:",params.alignment)
 	loadMAF(conn, params)
+elif params.loci: 
+	print("Loading LOCI file:",params.loci)
+	loadLOCI(conn, params)
 else:
 	#Option to load .loci alignment goes here!
-	print("No alignment input found. .loci and .fasta support not added yet!")
+	print("No alignment input found. .fasta, .gff, and .phylip support not added yet!")
 
 
 #First-pass bait design on loci passing pre-filters
@@ -168,8 +174,8 @@ for option in params.filter_r_objects:
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
+print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
-#print (pd.read_sql_query("SELECT * FROM loci", conn))
 #print (pd.read_sql_query("SELECT * FROM variants", conn))
 #print (pd.read_sql_query("SELECT * FROM samples", conn))			
 conn.commit()
