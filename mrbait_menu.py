@@ -377,8 +377,8 @@ class parseArgs():
 				assert False, "Unhandled option %r"%opt
 		
 		#DEBUG PRINTS
-		#for subopt in self.filter_r_objects:
-			#print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
+		for subopt in self.filter_r_objects:
+			print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 
 		#for subopt in self.filter_b_objects:
 			#print("filter_b: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3)) 	
 				

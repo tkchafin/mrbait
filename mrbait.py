@@ -54,7 +54,6 @@ def loadLOCI(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
 			
-
 #Generator function by ZDZ to parse a .loci file
 def read_loci(infile):
 	# make emptyp dictionary
@@ -74,6 +73,31 @@ def read_loci(infile):
 				yield(loci)
 				loci = Bio.Align.MultipleSeqAlignment([])
 
+
+#Function to filter target regions by --filter_R arguments 
+def filterTargetRegions(conn, params):
+	rand = 0 #false
+	rand_num = 0
+	for option in params.filter_r_objects: 
+		print("Select Region Option: ", option.o1)
+
+		if option.o1 is "r":
+			#Set 'rand' to TRUE for random selection AFTER other filters
+			rand = 1
+			rand_num = option.o2
+		elif option.o1 is "g": 
+			c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
+		elif option.o1 is "n":
+			c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
+		elif option.o1 is "m": 
+			m.regionFilterMinVar(conn, option.o2, option.o3)
+		elif option.o1 is "M":
+			m.regionFilterMaxVar(conn, option.o2, option.o3)
+			#m.printVarCounts(conn, option.o3)
+		else: 
+			assert False, "Unhandled option %r"%option 
+	#If 'random' select is turned on, then apply 
+	m.regionFilterRandom(conn, rand_num)
 
 ############################### MAIN ###################################
 
@@ -152,24 +176,8 @@ if params.mult_reg == 0:
 	#Apply --select_r filters 
 	
 #Either way, need to apply --filter_r filters
-for option in params.filter_r_objects: 
-	print("Select Region Option: ", option.o1)
-	rand = 0 #false
-	rand_num = 0
-	if option.o1 is "r":
-		rand = 1
-		rand_num = option.o2
-	elif option.o1 is "g": 
-		c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
-	elif option.o1 is "n":
-		c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
-	elif option.o1 is "m": 
-		m.regionFilterMinVar(conn, option.o2, option.o3)
-	elif option.o1 is "M":
-		m.regionFilterMaxVar(conn, option.o2, option.o3)
-		m.printVarCounts(conn, option.o3)
-	else: 
-		assert False, "Unhandled option %r"%option 
+filterTargetRegions(conn, params)
+
 		
 
 #Pre-filters: Length, alignment depth 
