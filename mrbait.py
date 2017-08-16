@@ -97,7 +97,8 @@ def filterTargetRegions(conn, params):
 		else: 
 			assert False, "Unhandled option %r"%option 
 	#If 'random' select is turned on, then apply 
-	m.regionFilterRandom(conn, rand_num)
+	if rand is 1:
+		m.regionFilterRandom(conn, rand_num)
 
 ############################### MAIN ###################################
 

@@ -167,5 +167,30 @@ def printVarCounts(conn, flank):
 	'''%(flank, flank)
 	print (pd.read_sql_query(sql2, conn))
 
-
+#Function for random selection of TRs
+def regionFilterRandom(conn, num):
+	cur = conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM REGIONS")
+	num = int(num)
+	rows = int(cur.fetchone()[0])
+	print("Number of rows:",rows)
+	if rows is 0 or rows is None: 
+		raise ValueError("There are no rows in <regions>!")
+	if num > rows:
+		num = rows
+	sql = ''' 
+		UPDATE regions 
+		SET pass = 1 
+		WHERE regid in 
+			(SELECT 
+				regid 
+			FROM
+				regions 
+			WHERE 
+				pass=0
+			ORDER BY RANDOM() LIMIT(%s - %s)
+			)
+	'''%(rows,num)
+	cur.execute(sql)
+	conn.commit()
 
