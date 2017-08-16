@@ -145,24 +145,27 @@ def regionFilterMaxVar(conn, val, flank):
 			WHERE counts > %s);
 
 	'''%(flank, flank, val)
-	#FOR TESTING/DEBUGGING
-	#sql2 = ''' 
-	#SELECT 
-	#	regid, 
-	#	COUNT(DISTINCT column) as counts 
-	#FROM 
-	#	regions INNER JOIN variants ON regions.locid = variants.locid 
-	#WHERE 
-	#	value != "N" AND value != "-"
-	#AND 
-	#	((column < (stop+%s)) AND (column > start-%s))
-	#GROUP BY regid
-	#'''%(flank, flank)
-	#print (pd.read_sql_query(sql2, conn))
 	cur.execute(sql)
 	conn.commit()
 
-
+#Function for debug printing of variant counts flanking TRs
+def printVarCounts(conn, flank):
+	cur = conn.cursor()
+	print("Variants within %r bases of TRs:"%flank)
+	#FOR TESTING/DEBUGGING
+	sql2 = ''' 
+	SELECT 
+		regid, 
+		COUNT(DISTINCT column) as counts 
+	FROM 
+		regions INNER JOIN variants ON regions.locid = variants.locid 
+	WHERE 
+		value != "N" AND value != "-"
+	AND 
+		((column < (stop+%s)) AND (column > start-%s))
+	GROUP BY regid
+	'''%(flank, flank)
+	print (pd.read_sql_query(sql2, conn))
 
 
 
