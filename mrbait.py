@@ -105,6 +105,7 @@ else:
 
 
 #First-pass bait design on loci passing pre-filters
+#PASS=1 is PASS=FALSE
 #Pre-filters: Length, alignment depth 
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 passedLoci = pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
@@ -149,6 +150,7 @@ print()
 if params.mult_reg == 0:	
 	print("Multiple regions NOT allowed")	
 	#Apply --select_r filters 
+	
 #Either way, need to apply --filter_r filters
 for option in params.filter_r_objects: 
 	print("Select Region Option: ", option.o1)
@@ -162,9 +164,10 @@ for option in params.filter_r_objects:
 	elif option.o1 is "n":
 		c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
 	elif option.o1 is "m": 
-		m.regionFilterMinVar(conn, option.o3, option.o2)
+		m.regionFilterMinVar(conn, option.o2, option.o3)
 	elif option.o1 is "M":
-		m.regionFilterMaxVar(conn, option.o3, option.o2)
+		m.regionFilterMaxVar(conn, option.o2, option.o3)
+		m.printVarCounts(conn, option.o3)
 	else: 
 		assert False, "Unhandled option %r"%option 
 		
@@ -179,7 +182,7 @@ for option in params.filter_r_objects:
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
-print (pd.read_sql_query("SELECT * FROM loci", conn))
+#print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
 #print (pd.read_sql_query("SELECT * FROM variants", conn))	
 conn.commit()
