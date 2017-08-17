@@ -112,6 +112,8 @@ def filterTargetRegions(conn, params):
 #BELOW IS WORKFLOW FOR UCE DESIGN, FINISH AND THEN CONVERT TO FUNCTIONS
 #ADD GFF FUNCTIONALITY LATER
 #Add multithreading support later... Each thread will need its own db conn
+#If TR too short, can add option to include variable flanking regions?
+#Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
 
 #Parse Command line arguments
 params = parseArgs()

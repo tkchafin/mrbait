@@ -84,6 +84,7 @@ def countSlidingWindow(seq, shift, width):
 
 #Object for creating an iterable slidinw window sampling			
 class slidingWindowGenerator():
+	#Need to come back and comment better... 
 	def __init__(self, seq, shift, width):
 		self.__seq = seq
 		self.__seqlen = len(self.__seq)
