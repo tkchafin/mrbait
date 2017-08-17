@@ -170,9 +170,16 @@ def printVarCounts(conn, flank):
 #Function for random selection of TRs
 def regionFilterRandom(conn, num):
 	cur = conn.cursor()
+	num = int(num) #number to keep
+	
+	#Fetch number of total
 	cur.execute("SELECT COUNT(*) FROM REGIONS")
-	num = int(num)
 	rows = int(cur.fetchone()[0])
+	
+	#fetch number already failed
+	cur.execute("SELECT COUNT(*) FROM regions WHERE pass=1")
+	fails = int(cur.fetchone()[0])	
+	
 	print("Number of rows:",rows)
 	if rows is 0 or rows is None: 
 		raise ValueError("There are no rows in <regions>!")
@@ -188,9 +195,9 @@ def regionFilterRandom(conn, num):
 				regions 
 			WHERE 
 				pass=0
-			ORDER BY RANDOM() LIMIT(%s - %s)
+			ORDER BY RANDOM() LIMIT(%s - %s - %s)
 			)
-	'''%(rows,num)
+	'''%(rows,fails,num)
 	cur.execute(sql)
 	conn.commit()
 
