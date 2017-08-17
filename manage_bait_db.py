@@ -183,21 +183,20 @@ def regionFilterRandom(conn, num):
 	print("Number of rows:",rows)
 	if rows is 0 or rows is None: 
 		raise ValueError("There are no rows in <regions>!")
-	if num > rows:
-		num = rows
-	sql = ''' 
-		UPDATE regions 
-		SET pass = 1 
-		WHERE regid in 
-			(SELECT 
-				regid 
-			FROM
-				regions 
-			WHERE 
-				pass=0
-			ORDER BY RANDOM() LIMIT(%s - %s - %s)
-			)
-	'''%(rows,fails,num)
-	cur.execute(sql)
-	conn.commit()
+	if num < rows-fails:
+		sql = ''' 
+			UPDATE regions 
+			SET pass = 1 
+			WHERE regid in 
+				(SELECT 
+					regid 
+				FROM
+					regions 
+				WHERE 
+					pass=0
+				ORDER BY RANDOM() LIMIT(%s - %s - %s)
+				)
+		'''%(rows,fails,num)
+		cur.execute(sql)
+		conn.commit()
 
