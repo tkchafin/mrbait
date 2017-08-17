@@ -60,7 +60,14 @@ def read_loci(infile):
 	loci = Bio.Align.MultipleSeqAlignment([])
 
 	# read file from command line
-	with open(infile) as file_object:	
+	try:
+		f = open(infile)
+	except IOError as err:
+		print("I/O error({0}): {1}".format(err.errno, err.strerror))
+	except:
+		print("Unexpected error:", sys.exec_info()[0])
+		
+	with f as file_object:	
 		
 		for line in file_object:
 			
