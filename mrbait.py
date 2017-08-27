@@ -106,6 +106,21 @@ def filterTargetRegions(conn, params):
 	#If 'random' select is turned on, then apply 
 	if rand is 1:
 		m.regionFilterRandom(conn, rand_num)
+		
+#Function to filter target regions by --filter_R arguments 
+def selectTargetRegions(conn, params):		
+	#For all alignments over --min_mult:
+		#If TRs are within --dist
+	print("Select TR criterion is: ",params.select_r)
+	print("Select dist is: ", params.select_r_dist)
+	print("Minimum mult_reg dist is: ",params.dist_r)
+	
+	#Populate temp table with TRs to resolve
+	m.fetchConflictTRs(conn, params.dist_r, params.select_r_dist)
+	
+	#Apply select_r filters for all alignments below --dist_r
+	#if params.dist_r < params.minlen:
+		
 
 ############################### MAIN ###################################
 
@@ -114,6 +129,8 @@ def filterTargetRegions(conn, params):
 #Add multithreading support later... Each thread will need its own db conn
 #If TR too short, can add option to include variable flanking regions?
 #Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
+
+#Add "flow control" options, e.g. only make db, load previous db, only TR, etc
 
 #Parse Command line arguments
 params = parseArgs()
@@ -184,6 +201,7 @@ print()
 if params.mult_reg == 0:	
 	print("Multiple regions NOT allowed")	
 	#Apply --select_r filters 
+	selectTargetRegions(conn, params)
 	
 #Either way, need to apply --filter_r filters
 filterTargetRegions(conn, params)

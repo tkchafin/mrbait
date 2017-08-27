@@ -61,7 +61,6 @@ def seqSlidingWindowString(seq, shift, width=2):
 		if j==seqlen: break	
 		
 #generator to create sliding windows by slicing out substrings, returns substring indices
-
 def seqSlidingWindow(seq, shift, width=2):
 	seqlen = len(seq)
 	for i in range(0,seqlen,shift):
