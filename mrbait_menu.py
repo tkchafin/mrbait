@@ -266,7 +266,7 @@ class parseArgs():
 				print("Warning: You are setting a hidden option <-d/--win_width>")
 				self.win_width = int(arg)
 			elif opt in ('-m', '--min_mult'):
-				self.win_shift = int(arg)
+				self.min_mult = int(arg)
 			elif opt in ('-v', '--var_max'):
 				self.var_max = int(arg)
 			elif opt in ('-n', '--numN'):
