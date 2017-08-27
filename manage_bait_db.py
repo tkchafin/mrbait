@@ -219,6 +219,29 @@ def regionFilterRandom(conn, num):
 		cur.execute(sql)
 		conn.commit()
 
+#Internal function for checking if TRs overlap within distance buffer
+def checkOverlap(row1, row2, dist):
+	x2 = row2["start"]
+	y2 = row2["stop"]
+	x1 = (row1["start"]-dist)
+	y1 = (row1["stop"]+dist)
+	
+	if x1 < 0: 
+		x1 = 0
+	
+	print("x1=",x1)
+	print("y1=",y1)
+	print("x2=",x2)
+	print("y2=",y2)
+	
+	if (x2 < x1) and (y2 >= x1):
+		return 1
+	elif (x2 <= y1) and (y2 > y1):
+		return 1
+	else:
+		return 0
+
+
 #Function to fetch all target regions requiring conflict resolution
 def fetchConflictTRs(conn, min_len, dist):
 	cur = conn.cursor()
@@ -267,6 +290,7 @@ def fetchConflictTRs(conn, min_len, dist):
 	'''
 	df = pd.read_sql_query(sql_test, conn)
 	block = max(df["locid"]) + 1
+	print("Block starting at:", block)
 	#for name, row in df.iterrows():
 		#If row isn't in a block:
 		#if row["conflict_block"] == "NULL":
@@ -278,8 +302,6 @@ def fetchConflictTRs(conn, min_len, dist):
 	for group, group_df in groups:
 		print("Group is: ",group)
 		#If only one TR for alignment, set choose to 1:
-		t = group_df.shape[0]
-		print("Count is: ",t)
 		if group_df.shape[0] == 1:
 			for name, row in group_df.iterrows():
 				#modify original dataframe
@@ -296,11 +318,14 @@ def fetchConflictTRs(conn, min_len, dist):
 							continue
 						else:
 							#If within dist_r bases, assign same conflict block
-							if _row["stop"] > (row["start"]- dist) or _row["start"] < (row["stop"]+ dist):
+							print("Comparing row ",name," and ", _name)
+							if checkOverlap(row, _row, dist) == 1:
+								print("overlap!")
 								if _row["conflict_block"] == "NULL":
 									df.loc[_name, "conflict_block"] = block
 									df.loc[name, "conflict_block"] = block
 									block+=1
+									continue
 								else:
 									df.loc[_name, "conflict_block"] = _row["conflict_block"]
 	#SOMETHING ISNT WORKING RIGHT

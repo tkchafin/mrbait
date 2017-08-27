@@ -113,12 +113,12 @@ def selectTargetRegions(conn, params):
 		#If TRs are within --dist
 	print("Select TR criterion is: ",params.select_r)
 	print("Select dist is: ", params.select_r_dist)
-	print("Minimum mult_reg dist is: ",params.dist_r)
+	print("Minimum mult_reg dist is: ",params.min_mult)
 	
 	#Populate temp table with TRs to resolve
-	m.fetchConflictTRs(conn, params.dist_r, params.select_r_dist)
+	m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 	
-	#Apply select_r filters for all alignments below --dist_r
+	#Apply select_r filters for all alignments below --min_mult
 	#if params.dist_r < params.minlen:
 		
 
