@@ -278,20 +278,24 @@ def fetchConflictTRs(conn, min_len, dist):
 	for group, group_df in groups:
 		print("Group is: ",group)
 		#If only one TR for alignment, set choose to 1:
-		if group_df.count == 1:
+		t = group_df.shape[0]
+		print("Count is: ",t)
+		if group_df.shape[0] == 1:
 			for name, row in group_df.iterrows():
+				#modify original dataframe
 				df.loc[name, "conflict_block"] = row["locid"]
-				df.loc[name, "choose"] = 1
 		else:
 			for name, row in group_df.iterrows():
 				#If alignment length below minlen, set conflict_group to locid
 				if row["length"] <= min_len:
 					df.loc[name, "conflict_block"] = row["locid"]
 				else:
+					#Else, compare with other TRs in alignment
 					for _name, _row in group_df.iterrows():
 						if name == _name:
 							continue
 						else:
+							#If within dist_r bases, assign same conflict block
 							if _row["stop"] > (row["start"]- dist) or _row["start"] < (row["stop"]+ dist):
 								if _row["conflict_block"] == "NULL":
 									df.loc[_name, "conflict_block"] = block
@@ -299,6 +303,9 @@ def fetchConflictTRs(conn, min_len, dist):
 									block+=1
 								else:
 									df.loc[_name, "conflict_block"] = _row["conflict_block"]
+	#SOMETHING ISNT WORKING RIGHT
+	
+	#Next step, send df back to SQLite and update conflicts table
 	print(df)
 	
 def randomChooseRegionMINLEN(conn, min_len):
