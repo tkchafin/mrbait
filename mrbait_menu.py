@@ -90,20 +90,20 @@ Target Region options:
 			  --Asserts <-T> is turned on
 	-S, --select_r	: Which criterion to select target regions w/in <-D> 
 			  --Options 
-				s=/snp=[d]   : Most SNPs w/in \"d\" bases
-				b=/bad=[d]   : Least Ns and gaps w/n \"d\" bases
-				c=/cons=[d]  : Most conserved w/in \"d\" bases
-				m/min        : Least SNP, N, or gap bases in bait region
-				r/rand       : Randomly choose a bait region [default]
+				s=[d]   : Most SNPs w/in \"d\" bases
+				b=[d]   : Least Ns and gaps w/n \"d\" bases
+				c=[d]  : Most conserved w/in \"d\" bases
+				m        : Least SNP, N, or gap bases in bait region
+				r       : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>	
 			  --Options
-				g=/gap=[x]   : Maximum of \"x\" gaps in target region
-				n=/bad=[x]   : Maximum of \"x\" Ns in target region
-				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
-				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=/rand=[x]  : Randomly retain \"x\" target regions w/ baits
+				g=[x]   : Maximum of \"x\" gaps in target region
+				b=[x]   : Maximum of \"x\" Ns in target region
+				m=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
+				M=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
+				r=[x]  : Randomly retain \"x\" target regions w/ baits
 				Ex: -F m=100,1 -F M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 	#Need -s option for picking baits within bait regions and for picking bait regions within loci
 	print("""
@@ -113,18 +113,18 @@ Bait Selection/ Optimization options:
 	-s,--select_b	: Which criterion to select a bait for target region 
 			  --NOTE: This option is ignored when <-T> or <-W>
 			  --Options 
-				s=/snp=[d]   : Most SNPs w/in \"d\" bases 
-				b=/bad=[d]   : Least Ns and gaps w/in \"d\" bases
-				c=/cons=[d]  : Most conserved w/in \"d\" bases
-				m/min        : Least SNP, N, or gap bases in bait region
-				r/rand       : Randomly choose a bait [default]
+				s=[d]   : Most SNPs w/in \"d\" bases 
+				b=[d]   : Least Ns and gaps w/in \"d\" bases
+				c=[d]  : Most conserved w/in \"d\" bases
+				m        : Least SNP, N, or gap bases in bait region
+				r       : Randomly choose a bait [default]
 				Ex: -S s=100 to choose region with most SNPs within 100 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 			  --Warning: May mask selections made using <-S> or <-F>	
 			  --Options 
-				m=/min=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
-				M=/max=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=/rand=[x]  : Randomly retain \"x\" baits OVERALL
+				m=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
+				M=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
+				r=[x]  : Randomly retain \"x\" baits OVERALL
 				Ex: -f m=100,1 -f M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 
 
@@ -300,7 +300,8 @@ class parseArgs():
 				temp = arg.split('=')
 				self.select_r = (temp[0]).lower()
 				chars = (['s','b','c','m','r'])
-				assert (string_containsAny(self.select_r, chars)) == 0, "Invalid option \"%r\" for <--select_r>" % self.select_r
+				if self.select_r not in chars: 
+					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
 				subchars = (['s','b','c'])
 				if string_containsAny(self.select_r, subchars) == 0:
 					if (len(temp) > 1):
@@ -334,7 +335,8 @@ class parseArgs():
 				temp = arg.split('=')
 				self.select_b = (temp[0]).lower()
 				chars = (['s','b','c','m','r'])
-				assert (string_containsAny(self.select_b, chars)) == 0, "Invalid option \"%r\" for <--select_b>" % self.select_b
+				if self.select_b not in chars: 
+					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
 				subchars = (['s','b','c'])
 				if string_containsAny(self.select_b, subchars) == 0:
 					if (len(temp) > 1):
