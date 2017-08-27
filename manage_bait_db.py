@@ -166,6 +166,25 @@ def printVarCounts(conn, flank):
 	GROUP BY regid
 	'''%(flank, flank)
 	print (pd.read_sql_query(sql2, conn))
+	
+#Function to select one TR per alignment based on 
+def printVarCounts(conn, flank):
+	cur = conn.cursor()
+	print("Variants within %r bases of TRs:"%flank)
+	#FOR TESTING/DEBUGGING
+	sql2 = ''' 
+	SELECT 
+		regid, 
+		COUNT(DISTINCT column) as counts 
+	FROM 
+		regions INNER JOIN variants ON regions.locid = variants.locid 
+	WHERE 
+		value != "N" AND value != "-"
+	AND 
+		((column < (stop+%s)) AND (column > start-%s))
+	GROUP BY regid
+	'''%(flank, flank)
+	print (pd.read_sql_query(sql2, conn))
 
 #Function for random selection of TRs
 def regionFilterRandom(conn, num):
@@ -199,4 +218,116 @@ def regionFilterRandom(conn, num):
 		'''%(rows,fails,num)
 		cur.execute(sql)
 		conn.commit()
+
+#Function to fetch all target regions requiring conflict resolution
+def fetchConflictTRs(conn, min_len, dist):
+	cur = conn.cursor()
+	#Create temporary table to store conflict block information
+	sql = ''' 
+	CREATE TEMPORARY TABLE conflicts (
+		regid INTEGER PRIMARY KEY,
+		length INTEGER, 
+		conflict_block INTEGER,
+		choose INTEGER,
+		FOREIGN KEY (regid) REFERENCES regions(regid)
+	); 
+
+	'''
+	cur.execute(sql)
+	conn.commit()
+	
+	#Populate table using passing TRs
+	sql2 = '''
+		INSERT INTO conflicts
+		SELECT 
+			regions.regid, 
+			loci.length,
+			"NULL" AS conflict_block,
+			"NULL" AS choose
+		FROM 
+			regions INNER JOIN loci ON regions.locid = loci.id 
+		WHERE 
+			regions.pass = "0"
+	'''
+	cur.execute(sql2)
+	conn.commit()
+	
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql_test = '''
+	SELECT 
+		conflicts.regid,
+		conflict_block,
+		conflicts.length,
+		choose, 
+		locid, 
+		start, 
+		stop
+	FROM 
+		conflicts INNER JOIN regions ON conflicts.regid = regions.regid
+	'''
+	df = pd.read_sql_query(sql_test, conn)
+	block = max(df["locid"]) + 1
+	#for name, row in df.iterrows():
+		#If row isn't in a block:
+		#if row["conflict_block"] == "NULL":
+			#Compare to all rows in same locus 
+			
+				#If overlap, assign block to both
+		#print(df["locid"] == row["locid"])
+	groups = df.groupby("locid")
+	for group, group_df in groups:
+		print("Group is: ",group)
+		#If only one TR for alignment, set choose to 1:
+		if group_df.count == 1:
+			for name, row in group_df.iterrows():
+				df.loc[name, "conflict_block"] = row["locid"]
+				df.loc[name, "choose"] = 1
+		else:
+			for name, row in group_df.iterrows():
+				#If alignment length below minlen, set conflict_group to locid
+				if row["length"] <= min_len:
+					df.loc[name, "conflict_block"] = row["locid"]
+				else:
+					for _name, _row in group_df.iterrows():
+						if name == _name:
+							continue
+						else:
+							if _row["stop"] > (row["start"]- dist) or _row["start"] < (row["stop"]+ dist):
+								if _row["conflict_block"] == "NULL":
+									df.loc[_name, "conflict_block"] = block
+									df.loc[name, "conflict_block"] = block
+									block+=1
+								else:
+									df.loc[_name, "conflict_block"] = _row["conflict_block"]
+	print(df)
+	
+def randomChooseRegionMINLEN(conn, min_len):
+	#Assign blocks as full alignments below min_len
+	sql_minlen = '''
+	UPDATE conflicts
+	SET choose = 1
+	WHERE
+		regid IN
+			(SELECT 
+				regid
+			FROM
+				(SELECT 
+					regid,
+					locid
+				FROM
+					conflicts INNER JOIN loci ON conflicts.locid = loci.id
+				WHERE 
+					length <= %r
+				ORDER BY
+					RANDOM() 
+				)
+			GROUP BY
+				locid
+			)
+	'''%min_len
+	cur.execute(sql_minlen)
+
+
+
+
 
