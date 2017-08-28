@@ -23,19 +23,19 @@ def loadMAF(conn, params):
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
-		
+
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
-		
+
 		print("Loading Locus #:",locid)
-		
+
 		#Extract variable positions for database
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
 
-#Function to load .loci file into database. 
+#Function to load .loci file into database.
 def loadLOCI(conn, params):
 	#Parse LOCI file and create database
 	for aln in read_loci(params.loci):
@@ -47,13 +47,13 @@ def loadLOCI(conn, params):
 		locus = a.consensAlign(aln, threshold=params.thresh)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
-		
+
 		print("Loading Locus #:",locid)
-		
+
 		#Extract variable positions for database
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
-			
+
 #Generator function by ZDZ to parse a .loci file
 def read_loci(infile):
 	# make emptyp dictionary
@@ -66,11 +66,11 @@ def read_loci(infile):
 		print("I/O error({0}): {1}".format(err.errno, err.strerror))
 	except:
 		print("Unexpected error:", sys.exec_info()[0])
-		
-	with f as file_object:	
-		
+
+	with f as file_object:
+
 		for line in file_object:
-			
+
 			if line[0] == ">":
 				identifier = line.split()[0]
 				sequence = line.split()[1]
@@ -81,46 +81,54 @@ def read_loci(infile):
 				loci = Bio.Align.MultipleSeqAlignment([])
 
 
-#Function to filter target regions by --filter_R arguments 
+#Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):
 	rand = 0 #false
 	rand_num = 0
-	for option in params.filter_r_objects: 
+	for option in params.filter_r_objects:
 		print("Select Region Option: ", option.o1)
 
 		if option.o1 is "r":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand = 1
 			rand_num = option.o2
-		elif option.o1 is "g": 
+		elif option.o1 is "g":
 			c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
 		elif option.o1 is "n":
 			c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
-		elif option.o1 is "m": 
+		elif option.o1 is "m":
 			m.regionFilterMinVar(conn, option.o2, option.o3)
 		elif option.o1 is "M":
 			m.regionFilterMaxVar(conn, option.o2, option.o3)
 			#m.printVarCounts(conn, option.o3)
-		else: 
-			assert False, "Unhandled option %r"%option 
-	#If 'random' select is turned on, then apply 
+		else:
+			assert False, "Unhandled option %r"%option
+	#If 'random' select is turned on, then apply
 	if rand is 1:
 		m.regionFilterRandom(conn, rand_num)
-		
-#Function to filter target regions by --filter_R arguments 
-def selectTargetRegions(conn, params):		
+
+#Function to filter target regions by --filter_R arguments
+def selectTargetRegions(conn, params):
 	#For all alignments over --min_mult:
 		#If TRs are within --dist
 	print("Select TR criterion is: ",params.select_r)
 	print("Select dist is: ", params.select_r_dist)
 	print("Minimum mult_reg dist is: ",params.min_mult)
-	
-	#Populate temp table with TRs to resolve
-	m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
-	
+	if params.mult_reg == 0:
+		print("Multiple regions NOT allowed, apply --select_r within whole loci")
+		#TODO: Need function call to buid conflict_blocks by whole loci
+		#TODO: Warning if --min_mult and --dist_r are set! 
+		#m.setConflictsNoMult
+	else:
+		print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
+
+		#Build conflict_blocks according to --dist_r and --min_mult parameters
+		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
+
+	#NEXT: Need to select TRs within conflict_blocks
 	#Apply select_r filters for all alignments below --min_mult
 	#if params.dist_r < params.minlen:
-		
+
 
 ############################### MAIN ###################################
 
@@ -140,14 +148,14 @@ conn = m.create_connection(params.db)
 c = conn.cursor()
 
 #Initialize empty databases
-#if conn.empty() or something like that 
+#if conn.empty() or something like that
 m.init_new_db(conn)
 
-#load alignment to database 
+#load alignment to database
 if params.alignment:
 	print("Loading MAF file:",params.alignment)
 	loadMAF(conn, params)
-elif params.loci: 
+elif params.loci:
 	print("Loading LOCI file:",params.loci)
 	loadLOCI(conn, params)
 else:
@@ -157,12 +165,12 @@ else:
 
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE
-#Pre-filters: Length, alignment depth 
+#Pre-filters: Length, alignment depth
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 passedLoci = pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
 
 
-#Target region discovery according to params set 
+#Target region discovery according to params set
 #looping through passedLoci only
 for seq in passedLoci.itertuples():
 	start = 0
@@ -173,11 +181,11 @@ for seq in passedLoci.itertuples():
 
 		seq_norm = s.simplifySeq(window_seq[0])
 		counts = s.seqCounterSimple(seq_norm)
-		
+
 		#If window passes filters, extend current bait region
 		#print("Start is ", start, " and stop is ",stop) #debug print
 		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
-			stop = window_seq[2]	
+			stop = window_seq[2]
 		else:
 			#If window fails, check if previous bait region passes to submit to DB
 			#print (stop-start)
@@ -188,27 +196,27 @@ for seq in passedLoci.itertuples():
 				#if tr_counts["*"] <= params.vmax_r:
 				print("	Target region: ", target)
 				#Submit target region to database
-				m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)	
+				m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)
 				#set start of next window to end of current TR
 				generator.setI(stop)
-				
+
 			#If bait fails, set start to start point of next window
 			start = generator.getI()+params.win_shift
 print()
 
-#Filter target regions 
+#Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
-if params.mult_reg == 0:	
-	print("Multiple regions NOT allowed")	
-	#Apply --select_r filters 
-	selectTargetRegions(conn, params)
-	
+print("Starting: Target Region Selection...")
+
+#Apply --select_r filters
+selectTargetRegions(conn, params)
+
 #Either way, need to apply --filter_r filters
 filterTargetRegions(conn, params)
 
-		
 
-#Pre-filters: Length, alignment depth 
+
+#Pre-filters: Length, alignment depth
 #c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 #passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
 
@@ -220,14 +228,6 @@ filterTargetRegions(conn, params)
 #c.execute("SELECT * FROM loci")
 #print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
-#print (pd.read_sql_query("SELECT * FROM variants", conn))	
+#print (pd.read_sql_query("SELECT * FROM variants", conn))
 conn.commit()
 conn.close()
-
-
-
-
-
-
-
-
