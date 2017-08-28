@@ -313,6 +313,9 @@ def fetchConflictTRs(conn, min_len, dist):
 					df.loc[name, "conflict_block"] = row["locid"]
 				else:
 					#Else, compare with other TRs in alignment
+					
+					###MAY ONLY NEED TO COMPARE NEAREST NEIGHBOR!!###
+					###WOULD BE FASTER###
 					for _name, _row in group_df.iterrows():
 						if name == _name:
 							continue
