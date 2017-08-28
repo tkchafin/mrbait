@@ -400,10 +400,10 @@ class parseArgs():
 			self.vmax_r = self.var_max
 
 		#Warn of argument masking
-		if self.mult_reg is 1:
+		if self.mult_reg is 0:
 			if self.dist_r is not None:
 				print("Warning: You have set <--dist_r/-D>, but it is ignored when <--mult_reg/-R> is off. ")
-			if self.in_mult is not None:
+			if self.min_mult is not None:
 				print("Warning: You have set <--min_mult/-m>, but it is ignored when <--mult_reg/-R> is off. ")
 
 		#Default of dist_r
