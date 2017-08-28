@@ -14,6 +14,7 @@ def create_connection(db):
 		print(e)
 	return None
 
+
 #Initialize empty databases
 def init_new_db(connection):
 	cursor = connection.cursor()
@@ -21,45 +22,45 @@ def init_new_db(connection):
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
 	cursor.execute('''DROP TABLE IF EXISTS regions''')
 	cursor.execute('''DROP TABLE IF EXISTS samples''')
-	
+
 	#Table holding records for each locus
 	cursor.execute('''
-		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL, 
+		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
 			UNIQUE(id))
 	''')
-	
+
 	#Table holding records for each locus
 	cursor.execute('''
-		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL, 
-			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER, 
-			bad INTEGER, gap INTEGER, start INTEGER NOT NULL, stop INTEGER NOT NULL, 
-			pass INTEGER NOT NULL, 
+		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
+			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
+			bad INTEGER, gap INTEGER, start INTEGER NOT NULL, stop INTEGER NOT NULL,
+			pass INTEGER NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
-	
+
 	#Table holding variant information
 	cursor.execute('''
-		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL, 
+		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
 			column INTGER NOT NULL, value TEXT NOT NULL,
-			FOREIGN KEY (locid) REFERENCES loci(id), 
-			PRIMARY KEY(varid), 
+			FOREIGN KEY (locid) REFERENCES loci(id),
+			PRIMARY KEY(varid),
 			UNIQUE(varid))
 	''')
-	
+
 	#Table holding records for each locus
 	#cursor.execute('''
-	#	CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL, 
+	#	CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL,
 	#		PRIMARY KEY (sampid),
 	#		UNIQUE(name))
 	#''')
-	
+
 	connection.commit()
 
 #Code to add record to 'loci' table
 def add_locus_record(conn, depth, consensus, passed=0):
 	stuff = [depth, int(len(consensus)), str(consensus), int(passed)]
-	sql = ''' INSERT INTO loci(depth, length, consensus, pass) 
+	sql = ''' INSERT INTO loci(depth, length, consensus, pass)
 				VALUES(?,?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
@@ -68,16 +69,16 @@ def add_locus_record(conn, depth, consensus, passed=0):
 
 #Code to add to 'variants' table
 def add_variant_record(conn, loc, pos, val):
-	#Establish cursor 
+	#Establish cursor
 	cur = conn.cursor()
-	
+
 	#Check if sample has a sampid, fetch if it exists
 	#sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
 	#cur.execute(sql)
 	#fetch = "SELECT sampid FROM samples WHERE name = %r"%name
 	#cur.execute(fetch)
 	#sampid = cur.fetchone()[0] #fecth the sample id
-	
+
 	#Check if position has a posid, fetch if it exists
 	sql2 = '''INSERT OR IGNORE INTO variants(locid, column, value) VALUES(?,?,?)'''
 	stuff = [loc, pos, val]
@@ -86,35 +87,35 @@ def add_variant_record(conn, loc, pos, val):
 
 #Function to add region to regions table
 def add_region_record(conn, locid, start, stop, seq, counts):
-	#Establish cursor 
+	#Establish cursor
 	cur = conn.cursor()
-	
+
 	#build sql and pack values to insert
 	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap,
 		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,0)'''
-	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop] 
-	
+	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop]
+
 	#insert
 	cur.execute(sql, stuff)
 	conn.commit()
 
-#Function to filter regions relation by minimum flanking SNPs 
+#Function to filter regions relation by minimum flanking SNPs
 def regionFilterMinVar(conn, val, flank):
 	cur = conn.cursor()
 	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is less than minimum
-	sql = ''' 
-		UPDATE regions 
-		SET pass = 1 
-		WHERE regid in 
+	sql = '''
+		UPDATE regions
+		SET pass = 1
+		WHERE regid in
 			(SELECT regid FROM
-			(SELECT 
-				regid, 
-				COUNT(DISTINCT column) as counts 
-			FROM 
-				regions INNER JOIN variants ON regions.locid = variants.locid 
-			WHERE 
+			(SELECT
+				regid,
+				COUNT(DISTINCT column) as counts
+			FROM
+				regions INNER JOIN variants ON regions.locid = variants.locid
+			WHERE
 				value != "N" AND value != "-"
-			AND 
+			AND
 				((column < (stop+%s)) AND (column > start-%s))
 			GROUP BY regid)
 			WHERE counts < %s);
@@ -123,23 +124,23 @@ def regionFilterMinVar(conn, val, flank):
 	cur.execute(sql)
 	conn.commit()
 
-#Function to filter regions relation by maximum flanking SNPs 
+#Function to filter regions relation by maximum flanking SNPs
 def regionFilterMaxVar(conn, val, flank):
 	cur = conn.cursor()
 	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is greater than maximum
-	sql = ''' 
-		UPDATE regions 
-		SET pass = 1 
-		WHERE regid in 
+	sql = '''
+		UPDATE regions
+		SET pass = 1
+		WHERE regid in
 			(SELECT regid FROM
-			(SELECT 
-				regid, 
-				COUNT(DISTINCT column) as counts 
-			FROM 
-				regions INNER JOIN variants ON regions.locid = variants.locid 
-			WHERE 
+			(SELECT
+				regid,
+				COUNT(DISTINCT column) as counts
+			FROM
+				regions INNER JOIN variants ON regions.locid = variants.locid
+			WHERE
 				value != "N" AND value != "-"
-			AND 
+			AND
 				((column < (stop+%s)) AND (column > start-%s))
 			GROUP BY regid)
 			WHERE counts > %s);
@@ -153,34 +154,34 @@ def printVarCounts(conn, flank):
 	cur = conn.cursor()
 	print("Variants within %r bases of TRs:"%flank)
 	#FOR TESTING/DEBUGGING
-	sql2 = ''' 
-	SELECT 
-		regid, 
-		COUNT(DISTINCT column) as counts 
-	FROM 
-		regions INNER JOIN variants ON regions.locid = variants.locid 
-	WHERE 
+	sql2 = '''
+	SELECT
+		regid,
+		COUNT(DISTINCT column) as counts
+	FROM
+		regions INNER JOIN variants ON regions.locid = variants.locid
+	WHERE
 		value != "N" AND value != "-"
-	AND 
+	AND
 		((column < (stop+%s)) AND (column > start-%s))
 	GROUP BY regid
 	'''%(flank, flank)
 	print (pd.read_sql_query(sql2, conn))
-	
-#Function to select one TR per alignment based on 
+
+#Function to select one TR per alignment based on
 def printVarCounts(conn, flank):
 	cur = conn.cursor()
 	print("Variants within %r bases of TRs:"%flank)
 	#FOR TESTING/DEBUGGING
-	sql2 = ''' 
-	SELECT 
-		regid, 
-		COUNT(DISTINCT column) as counts 
-	FROM 
-		regions INNER JOIN variants ON regions.locid = variants.locid 
-	WHERE 
+	sql2 = '''
+	SELECT
+		regid,
+		COUNT(DISTINCT column) as counts
+	FROM
+		regions INNER JOIN variants ON regions.locid = variants.locid
+	WHERE
 		value != "N" AND value != "-"
-	AND 
+	AND
 		((column < (stop+%s)) AND (column > start-%s))
 	GROUP BY regid
 	'''%(flank, flank)
@@ -190,28 +191,28 @@ def printVarCounts(conn, flank):
 def regionFilterRandom(conn, num):
 	cur = conn.cursor()
 	num = int(num) #number to keep
-	
+
 	#Fetch number of total
 	cur.execute("SELECT COUNT(*) FROM REGIONS")
 	rows = int(cur.fetchone()[0])
-	
+
 	#fetch number already failed
 	cur.execute("SELECT COUNT(*) FROM regions WHERE pass=1")
-	fails = int(cur.fetchone()[0])	
-	
+	fails = int(cur.fetchone()[0])
+
 	print("Number of rows:",rows)
-	if rows is 0 or rows is None: 
+	if rows is 0 or rows is None:
 		raise ValueError("There are no rows in <regions>!")
 	if num < rows-fails:
-		sql = ''' 
-			UPDATE regions 
-			SET pass = 1 
-			WHERE regid in 
-				(SELECT 
-					regid 
+		sql = '''
+			UPDATE regions
+			SET pass = 1
+			WHERE regid in
+				(SELECT
+					regid
 				FROM
-					regions 
-				WHERE 
+					regions
+				WHERE
 					pass=0
 				ORDER BY RANDOM() LIMIT(%s - %s - %s)
 				)
@@ -225,18 +226,23 @@ def checkOverlap(row1, row2, dist):
 	y2 = row2["stop"]
 	x1 = (row1["start"]-dist)
 	y1 = (row1["stop"]+dist)
-	
-	if x1 < 0: 
+
+	if x1 < 0:
 		x1 = 0
-	
+
 	print("x1=",x1)
 	print("y1=",y1)
 	print("x2=",x2)
 	print("y2=",y2)
-	
+
+	#Left edge of row1 overlaps right edge of row2
 	if (x2 < x1) and (y2 >= x1):
 		return 1
+	#Right edge of row1 overlaps left edge of row2
 	elif (x2 <= y1) and (y2 > y1):
+		return 1
+	#Row 2 completely overlapped by row1
+	elif (x2 >= x1 and y2 > x1) and (x2 < y1 and y2 <= y1):
 		return 1
 	else:
 		return 0
@@ -246,46 +252,46 @@ def checkOverlap(row1, row2, dist):
 def fetchConflictTRs(conn, min_len, dist):
 	cur = conn.cursor()
 	#Create temporary table to store conflict block information
-	sql = ''' 
+	sql = '''
 	CREATE TEMPORARY TABLE conflicts (
 		regid INTEGER PRIMARY KEY,
-		length INTEGER, 
+		length INTEGER,
 		conflict_block INTEGER,
 		choose INTEGER,
 		FOREIGN KEY (regid) REFERENCES regions(regid)
-	); 
+	);
 
 	'''
 	cur.execute(sql)
 	conn.commit()
-	
+
 	#Populate table using passing TRs
 	sql2 = '''
 		INSERT INTO conflicts
-		SELECT 
-			regions.regid, 
+		SELECT
+			regions.regid,
 			loci.length,
 			"NULL" AS conflict_block,
 			"NULL" AS choose
-		FROM 
-			regions INNER JOIN loci ON regions.locid = loci.id 
-		WHERE 
+		FROM
+			regions INNER JOIN loci ON regions.locid = loci.id
+		WHERE
 			regions.pass = "0"
 	'''
 	cur.execute(sql2)
 	conn.commit()
-	
+
 	#Query conflicts temp table to make a pandas dataframe for parsing
 	sql_test = '''
-	SELECT 
+	SELECT
 		conflicts.regid,
 		conflict_block,
 		conflicts.length,
-		choose, 
-		locid, 
-		start, 
+		choose,
+		locid,
+		start,
 		stop
-	FROM 
+	FROM
 		conflicts INNER JOIN regions ON conflicts.regid = regions.regid
 	'''
 	df = pd.read_sql_query(sql_test, conn)
@@ -294,48 +300,77 @@ def fetchConflictTRs(conn, min_len, dist):
 	#for name, row in df.iterrows():
 		#If row isn't in a block:
 		#if row["conflict_block"] == "NULL":
-			#Compare to all rows in same locus 
-			
+			#Compare to all rows in same locus
+
 				#If overlap, assign block to both
 		#print(df["locid"] == row["locid"])
 	groups = df.groupby("locid")
 	for group, group_df in groups:
-		print("Group is: ",group)
+		print("\n########Group is: ",group,"\n")
 		#If only one TR for alignment, set choose to 1:
 		if group_df.shape[0] == 1:
 			for name, row in group_df.iterrows():
 				#modify original dataframe
 				df.loc[name, "conflict_block"] = row["locid"]
 		else:
+			#For each TR in locus
 			for name, row in group_df.iterrows():
+				print("\nName in group_df:",name)
+				print("Last INDEX in group_df:",group_df.index[-1])
+
 				#If alignment length below minlen, set conflict_group to locid
 				if row["length"] <= min_len:
 					df.loc[name, "conflict_block"] = row["locid"]
 				else:
-					#Else, compare with other TRs in alignment
-					
-					###MAY ONLY NEED TO COMPARE NEAREST NEIGHBOR!!###
-					###WOULD BE FASTER###
-					for _name, _row in group_df.iterrows():
-						if name == _name:
-							continue
+					#Else, compare with RIGHT NEIGHBOR
+					#Assumes ordered left to right within locus
+					#Maybe make sure to ORDER BY in query??
+					_name = int(name) + 1
+
+					#If this is the last TR in locus (i.e. no right neighbor)
+					if name == (group_df.index[-1]):
+						if df.loc[name, "conflict_block"] == "NULL":
+							df.loc[name, "conflict_block"] = block
+							block += 1
+						break
+					else:
+						_row = group_df.loc[_name]
+						#print(_row)
+						#	print(_row)
+						#for _name, _row in group_df.iterrows():
+						#if name == _name:
+						#	continue
+						#else:
+						#If within dist_r bases, assign same conflict block
+						print("Comparing row ",name," and ", _name)
+						print()
+						#If they overlap, assign them both to same conflict block
+						if checkOverlap(row, _row, dist) == 1:
+							print("overlap!")
+							#Fetch conflict_block currents from parent df
+							cb = df.loc[name, "conflict_block"]
+							_cb = df.loc[_name, "conflict_block"]
+							#If neither is assigned, assign both to new block
+							if (cb == "NULL") and (_cb == "NULL"):
+								print("Assigning block: ",block)
+								df.loc[_name, "conflict_block"] = block
+								df.loc[name, "conflict_block"] = block
+								block+=1
+							#Else if row1 is assigned, give row2 the block of row1
+							elif _cb == "NULL":
+								df.loc[_name, "conflict_block"] = df.loc[name, "conflict_block"]
+							#Or if row2 has block, assign to row1
+							elif cb == "NULL":
+								df.loc[name, "conflict_block"] = df.loc[_name, "conflict_block"]
+							#If no overlap, assign Row1 to its own conflict_block
 						else:
-							#If within dist_r bases, assign same conflict block
-							print("Comparing row ",name," and ", _name)
-							if checkOverlap(row, _row, dist) == 1:
-								print("overlap!")
-								if _row["conflict_block"] == "NULL":
-									df.loc[_name, "conflict_block"] = block
-									df.loc[name, "conflict_block"] = block
-									block+=1
-									continue
-								else:
-									df.loc[_name, "conflict_block"] = _row["conflict_block"]
+							df.loc[name, "conflict_block"] = block
+							block += 1
 	#SOMETHING ISNT WORKING RIGHT
-	
+
 	#Next step, send df back to SQLite and update conflicts table
 	print(df)
-	
+
 def randomChooseRegionMINLEN(conn, min_len):
 	#Assign blocks as full alignments below min_len
 	sql_minlen = '''
@@ -343,26 +378,21 @@ def randomChooseRegionMINLEN(conn, min_len):
 	SET choose = 1
 	WHERE
 		regid IN
-			(SELECT 
+			(SELECT
 				regid
 			FROM
-				(SELECT 
+				(SELECT
 					regid,
 					locid
 				FROM
 					conflicts INNER JOIN loci ON conflicts.locid = loci.id
-				WHERE 
+				WHERE
 					length <= %r
 				ORDER BY
-					RANDOM() 
+					RANDOM()
 				)
 			GROUP BY
 				locid
 			)
 	'''%min_len
 	cur.execute(sql_minlen)
-
-
-
-
-
