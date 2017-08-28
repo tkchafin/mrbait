@@ -117,7 +117,6 @@ def selectTargetRegions(conn, params):
 	if params.mult_reg == 0:
 		print("Multiple regions NOT allowed, apply --select_r within whole loci")
 		#TODO: Need function call to buid conflict_blocks by whole loci
-		#TODO: Warning if --min_mult and --dist_r are set! 
 		#m.setConflictsNoMult
 	else:
 		print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
@@ -136,9 +135,9 @@ def selectTargetRegions(conn, params):
 #ADD GFF FUNCTIONALITY LATER
 #Add multithreading support later... Each thread will need its own db conn
 #If TR too short, can add option to include variable flanking regions?
-#Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
-
-#Add "flow control" options, e.g. only make db, load previous db, only TR, etc
+#TODO: Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
+#TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
+#TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
 
 #Parse Command line arguments
 params = parseArgs()

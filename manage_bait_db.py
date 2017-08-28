@@ -230,10 +230,10 @@ def checkOverlap(row1, row2, dist):
 	if x1 < 0:
 		x1 = 0
 
-	print("x1=",x1)
-	print("y1=",y1)
-	print("x2=",x2)
-	print("y2=",y2)
+	# print("x1=",x1)
+	# print("y1=",y1)
+	# print("x2=",x2)
+	# print("y2=",y2)
 
 	#Left edge of row1 overlaps right edge of row2
 	if (x2 < x1) and (y2 >= x1):
@@ -248,19 +248,18 @@ def checkOverlap(row1, row2, dist):
 		return 0
 
 
-#Function to fetch all target regions requiring conflict resolution
-def fetchConflictTRs(conn, min_len, dist):
+#Function to initialize TEMPORARY TABLE 'conflicts'
+def initializeConflicts(conn):
 	cur = conn.cursor()
 	#Create temporary table to store conflict block information
 	sql = '''
-	CREATE TEMPORARY TABLE conflicts (
-		regid INTEGER PRIMARY KEY,
-		length INTEGER,
-		conflict_block INTEGER,
-		choose INTEGER,
-		FOREIGN KEY (regid) REFERENCES regions(regid)
-	);
-
+		CREATE TEMPORARY TABLE conflicts (
+			regid INTEGER PRIMARY KEY,
+			length INTEGER,
+			conflict_block INTEGER,
+			choose INTEGER,
+			FOREIGN KEY (regid) REFERENCES regions(regid)
+		);
 	'''
 	cur.execute(sql)
 	conn.commit()
@@ -281,32 +280,29 @@ def fetchConflictTRs(conn, min_len, dist):
 	cur.execute(sql2)
 	conn.commit()
 
+
+#Function to fetch all target regions requiring conflict resolution
+def fetchConflictTRs(conn, min_len, dist):
+	cur = conn.cursor()
+	#TODO: Check and first make sure conflicts table exists, or otherwise implement error handling
 	#Query conflicts temp table to make a pandas dataframe for parsing
 	sql_test = '''
-	SELECT
-		conflicts.regid,
-		conflict_block,
-		conflicts.length,
-		choose,
-		locid,
-		start,
-		stop
-	FROM
-		conflicts INNER JOIN regions ON conflicts.regid = regions.regid
+		SELECT
+			conflicts.regid,
+			conflict_block,
+			conflicts.length,
+			choose,
+			locid,
+			start,
+			stop
+		FROM
+			conflicts INNER JOIN regions ON conflicts.regid = regions.regid
 	'''
 	df = pd.read_sql_query(sql_test, conn)
-	block = max(df["locid"]) + 1
-	print("Block starting at:", block)
-	#for name, row in df.iterrows():
-		#If row isn't in a block:
-		#if row["conflict_block"] == "NULL":
-			#Compare to all rows in same locus
-
-				#If overlap, assign block to both
-		#print(df["locid"] == row["locid"])
+	block = int(max(df["locid"]) + 1) #make sure to enforce integer type, or it fucks up in sql later
 	groups = df.groupby("locid")
 	for group, group_df in groups:
-		print("\n########Group is: ",group,"\n")
+		#print("\n########Group is: ",group,"\n")
 		#If only one TR for alignment, set choose to 1:
 		if group_df.shape[0] == 1:
 			for name, row in group_df.iterrows():
@@ -315,8 +311,8 @@ def fetchConflictTRs(conn, min_len, dist):
 		else:
 			#For each TR in locus
 			for name, row in group_df.iterrows():
-				print("\nName in group_df:",name)
-				print("Last INDEX in group_df:",group_df.index[-1])
+				#print("\nName in group_df:",name)
+				#print("Last INDEX in group_df:",group_df.index[-1])
 
 				#If alignment length below minlen, set conflict_group to locid
 				if row["length"] <= min_len:
@@ -342,17 +338,17 @@ def fetchConflictTRs(conn, min_len, dist):
 						#	continue
 						#else:
 						#If within dist_r bases, assign same conflict block
-						print("Comparing row ",name," and ", _name)
-						print()
+						#print("Comparing row ",name," and ", _name)
+						#print()
 						#If they overlap, assign them both to same conflict block
 						if checkOverlap(row, _row, dist) == 1:
-							print("overlap!")
+							#print("overlap!")
 							#Fetch conflict_block currents from parent df
 							cb = df.loc[name, "conflict_block"]
 							_cb = df.loc[_name, "conflict_block"]
 							#If neither is assigned, assign both to new block
 							if (cb == "NULL") and (_cb == "NULL"):
-								print("Assigning block: ",block)
+								#print("Assigning block: ",block)
 								df.loc[_name, "conflict_block"] = block
 								df.loc[name, "conflict_block"] = block
 								block+=1
@@ -366,10 +362,26 @@ def fetchConflictTRs(conn, min_len, dist):
 						else:
 							df.loc[name, "conflict_block"] = block
 							block += 1
-	#SOMETHING ISNT WORKING RIGHT
 
 	#Next step, send df back to SQLite and update conflicts table
-	print(df)
+	#print(df)
+	df.to_sql('t', conn, if_exists='replace')
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			conflicts
+		SET
+			conflict_block = (SELECT t.conflict_block FROM t WHERE t.regid = conflicts.regid)
+		WHERE
+			EXISTS(SELECT * FROM t WHERE t.regid = conflicts.regid)
+	'''
+	cur.execute(sql_update)
+	conn.commit()
+	#print(pd.read_sql_query("SELECT * FROM t", conn))
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS t")
+	#print(pd.read_sql_query("SELECT * FROM t", conn))
+	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 def randomChooseRegionMINLEN(conn, min_len):
 	#Assign blocks as full alignments below min_len
