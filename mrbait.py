@@ -114,13 +114,14 @@ def selectTargetRegions(conn, params):
 	print("Select TR criterion is: ",params.select_r)
 	print("Select dist is: ", params.select_r_dist)
 	print("Minimum mult_reg dist is: ",params.min_mult)
+
+	#print(pd.read_sql_query("SELECT * FROM regions", conn))
 	if params.mult_reg == 0:
 		print("Multiple regions NOT allowed, apply --select_r within whole loci")
 		#TODO: Need function call to buid conflict_blocks by whole loci
-		#m.setConflictsNoMult
+		m.fetchConflictTRs_NoMult(conn)
 	else:
 		print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
-
 		#Build conflict_blocks according to --dist_r and --min_mult parameters
 		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 
