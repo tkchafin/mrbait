@@ -251,6 +251,10 @@ def checkOverlap(row1, row2, dist):
 #Function to initialize TEMPORARY TABLE 'conflicts'
 def initializeConflicts(conn):
 	cur = conn.cursor()
+
+	#Clear conflicts table if it exists already
+	cur.execute("DROP TABLE IF EXISTS conflicts")
+
 	#Create temporary table to store conflict block information
 	sql = '''
 		CREATE TEMPORARY TABLE conflicts (
@@ -263,6 +267,20 @@ def initializeConflicts(conn):
 	'''
 	cur.execute(sql)
 	conn.commit()
+
+	check = '''
+		SELECT
+			count(*)
+		FROM
+		 	sqlite_temp_master
+		WHERE
+			type='table' AND name='conflicts'
+	'''
+	res_check = cur.execute(check)
+
+	#Raise exception if conflicts failed to initialize
+	if (cur.fetchone()[0]) is 0:
+		raise RuntimeError("SQL Error: Failed to CREATE TEMPORARY TABLE \"conflicts\"")
 
 	#Populate table using passing TRs
 	sql2 = '''
@@ -281,10 +299,44 @@ def initializeConflicts(conn):
 	conn.commit()
 
 
+
+#Function to build conflicts table when --R is false
+def fetchConflictTRs_NoMult(conn):
+	cur = conn.cursor()
+
+	#Function call to build conflicts table
+	try:
+		num = initializeConflicts(conn)
+	except RuntimeError as err:
+		print(err.args)
+
+	#Query to UPDATE conflicts with each locus as a conflict_block
+	update = '''
+		UPDATE
+			conflicts
+		SET
+			conflict_block = (SELECT r.locid FROM regions AS r WHERE r.regid = conflicts.regid)
+		WHERE
+			EXISTS(SELECT * FROM regions AS r WHERE r.regid = conflicts.regid)
+	'''
+	cur.execute(update)
+	conn.commit()
+
+	#DEBUG print
+	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
+
+
 #Function to fetch all target regions requiring conflict resolution
 def fetchConflictTRs(conn, min_len, dist):
 	cur = conn.cursor()
 	#TODO: Check and first make sure conflicts table exists, or otherwise implement error handling
+
+	#Function call to build conflicts table
+	try:
+		num = initializeConflicts(conn)
+	except RuntimeError as err:
+		print(err.args)
+
 	#Query conflicts temp table to make a pandas dataframe for parsing
 	sql_test = '''
 		SELECT
@@ -299,7 +351,9 @@ def fetchConflictTRs(conn, min_len, dist):
 			conflicts INNER JOIN regions ON conflicts.regid = regions.regid
 	'''
 	df = pd.read_sql_query(sql_test, conn)
+	#Set block num start at 1+ last locid (to prevent overlap in block nums)
 	block = int(max(df["locid"]) + 1) #make sure to enforce integer type, or it fucks up in sql later
+	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
 	groups = df.groupby("locid")
 	for group, group_df in groups:
 		#print("\n########Group is: ",group,"\n")
@@ -380,7 +434,8 @@ def fetchConflictTRs(conn, min_len, dist):
 	#print(pd.read_sql_query("SELECT * FROM t", conn))
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS t")
-	#print(pd.read_sql_query("SELECT * FROM t", conn))
+
+	#DEBUG print 
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 def randomChooseRegionMINLEN(conn, min_len):
