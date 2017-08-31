@@ -88,17 +88,17 @@ def filterTargetRegions(conn, params):
 	for option in params.filter_r_objects:
 		print("Select Region Option: ", option.o1)
 
-		if option.o1 is "r":
+		if option.o1 == "r":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand = 1
 			rand_num = option.o2
-		elif option.o1 is "g":
+		elif option.o1 == "g":
 			c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
-		elif option.o1 is "n":
+		elif option.o1 == "n":
 			c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
-		elif option.o1 is "m":
+		elif option.o1 == "m":
 			m.regionFilterMinVar(conn, option.o2, option.o3)
-		elif option.o1 is "M":
+		elif option.o1 == "M":
 			m.regionFilterMaxVar(conn, option.o2, option.o3)
 			#m.printVarCounts(conn, option.o3)
 		else:
@@ -115,6 +115,7 @@ def selectTargetRegions(conn, params):
 	print("Select dist is: ", params.select_r_dist)
 	print("Minimum mult_reg dist is: ",params.min_mult)
 
+	#Build conflict tables
 	#print(pd.read_sql_query("SELECT * FROM regions", conn))
 	if params.mult_reg == 0:
 		print("Multiple regions NOT allowed, apply --select_r within whole loci")
@@ -126,8 +127,27 @@ def selectTargetRegions(conn, params):
 		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 
 	#NEXT: Need to select TRs within conflict_blocks
-	#Apply select_r filters for all alignments below --min_mult
-	#if params.dist_r < params.minlen:
+	#Apply select_r filters for all conflicting TRs
+	if params.select_r == "r":
+		#randomly resolve conflicts
+		print("--select_r is RANDOM")
+	elif params.select_r == "s":
+		#Select based on SNPs flanking in "d" dist
+		print("--select_r is SNP, dist is ",params.dist_r)
+	elif params.select_r == "m":
+		#Select based on minimizing SNPs, Ns and gaps in TR region, otherwise randomly
+		print("--select_r is MINVAR_TR")
+	elif params.select_r == "b":
+		#Select based on least Ns and gaps in "d" flanking bases
+		print("--select_r is MINBAD, dist is ", params.dist_r)
+	elif params.select_r == "c":
+		#Select based on minimizing SNPs in flanking region
+		print("select_r is MINVAR_FLANK, dist is ", params.dist_r)
+	else:
+		assert False, "Unhandled option %r"%params.select_r
+
+	#NEXT: Randomly resolve any remaining conflicts
+	#NEXT: Push conflicts to change "pass" attribute in regions table
 
 
 ############################### MAIN ###################################
