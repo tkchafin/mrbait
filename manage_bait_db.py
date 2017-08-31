@@ -86,11 +86,7 @@ def getNumTRs(conn):
 	'''
 	cur.execute(check)
 
-	#Raise exception if conflicts failed to initialize
-	if (cur.fetchone()[0]) is 0:
-		raise RuntimeError("SQL Error: Failed to CREATE TEMPORARY TABLE \"conflicts\"")
-
-	return(cur.fetchone()[0])
+	return((cur.fetchone()[0]))
 
 #Function returns pandas dataframe of passedLoci
 def getNumPassedTRs(conn):
@@ -105,11 +101,7 @@ def getNumPassedTRs(conn):
 	'''
 	cur.execute(check)
 
-	#Raise exception if conflicts failed to initialize
-	if (cur.fetchone()[0]) is 0:
-		raise RuntimeError("SQL Error: Failed to CREATE TEMPORARY TABLE \"conflicts\"")
-
-	return(cur.fetchone()[0])
+	return((cur.fetchone()[0]))
 
 #Code to add record to 'loci' table
 def add_locus_record(conn, depth, consensus, passed=1):

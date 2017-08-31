@@ -153,9 +153,11 @@ def selectTargetRegions(conn, params):
 #Function to check that target regions table is valid to continue
 def checkTargetRegions(conn):
 	#Fetch number of entries to TR table
-	if (m.getNumTRs(conn) <= 0):
+	total = m.getNumTRs(conn)
+	if (int(total) <= 0):
 		sys.exit("Program killed: No Target Regions were found.")
-	if (m.getNumPassedTRs(conn) <= 0):
+	passed = m.getNumPassedTRs(conn)
+	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 	print("Checking target regions")
 
@@ -196,9 +198,9 @@ else:
 #PASS=1 is PASS=FALSE
 #Pre-filters: Length, alignment depth
 m.filterLoci(conn, params.minlen, params.cov)
-c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
 passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
-
+if passedLoci.shape[0] <= 0:
+	sys.exit("Program killed: No loci passed filtering.")
 
 #Target region discovery according to params set
 #looping through passedLoci only
@@ -235,7 +237,7 @@ for seq in passedLoci.itertuples():
 print()
 
 #Assert that there are TRs chosen, and that not all have been filtered out
-#checkTargetRegions(conn)
+checkTargetRegions(conn)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
@@ -244,7 +246,7 @@ print("Starting: Target Region Selection...")
 #First pass filtering of target regions
 filterTargetRegions(conn, params)
 
-#Apply --select_r filters to sort any conflicting TRs 
+#Apply --select_r filters to sort any conflicting TRs
 selectTargetRegions(conn, params)
 
 
