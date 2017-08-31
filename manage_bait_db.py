@@ -220,6 +220,32 @@ def regionFilterRandom(conn, num):
 		cur.execute(sql)
 		conn.commit()
 
+def randomChooseRegionMINLEN(conn, min_len):
+	#Assign blocks as full alignments below min_len
+	sql_minlen = '''
+	UPDATE conflicts
+	SET choose = 1
+	WHERE
+		regid IN
+			(SELECT
+				regid
+			FROM
+				(SELECT
+					regid,
+					locid
+				FROM
+					conflicts INNER JOIN loci ON conflicts.locid = loci.id
+				WHERE
+					length <= %r
+				ORDER BY
+					RANDOM()
+				)
+			GROUP BY
+				locid
+			)
+	'''%min_len
+	cur.execute(sql_minlen)
+
 #Internal function for checking if TRs overlap within distance buffer
 def checkOverlap(row1, row2, dist):
 	x2 = row2["start"]
@@ -435,31 +461,5 @@ def fetchConflictTRs(conn, min_len, dist):
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS t")
 
-	#DEBUG print 
+	#DEBUG print
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
-
-def randomChooseRegionMINLEN(conn, min_len):
-	#Assign blocks as full alignments below min_len
-	sql_minlen = '''
-	UPDATE conflicts
-	SET choose = 1
-	WHERE
-		regid IN
-			(SELECT
-				regid
-			FROM
-				(SELECT
-					regid,
-					locid
-				FROM
-					conflicts INNER JOIN loci ON conflicts.locid = loci.id
-				WHERE
-					length <= %r
-				ORDER BY
-					RANDOM()
-				)
-			GROUP BY
-				locid
-			)
-	'''%min_len
-	cur.execute(sql_minlen)
