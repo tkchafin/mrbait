@@ -27,7 +27,7 @@ def loadMAF(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
 
 		print("Loading Locus #:",locid)
 
@@ -46,7 +46,7 @@ def loadLOCI(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 0)
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
 
 		print("Loading Locus #:",locid)
 
@@ -93,9 +93,9 @@ def filterTargetRegions(conn, params):
 			rand = 1
 			rand_num = option.o2
 		elif option.o1 == "g":
-			c.execute("UPDATE regions SET pass=1 WHERE gap > %s"%int(option.o2))
+			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
 		elif option.o1 == "n":
-			c.execute("UPDATE regions SET pass=1 WHERE bad > %s"%int(option.o2))
+			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
 		elif option.o1 == "m":
 			m.regionFilterMinVar(conn, option.o2, option.o3)
 		elif option.o1 == "M":
@@ -153,6 +153,10 @@ def selectTargetRegions(conn, params):
 #Function to check that target regions table is valid to continue
 def checkTargetRegions(conn):
 	#Fetch number of entries to TR table
+	if (m.getNumTRs(conn) <= 0):
+		sys.exit("Program killed: No Target Regions were found.")
+	if (m.getNumPassedTRs(conn) <= 0):
+		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 	print("Checking target regions")
 
 ############################### MAIN ###################################
@@ -231,18 +235,17 @@ for seq in passedLoci.itertuples():
 print()
 
 #Assert that there are TRs chosen, and that not all have been filtered out
-checkTargetRegions(conn)
+#checkTargetRegions(conn)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
 print("Starting: Target Region Selection...")
 
-#Apply --select_r filters
-selectTargetRegions(conn, params)
-
-#Either way, need to apply --filter_r filters
+#First pass filtering of target regions
 filterTargetRegions(conn, params)
 
+#Apply --select_r filters to sort any conflicting TRs 
+selectTargetRegions(conn, params)
 
 
 #Pre-filters: Length, alignment depth
