@@ -306,8 +306,8 @@ class parseArgs():
 				if string_containsAny(self.select_r, subchars) == 0:
 					if (len(temp) > 1):
 						assert len(temp) is 2, "invalid use of <--select_r>"
-						assert isinstance(temp[1], int), "select_r_dist must be an integer"
 						self.select_r_dist = int(temp[1])
+						assert isinstance(self.select_r_dist, int), "select_r_dist must be an integer"
 						assert self.select_r_dist >= 0, "select_r_dist must be an integer greater than zero!"
 					else:
 						self.select_r_dist = 100
