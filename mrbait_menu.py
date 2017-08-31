@@ -232,8 +232,9 @@ class parseArgs():
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
 				#Parse through arguments and set params
-		for opt, arg in options:
-			arg = arg.replace(" ","")
+		for opt, arg_raw in options:
+			arg = arg_raw.replace(" ","")
+			arg = arg.strip()
 			if opt in ('-M', '--maf'):
 				self.alignment = arg
 			elif opt in ('-h', '--help'):
