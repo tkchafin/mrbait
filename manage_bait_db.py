@@ -57,6 +57,25 @@ def init_new_db(connection):
 
 	connection.commit()
 
+#Function to filter loci by coverage and length
+def filterLoci(conn, minlen, mincov):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		loci
+	SET
+		pass=1
+	WHERE
+		length < %s OR depth < %s
+	'''%(minlen, mincov)
+	cur.execute(sql)
+	conn.commit()
+
+#Function returns pandas dataframe of passedLoci
+def getPassedLoci(conn):
+	return(pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn))
+
+
 #Code to add record to 'loci' table
 def add_locus_record(conn, depth, consensus, passed=0):
 	stuff = [depth, int(len(consensus)), str(consensus), int(passed)]
@@ -463,3 +482,32 @@ def fetchConflictTRs(conn, min_len, dist):
 
 	#DEBUG print
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
+
+#Function for random selection of TRs within conflict blocks
+def regionSelectRandom(conn):
+	cur = conn.cursor()
+
+	#Fetch number of entries in conflict tables
+	cur.execute("SELECT COUNT(*) FROM conflicts")
+	rows = int(cur.fetchone()[0])
+	assert rows > 0, "Error: Conflicts table is empty"
+
+	# print("Number of rows:",rows)
+	# if rows is 0 or rows is None:
+	# 	raise ValueError("There are no rows in <regions>!")
+	# if num < rows-fails:
+	# 	sql = '''
+	# 		UPDATE regions
+	# 		SET pass = 1
+	# 		WHERE regid in
+	# 			(SELECT
+	# 				regid
+	# 			FROM
+	# 				regions
+	# 			WHERE
+	# 				choose=NULL
+	# 			ORDER BY RANDOM() LIMIT(%s - %s - %s)
+	# 			)
+	# 	'''%(rows,fails,num)
+	# 	cur.execute(sql)
+	# 	conn.commit()

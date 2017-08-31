@@ -131,6 +131,7 @@ def selectTargetRegions(conn, params):
 	if params.select_r == "r":
 		#randomly resolve conflicts
 		print("--select_r is RANDOM")
+		m.regionSelectRandom(conn)
 	elif params.select_r == "s":
 		#Select based on SNPs flanking in "d" dist
 		print("--select_r is SNP, dist is ",params.dist_r)
@@ -149,6 +150,10 @@ def selectTargetRegions(conn, params):
 	#NEXT: Randomly resolve any remaining conflicts
 	#NEXT: Push conflicts to change "pass" attribute in regions table
 
+#Function to check that target regions table is valid to continue
+def checkTargetRegions(conn):
+	#Fetch number of entries to TR table
+	print("Checking target regions")
 
 ############################### MAIN ###################################
 
@@ -186,8 +191,9 @@ else:
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE
 #Pre-filters: Length, alignment depth
+m.filterLoci(conn, params.minlen, params.cov)
 c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
-passedLoci = pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn) #returns pandas dataframe
+passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
 
 
 #Target region discovery according to params set
@@ -223,6 +229,9 @@ for seq in passedLoci.itertuples():
 			#If bait fails, set start to start point of next window
 			start = generator.getI()+params.win_shift
 print()
+
+#Assert that there are TRs chosen, and that not all have been filtered out
+checkTargetRegions(conn)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
