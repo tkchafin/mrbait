@@ -64,7 +64,7 @@ def filterLoci(conn, minlen, mincov):
 	UPDATE
 		loci
 	SET
-		pass=1
+		pass=0
 	WHERE
 		length < %s OR depth < %s
 	'''%(minlen, mincov)
@@ -73,11 +73,46 @@ def filterLoci(conn, minlen, mincov):
 
 #Function returns pandas dataframe of passedLoci
 def getPassedLoci(conn):
-	return(pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=0""", conn))
+	return(pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=1""", conn))
 
+#Function returns pandas dataframe of passedLoci
+def getNumTRs(conn):
+	cur = conn.cursor()
+	check = '''
+		SELECT
+			count(*)
+		FROM
+		 	regions
+	'''
+	cur.execute(check)
+
+	#Raise exception if conflicts failed to initialize
+	if (cur.fetchone()[0]) is 0:
+		raise RuntimeError("SQL Error: Failed to CREATE TEMPORARY TABLE \"conflicts\"")
+
+	return(cur.fetchone()[0])
+
+#Function returns pandas dataframe of passedLoci
+def getNumPassedTRs(conn):
+	cur = conn.cursor()
+	check = '''
+		SELECT
+			count(*)
+		FROM
+		 	regions
+		WHERE
+			pass=1
+	'''
+	cur.execute(check)
+
+	#Raise exception if conflicts failed to initialize
+	if (cur.fetchone()[0]) is 0:
+		raise RuntimeError("SQL Error: Failed to CREATE TEMPORARY TABLE \"conflicts\"")
+
+	return(cur.fetchone()[0])
 
 #Code to add record to 'loci' table
-def add_locus_record(conn, depth, consensus, passed=0):
+def add_locus_record(conn, depth, consensus, passed=1):
 	stuff = [depth, int(len(consensus)), str(consensus), int(passed)]
 	sql = ''' INSERT INTO loci(depth, length, consensus, pass)
 				VALUES(?,?,?,?) '''
@@ -111,7 +146,7 @@ def add_region_record(conn, locid, start, stop, seq, counts):
 
 	#build sql and pack values to insert
 	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap,
-		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,0)'''
+		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,1)'''
 	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop]
 
 	#insert
@@ -121,10 +156,10 @@ def add_region_record(conn, locid, start, stop, seq, counts):
 #Function to filter regions relation by minimum flanking SNPs
 def regionFilterMinVar(conn, val, flank):
 	cur = conn.cursor()
-	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is less than minimum
+	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is less than minimum
 	sql = '''
 		UPDATE regions
-		SET pass = 1
+		SET pass = 0
 		WHERE regid in
 			(SELECT regid FROM
 			(SELECT
@@ -146,10 +181,10 @@ def regionFilterMinVar(conn, val, flank):
 #Function to filter regions relation by maximum flanking SNPs
 def regionFilterMaxVar(conn, val, flank):
 	cur = conn.cursor()
-	#Update pass to "1/fail" where COUNT(vars) in flanking region + TR is greater than maximum
+	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is greater than maximum
 	sql = '''
 		UPDATE regions
-		SET pass = 1
+		SET pass = 0
 		WHERE regid in
 			(SELECT regid FROM
 			(SELECT
@@ -216,7 +251,7 @@ def regionFilterRandom(conn, num):
 	rows = int(cur.fetchone()[0])
 
 	#fetch number already failed
-	cur.execute("SELECT COUNT(*) FROM regions WHERE pass=1")
+	cur.execute("SELECT COUNT(*) FROM regions WHERE pass=0")
 	fails = int(cur.fetchone()[0])
 
 	print("Number of rows:",rows)
@@ -225,14 +260,14 @@ def regionFilterRandom(conn, num):
 	if num < rows-fails:
 		sql = '''
 			UPDATE regions
-			SET pass = 1
+			SET pass = 0
 			WHERE regid in
 				(SELECT
 					regid
 				FROM
 					regions
 				WHERE
-					pass=0
+					pass=1
 				ORDER BY RANDOM() LIMIT(%s - %s - %s)
 				)
 		'''%(rows,fails,num)
@@ -242,26 +277,26 @@ def regionFilterRandom(conn, num):
 def randomChooseRegionMINLEN(conn, min_len):
 	#Assign blocks as full alignments below min_len
 	sql_minlen = '''
-	UPDATE conflicts
-	SET choose = 1
-	WHERE
-		regid IN
-			(SELECT
-				regid
-			FROM
+		UPDATE conflicts
+		SET choose = 1
+		WHERE
+			regid IN
 				(SELECT
-					regid,
-					locid
+					regid
 				FROM
-					conflicts INNER JOIN loci ON conflicts.locid = loci.id
-				WHERE
-					length <= %r
-				ORDER BY
-					RANDOM()
+					(SELECT
+						regid,
+						locid
+					FROM
+						conflicts INNER JOIN loci ON conflicts.locid = loci.id
+					WHERE
+						length <= %r
+					ORDER BY
+						RANDOM()
+					)
+				GROUP BY
+					locid
 				)
-			GROUP BY
-				locid
-			)
 	'''%min_len
 	cur.execute(sql_minlen)
 
@@ -338,7 +373,7 @@ def initializeConflicts(conn):
 		FROM
 			regions INNER JOIN loci ON regions.locid = loci.id
 		WHERE
-			regions.pass = "0"
+			regions.pass=1
 	'''
 	cur.execute(sql2)
 	conn.commit()
@@ -394,7 +429,10 @@ def fetchConflictTRs(conn, min_len, dist):
 			stop
 		FROM
 			conflicts INNER JOIN regions ON conflicts.regid = regions.regid
+		WHERE
+			regions.pass=1
 	'''
+
 	df = pd.read_sql_query(sql_test, conn)
 	#Set block num start at 1+ last locid (to prevent overlap in block nums)
 	block = int(max(df["locid"]) + 1) #make sure to enforce integer type, or it fucks up in sql later
