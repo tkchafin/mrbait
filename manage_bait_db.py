@@ -677,10 +677,8 @@ def regionSelect_SNP(conn, dist):
 				raise RuntimeError(message)
 
 	#Push modified DF to SQL as temp table
-	print("\n\nFinal pandas table:\n\n",df,"\n\n")
 	updateChosenFromPandas(conn, df)
 
-	print("\n\n")
 
 #Function to prints flanking SNPs for conflicting regions...
 #Function for use when debugging

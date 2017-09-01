@@ -131,14 +131,8 @@ def selectTargetRegions(conn, params):
 	#NEXT: Need to select TRs within conflict_blocks
 	#Apply select_r filters for all conflicting TRs
 	if params.select_r == "r":
-		#randomly resolve conflicts
-		print("--select_r is RANDOM")
-		try:
-			m.regionSelectRandom(conn)
-		except ValueError as err:
-			sys.exit(err.args)
-		except:
-			sys.exit(sys.exc_info()[0])
+		#Do it later
+		pass
 	elif params.select_r == "s":
 		#Select based on SNPs flanking in "d" dist
 		print("--select_r is SNP, dist is ",params.select_r_dist)
@@ -160,6 +154,14 @@ def selectTargetRegions(conn, params):
 	else:
 		assert False, "Unhandled option %r"%params.select_r
 
+	#randomly resolve any remaining conflicts
+	print("--select_r is RANDOM")
+	try:
+		m.regionSelectRandom(conn)
+	except ValueError as err:
+		sys.exit(err.args)
+	except:
+			sys.exit(sys.exc_info()[0])
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 	#NEXT: Randomly resolve any remaining conflicts
 	#NEXT: Push conflicts to change "pass" attribute in regions table
