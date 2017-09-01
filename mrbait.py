@@ -90,8 +90,8 @@ def filterTargetRegions(conn, params):
 
 		if option.o1 == "r":
 			#Set 'rand' to TRUE for random selection AFTER other filters
-			rand = 1
-			rand_num = option.o2
+			rand_num = int(option.o2)
+			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
 		elif option.o1 == "g":
 			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
 		elif option.o1 == "n":
@@ -103,9 +103,11 @@ def filterTargetRegions(conn, params):
 			#m.printVarCounts(conn, option.o3)
 		else:
 			assert False, "Unhandled option %r"%option
-	#If 'random' select is turned on, then apply
-	if rand is 1:
-		m.regionFilterRandom(conn, rand_num)
+
+	#If 'random' select is turned on, then apply AFTER resolving conflicts
+	if rand_num:
+		return(rand_num)
+
 
 #Function to filter target regions by --filter_R arguments
 def selectTargetRegions(conn, params):
@@ -134,21 +136,27 @@ def selectTargetRegions(conn, params):
 		try:
 			m.regionSelectRandom(conn)
 		except ValueError as err:
-			print(err.args)
+			sys.exit(err.args)
 		except:
-			print("Unexpected error:",sys.exc_info()[0])
+			sys.exit(sys.exc_info()[0])
 	elif params.select_r == "s":
 		#Select based on SNPs flanking in "d" dist
-		print("--select_r is SNP, dist is ",params.dist_r)
+		print("--select_r is SNP, dist is ",params.select_r_dist)
+		try:
+			m.regionSelect_SNP(conn,params.select_r_dist)
+		except ValueError as err:
+			sys.exit(err.args)
+	#	except:
+		#	sys.exit(sys.exc_info()[0])
 	elif params.select_r == "m":
 		#Select based on minimizing SNPs, Ns and gaps in TR region, otherwise randomly
 		print("--select_r is MINVAR_TR")
 	elif params.select_r == "b":
 		#Select based on least Ns and gaps in "d" flanking bases
-		print("--select_r is MINBAD, dist is ", params.dist_r)
+		print("--select_r is MINBAD, dist is ", params.select_r_dist)
 	elif params.select_r == "c":
 		#Select based on minimizing SNPs in flanking region
-		print("select_r is MINVAR_FLANK, dist is ", params.dist_r)
+		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
 	else:
 		assert False, "Unhandled option %r"%params.select_r
 
@@ -250,11 +258,15 @@ checkTargetRegions(conn)
 print("Starting: Target Region Selection...")
 
 #First pass filtering of target regions
-filterTargetRegions(conn, params)
+rand = filterTargetRegions(conn, params)
 
 #Apply --select_r filters to sort any conflicting TRs
 selectTargetRegions(conn, params)
 
+#If RANDOM filter for TRs was applied, apply if AFTER TR conflict resolution
+if rand:
+	print("randomly filtering all TRs")
+	m.regionFilterRandom(conn, rand)
 
 #Pre-filters: Length, alignment depth
 #c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
