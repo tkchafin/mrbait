@@ -395,7 +395,7 @@ def fetchConflictTRs_NoMult(conn):
 	conn.commit()
 
 	#DEBUG print
-	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
+	#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 
 #Function to fetch all target regions requiring conflict resolution
@@ -511,7 +511,7 @@ def fetchConflictTRs(conn, min_len, dist):
 	cur.execute("DROP TABLE IF EXISTS t")
 
 	#DEBUG print
-	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
+	#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 #Function for random selection of TRs within conflict blocks
 def regionSelectRandom(conn):
@@ -522,22 +522,37 @@ def regionSelectRandom(conn):
 	rows = int(cur.fetchone()[0])
 	assert rows > 0, "Error: Conflicts table is empty"
 
-	# print("Number of rows:",rows)
-	# if rows is 0 or rows is None:
-	# 	raise ValueError("There are no rows in <regions>!")
-	# if num < rows-fails:
-	# 	sql = '''
-	# 		UPDATE regions
-	# 		SET pass = 1
-	# 		WHERE regid in
-	# 			(SELECT
-	# 				regid
-	# 			FROM
-	# 				regions
-	# 			WHERE
-	# 				choose=NULL
-	# 			ORDER BY RANDOM() LIMIT(%s - %s - %s)
-	# 			)
-	# 	'''%(rows,fails,num)
-	# 	cur.execute(sql)
-	# 	conn.commit()
+	#Make sure there is some data to work on
+	if rows is 0 or rows is None:
+		raise ValueError("There are no rows in <regions>!")
+
+	sql = '''
+	UPDATE
+		conflicts
+	SET
+		choose=1
+	WHERE
+		regid IN
+			(SELECT
+				regid
+			FROM
+				(SELECT
+					*
+				FROM
+					conflicts
+				WHERE
+					choose="NULL"
+				ORDER BY
+					RANDOM()
+				)
+			GROUP BY
+				conflict_block
+			)
+	'''
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
+
+	#Set "unchosen" regions to 0/FALSE
+	cur.execute("UPDATE conflicts SET choose=0 WHERE choose='NULL'")
+	conn.commit()

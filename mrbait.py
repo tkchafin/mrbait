@@ -131,7 +131,12 @@ def selectTargetRegions(conn, params):
 	if params.select_r == "r":
 		#randomly resolve conflicts
 		print("--select_r is RANDOM")
-		m.regionSelectRandom(conn)
+		try:
+			m.regionSelectRandom(conn)
+		except ValueError as err:
+			print(err.args)
+		except:
+			print("Unexpected error:",sys.exc_info()[0])
 	elif params.select_r == "s":
 		#Select based on SNPs flanking in "d" dist
 		print("--select_r is SNP, dist is ",params.dist_r)
@@ -147,6 +152,7 @@ def selectTargetRegions(conn, params):
 	else:
 		assert False, "Unhandled option %r"%params.select_r
 
+	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 	#NEXT: Randomly resolve any remaining conflicts
 	#NEXT: Push conflicts to change "pass" attribute in regions table
 
@@ -257,6 +263,7 @@ selectTargetRegions(conn, params)
 #NOTE: parallelize bait discovery in future!!
 #NOTE: Add option for end-trimming off of baits/regions to remove Ns, gaps, etc
 
+print("\n\nProgram ending...Here are some results\n\n")
 #Next:
 #	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
