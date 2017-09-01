@@ -209,26 +209,7 @@ def printVarCounts(conn, flank):
 	WHERE
 		value != "N" AND value != "-"
 	AND
-		((column < (stop+%s)) AND (column > start-%s))
-	GROUP BY regid
-	'''%(flank, flank)
-	print (pd.read_sql_query(sql2, conn))
-
-#Function to select one TR per alignment based on
-def printVarCounts(conn, flank):
-	cur = conn.cursor()
-	print("Variants within %r bases of TRs:"%flank)
-	#FOR TESTING/DEBUGGING
-	sql2 = '''
-	SELECT
-		regid,
-		COUNT(DISTINCT column) as counts
-	FROM
-		regions INNER JOIN variants ON regions.locid = variants.locid
-	WHERE
-		value != "N" AND value != "-"
-	AND
-		((column < (stop+%s)) AND (column > start-%s))
+		((column <= (stop+%s)) AND (column >= start-%s))
 	GROUP BY regid
 	'''%(flank, flank)
 	print (pd.read_sql_query(sql2, conn))
@@ -397,6 +378,12 @@ def fetchConflictTRs_NoMult(conn):
 	#DEBUG print
 	#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
+#Function to fetch number of rows in conflicts table
+def getConflictNumRows(conn):
+	cur = conn.cursor()
+	cur.execute("SELECT COUNT(*) FROM conflicts")
+	rows = int(cur.fetchone()[0])
+	return(rows)
 
 #Function to fetch all target regions requiring conflict resolution
 def fetchConflictTRs(conn, min_len, dist):
@@ -518,13 +505,11 @@ def regionSelectRandom(conn):
 	cur = conn.cursor()
 
 	#Fetch number of entries in conflict tables
-	cur.execute("SELECT COUNT(*) FROM conflicts")
-	rows = int(cur.fetchone()[0])
-	assert rows > 0, "Error: Conflicts table is empty"
+	rows = getConflictNumRows(conn)
 
 	#Make sure there is some data to work on
 	if rows is 0 or rows is None:
-		raise ValueError("There are no rows in <regions>!")
+		raise ValueError("There are no rows in <conflicts>!")
 
 	sql = '''
 	UPDATE
@@ -556,3 +541,127 @@ def regionSelectRandom(conn):
 	#Set "unchosen" regions to 0/FALSE
 	cur.execute("UPDATE conflicts SET choose=0 WHERE choose='NULL'")
 	conn.commit()
+
+
+#Function for resolving conflict blocks by number of flanking SNPs
+def regionSelect_SNP(conn, dist):
+	cur = conn.cursor()
+
+	#Fetch number of entries in conflict tables
+	rows = getConflictNumRows(conn)
+
+	#Make sure there is some data to work on
+	if rows <= 0 :
+		raise ValueError("There are no rows in <conflicts>!")
+
+	#Check that dist value is acceptable
+	if isinstance(dist, int) == False:
+		raise ValueError("Flanking distance does not appear to be an integer")
+	if dist <= 0:
+		raise ValueError("Flanking distance for counting SNPs cannot be less than 1")
+
+	# Template:
+	# -Fetch joined conflict table (get flanking SNPs)
+	# -Split pandas df into groups
+	# -Loop through each group, tracking top region(s)
+	# -If one region wins, set choose=1 and choose=0 for the rest
+	#-For all groups with one region chosen, set remaining to 0
+	#-If two are chosen, set others to 0 and keep the "tied" as NULL
+	#-Any region in a block that had NO vars will be kept as NULL.
+	#-----AFTER pushing pandas df back and updating, need to update
+	#-----all unchosen regions to 0 ONLY IF the block alreday has a selected region
+	
+	#-Use RANDOM to resolve any remaining NULLs.
+	#print("DIST IS ",dist)
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			COUNT(v.value) as counts
+		FROM
+			(conflicts AS c INNER JOIN regions AS r USING (regid))
+			INNER JOIN variants as v USING (locid)
+		WHERE
+			c.choose="NULL"
+		AND
+			v.value !="N" AND v.value != "-"
+		AND
+			v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+		GROUP BY
+			c.regid
+	'''%(dist, dist)
+
+	#printFlankingSNPs_conflicts(conn, dist)
+	#printFlankingSNPCounts_conflicts(conn, dist)
+	df = pd.read_sql_query(sql, conn)
+
+	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
+	#Loop through groups and select highest
+	groups = df.groupby("conflict_block")
+	for group, group_df in groups:
+		print("\n########Conflict Block is: ",group,"\n")
+		print(group_df)
+		#If only one TR for alignment, set choose to 1:
+		if group_df.shape[0] == 1:
+			for name, row in group_df.iterrows():
+				#modify original dataframe
+				df.loc[name, "choose"] = 1
+		#else:
+			#For each TR in locus
+			#for name, row in group_df.iterrows():
+				#print(row)
+	print("\n\n")
+
+#Function to prints flanking SNPs for conflicting regions...
+#Function for use when debugging
+def printFlankingSNPs_conflicts(conn, dist):
+	cur = conn.cursor()
+
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			v.value,
+			v.column
+		FROM
+			(conflicts AS c INNER JOIN regions AS r USING (regid))
+			INNER JOIN variants as v USING (locid)
+		WHERE
+			c.choose="NULL"
+		AND
+			v.value !="N" AND v.value != "-"
+		AND
+			((v.column <=(r.stop+%s)) AND (v.column >= r.start-%s))
+
+	'''%(dist, dist)
+	print(pd.read_sql_query(sql, conn))
+
+#Function to prints flanking SNPs for conflicting regions...
+#Function for use when debugging
+def printFlankingSNPCounts_conflicts(conn, dist):
+	cur = conn.cursor()
+
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			COUNT(v.value) AS counts
+		FROM
+			(conflicts AS c INNER JOIN regions AS r USING (regid))
+			INNER JOIN variants as v USING (locid)
+		WHERE
+			c.choose="NULL"
+		AND
+			v.value !="N" AND v.value != "-"
+		AND
+			((v.column <=(r.stop+%s)) AND (v.column >= r.start-%s))
+		GROUP BY
+			c.regid
+	'''%(dist, dist)
+	print(pd.read_sql_query(sql, conn))
