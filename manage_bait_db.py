@@ -351,7 +351,61 @@ def initializeConflicts(conn):
 	cur.execute(sql2)
 	conn.commit()
 
+#Function to take a pointer to a pandas dataframe, send to SQL, and update conflicts table
+def updateConflictsFromPandas(conn, df):
+	cur = conn.cursor()
 
+	#Fetch number of entries in conflict tables
+	rows = getConflictNumRows(conn)
+
+	#Make sure there is some data to work on
+	if rows is 0 or rows is None:
+		raise ValueError("There are no rows in <conflicts>!")
+
+	df.to_sql('t', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			conflicts
+		SET
+			conflict_block = (SELECT t.conflict_block FROM t WHERE t.regid = conflicts.regid)
+		WHERE
+			EXISTS(SELECT * FROM t WHERE t.regid = conflicts.regid)
+	'''
+	cur.execute(sql_update)
+
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS t")
+	conn.commit()
+
+#Function to take a pointer to a pandas dataframe, send to SQL, and update conflicts table
+def updateChosenFromPandas(conn, df):
+	cur = conn.cursor()
+
+	#Fetch number of entries in conflict tables
+	rows = getConflictNumRows(conn)
+
+	#Make sure there is some data to work on
+	if rows is 0 or rows is None:
+		raise ValueError("There are no rows in <conflicts>!")
+
+	df.to_sql('t', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			conflicts
+		SET
+			choose = (SELECT t.choose FROM t WHERE t.regid = conflicts.regid)
+		WHERE
+			EXISTS(SELECT * FROM t WHERE t.regid = conflicts.regid)
+	'''
+	cur.execute(sql_update)
+
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS t")
+	conn.commit()
 
 #Function to build conflicts table when --R is false
 def fetchConflictTRs_NoMult(conn):
@@ -480,23 +534,7 @@ def fetchConflictTRs(conn, min_len, dist):
 							block += 1
 
 	#Next step, send df back to SQLite and update conflicts table
-	#print(df)
-	df.to_sql('t', conn, if_exists='replace')
-	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
-	sql_update = '''
-		UPDATE
-			conflicts
-		SET
-			conflict_block = (SELECT t.conflict_block FROM t WHERE t.regid = conflicts.regid)
-		WHERE
-			EXISTS(SELECT * FROM t WHERE t.regid = conflicts.regid)
-	'''
-	cur.execute(sql_update)
-	conn.commit()
-	#print(pd.read_sql_query("SELECT * FROM t", conn))
-	#Clear up the temp table t
-	cur.execute("DROP TABLE IF EXISTS t")
-
+	updateConflictsFromPandas(conn, df)
 	#DEBUG print
 	#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
@@ -565,12 +603,13 @@ def regionSelect_SNP(conn, dist):
 	# -Split pandas df into groups
 	# -Loop through each group, tracking top region(s)
 	# -If one region wins, set choose=1 and choose=0 for the rest
-	#-For all groups with one region chosen, set remaining to 0
+	#-Set chosen to 1
 	#-If two are chosen, set others to 0 and keep the "tied" as NULL
 	#-Any region in a block that had NO vars will be kept as NULL.
 	#-----AFTER pushing pandas df back and updating, need to update
 	#-----all unchosen regions to 0 ONLY IF the block alreday has a selected region
-	
+	#-----final call to RANDOM select by parent function will sort out the rest
+
 	#-Use RANDOM to resolve any remaining NULLs.
 	#print("DIST IS ",dist)
 	#Query conflicts temp table to make a pandas dataframe for parsing
@@ -608,10 +647,39 @@ def regionSelect_SNP(conn, dist):
 			for name, row in group_df.iterrows():
 				#modify original dataframe
 				df.loc[name, "choose"] = 1
-		#else:
+		else:
 			#For each TR in locus
-			#for name, row in group_df.iterrows():
-				#print(row)
+			chosen_ones = []
+			best = 0
+			#Loop through and figure out which is best
+			for name, row in group_df.iterrows():
+				if row["counts"] < best:
+					continue
+				elif row["counts"] > best:
+					#If this is the best we've seen, replace chosen_ones with new choice
+					best = row["counts"]
+					chosen_ones = [name]
+				elif row["counts"] == best and best != 0:
+					#If its a tie, add to list of chosen_ones
+					chosen_ones.append(name)
+			#Use chosen list to assign values
+			#If one chosen, set chosen to 1/True and the rest to 0/False
+			if len(chosen_ones) == 1:
+				df.loc[df["conflict_block"] == group, "choose"] = 0
+				df.loc[chosen_ones[0], "choose"] = 1
+			#Elif, multiple were chosen
+			elif len(chosen_ones) > 1:
+				df.loc[df["conflict_block"] == group, "choose"] = 0
+				for i in chosen_ones:
+					df.loc[i, "choose"] = "NULL"
+			else:
+				message = "Error: No TR chosen for block " + group + ", something went wrong"
+				raise RuntimeError(message)
+
+	#Push modified DF to SQL as temp table
+	print("\n\nFinal pandas table:\n\n",df,"\n\n")
+	updateChosenFromPandas(conn, df)
+
 	print("\n\n")
 
 #Function to prints flanking SNPs for conflicting regions...
