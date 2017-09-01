@@ -131,6 +131,7 @@ def selectTargetRegions(conn, params):
 	#NEXT: Need to select TRs within conflict_blocks
 	#Apply select_r filters for all conflicting TRs
 	if params.select_r == "r":
+	print("--select_r is RANDOM")
 		#Do it later
 		pass
 	elif params.select_r == "s":
@@ -148,6 +149,10 @@ def selectTargetRegions(conn, params):
 	elif params.select_r == "b":
 		#Select based on least Ns and gaps in "d" flanking bases
 		print("--select_r is MINBAD, dist is ", params.select_r_dist)
+		try:
+			m.regionSelect_MINBAD(conn,params.select_r_dist)
+		except ValueError as err:
+			sys.exit(err.args)
 	elif params.select_r == "c":
 		#Select based on minimizing SNPs in flanking region
 		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
@@ -155,7 +160,6 @@ def selectTargetRegions(conn, params):
 		assert False, "Unhandled option %r"%params.select_r
 
 	#randomly resolve any remaining conflicts
-	print("--select_r is RANDOM")
 	try:
 		m.regionSelectRandom(conn)
 	except ValueError as err:
