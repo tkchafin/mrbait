@@ -324,10 +324,10 @@ class parseArgs():
 				subopts = re.split('=|,',arg)
 				if subopts[0] in ('m','M'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					self.filter_r_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
+					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
 				elif subopts[0] in ('r','g','n'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
+					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
 				else:
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
