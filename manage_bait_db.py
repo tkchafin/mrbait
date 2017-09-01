@@ -638,6 +638,93 @@ def regionSelect_SNP(conn, dist):
 
 	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
 	#Loop through groups and select highest
+	try:
+		df = parseCountsMax(df)
+	except:
+		raise
+
+	#Push modified DF to SQL as temp table
+	updateChosenFromPandas(conn, df)
+
+
+#Function to prints flanking SNPs for conflicting regions...
+#Function for use when debugging
+def printFlankingSNPs_conflicts(conn, dist):
+	cur = conn.cursor()
+
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			v.value,
+			v.column
+		FROM
+			(conflicts AS c INNER JOIN regions AS r USING (regid))
+			INNER JOIN variants as v USING (locid)
+		WHERE
+			c.choose="NULL"
+		AND
+			v.value !="N" AND v.value != "-"
+		AND
+			((v.column <=(r.stop+%s)) AND (v.column >= r.start-%s))
+
+	'''%(dist, dist)
+	print(pd.read_sql_query(sql, conn))
+
+
+#Function to loop though pandas DF of conflict counts and choose best by "minimum"
+def parseCountsMin(df):
+	#Loop through groups and select lowest
+	groups = df.groupby("conflict_block")
+	for group, group_df in groups:
+		#print("\n########Conflict Block is: ",group,"\n")
+		#print(group_df)
+		#If only one TR for alignment, set choose to 1:
+		if group_df.shape[0] == 1:
+			for name, row in group_df.iterrows():
+				#modify original dataframe
+				df.loc[name, "choose"] = 1
+		else:
+			#For each TR in locus
+			chosen_ones = []
+			best = 0
+			track = 0
+			#Loop through and figure out which is best
+			for name, row in group_df.iterrows():
+				if track == 0:
+					best = row["counts"]
+					chosen_ones = [name]
+					track = 1
+				else:
+					if row["counts"] > best:
+						continue
+					elif row["counts"] < best:
+						#If this is the best we've seen, replace chosen_ones with new choice
+						best = row["counts"]
+						chosen_ones = [name]
+					elif row["counts"] == best:
+						#If its a tie, add to list of chosen_ones
+						chosen_ones.append(name)
+
+			#Use chosen list to assign values
+			#If one chosen, set chosen to 1/True and the rest to 0/False
+			if len(chosen_ones) == 1:
+				df.loc[df["conflict_block"] == group, "choose"] = 0
+				df.loc[chosen_ones[0], "choose"] = 1
+			#Elif, multiple were chosen
+			elif len(chosen_ones) > 1:
+				df.loc[df["conflict_block"] == group, "choose"] = 0
+				for i in chosen_ones:
+					df.loc[i, "choose"] = "NULL"
+			else:
+				message = "Error: No TR chosen for block " + group + ", something went wrong"
+				raise RuntimeError(message)
+	return(df)
+
+#Function to go through pandas df of conflict counts and choose best by "maximum"
+def parseCountsMax(df):
 	groups = df.groupby("conflict_block")
 	for group, group_df in groups:
 		#print("\n########Conflict Block is: ",group,"\n")
@@ -675,36 +762,7 @@ def regionSelect_SNP(conn, dist):
 			else:
 				message = "Error: No TR chosen for block " + group + ", something went wrong"
 				raise RuntimeError(message)
-
-	#Push modified DF to SQL as temp table
-	updateChosenFromPandas(conn, df)
-
-
-#Function to prints flanking SNPs for conflicting regions...
-#Function for use when debugging
-def printFlankingSNPs_conflicts(conn, dist):
-	cur = conn.cursor()
-
-	#Query conflicts temp table to make a pandas dataframe for parsing
-	sql = '''
-		SELECT
-			c.regid,
-			conflict_block,
-			choose,
-			v.value,
-			v.column
-		FROM
-			(conflicts AS c INNER JOIN regions AS r USING (regid))
-			INNER JOIN variants as v USING (locid)
-		WHERE
-			c.choose="NULL"
-		AND
-			v.value !="N" AND v.value != "-"
-		AND
-			((v.column <=(r.stop+%s)) AND (v.column >= r.start-%s))
-
-	'''%(dist, dist)
-	print(pd.read_sql_query(sql, conn))
+	return(df)
 
 #Function to prints flanking SNPs for conflicting regions...
 #Function for use when debugging
@@ -783,50 +841,43 @@ def regionSelect_MINBAD(conn, dist):
 
 	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
 	#Loop through groups and select highest
-	groups = df.groupby("conflict_block")
-	for group, group_df in groups:
-		#print("\n########Conflict Block is: ",group,"\n")
-		#print(group_df)
-		#If only one TR for alignment, set choose to 1:
-		if group_df.shape[0] == 1:
-			for name, row in group_df.iterrows():
-				#modify original dataframe
-				df.loc[name, "choose"] = 1
-		else:
-			#For each TR in locus
-			chosen_ones = []
-			best = 0
-			track = 0
-			#Loop through and figure out which is best
-			for name, row in group_df.iterrows():
-				if track == 0:
-					best = row["counts"]
-					chosen_ones = [name]
-					track = 1
-				else:
-					if row["counts"] > best:
-						continue
-					elif row["counts"] < best:
-						#If this is the best we've seen, replace chosen_ones with new choice
-						best = row["counts"]
-						chosen_ones = [name]
-					elif row["counts"] == best:
-						#If its a tie, add to list of chosen_ones
-						chosen_ones.append(name)
+	try:
+		df = parseCountsMin(df)
+	except:
+		raise
 
-			#Use chosen list to assign values
-			#If one chosen, set chosen to 1/True and the rest to 0/False
-			if len(chosen_ones) == 1:
-				df.loc[df["conflict_block"] == group, "choose"] = 0
-				df.loc[chosen_ones[0], "choose"] = 1
-			#Elif, multiple were chosen
-			elif len(chosen_ones) > 1:
-				df.loc[df["conflict_block"] == group, "choose"] = 0
-				for i in chosen_ones:
-					df.loc[i, "choose"] = "NULL"
-			else:
-				message = "Error: No TR chosen for block " + group + ", something went wrong"
-				raise RuntimeError(message)
+	#Push modified DF to SQL as temp table
+	updateChosenFromPandas(conn, df)
+
+#Function for resolving conflict blocks by minimizing "bad" bases in flanking region
+def regionSelect_MINVAR_TR(conn):
+	cur = conn.cursor()
+
+	#Fetch number of entries in conflict tables
+	rows = getConflictNumRows(conn)
+	#Make sure there is some data to work on
+	if rows <= 0 :
+		raise ValueError("There are no rows in <conflicts>!")
+
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			(vars + gap + bad) AS counts
+		FROM
+			conflicts AS c INNER JOIN regions AS r USING (regid)
+		WHERE
+			c.choose="NULL"
+	'''
+
+	df = pd.read_sql_query(sql, conn)
+	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
+	try:
+		df = parseCountsMin(df)
+	except:
+		raise
 
 	#Push modified DF to SQL as temp table
 	updateChosenFromPandas(conn, df)

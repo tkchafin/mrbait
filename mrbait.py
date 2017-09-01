@@ -131,7 +131,7 @@ def selectTargetRegions(conn, params):
 	#NEXT: Need to select TRs within conflict_blocks
 	#Apply select_r filters for all conflicting TRs
 	if params.select_r == "r":
-	print("--select_r is RANDOM")
+		print("--select_r is RANDOM")
 		#Do it later
 		pass
 	elif params.select_r == "s":
@@ -146,6 +146,10 @@ def selectTargetRegions(conn, params):
 	elif params.select_r == "m":
 		#Select based on minimizing SNPs, Ns and gaps in TR region, otherwise randomly
 		print("--select_r is MINVAR_TR")
+		try:
+			m.regionSelect_MINVAR_TR(conn)
+		except ValueError as err:
+			sys.exit(err.args)
 	elif params.select_r == "b":
 		#Select based on least Ns and gaps in "d" flanking bases
 		print("--select_r is MINBAD, dist is ", params.select_r_dist)
@@ -167,8 +171,9 @@ def selectTargetRegions(conn, params):
 	except:
 			sys.exit(sys.exc_info()[0])
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
-	#NEXT: Randomly resolve any remaining conflicts
+
 	#NEXT: Push conflicts to change "pass" attribute in regions table
+	#m.pushResolvedConflicts(conn)
 
 #Function to check that target regions table is valid to continue
 def checkTargetRegions(conn):
