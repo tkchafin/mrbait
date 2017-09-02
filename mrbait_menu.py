@@ -84,7 +84,8 @@ Target Region options:
 			  --Individual baits are constrained by <-v>
 			  --By default set to the value of <-v, --var_max>
 			  --Also controllable with -F M=0,[x] where x is maximum value
-	-D,--dist_r	: Minimum distance between disjunct target regions [100]
+	-D,--dist_r	: Minimum distance between target regions [100]
+			  --Conflicts will be resolved according to --select_r
 	-p,--tile_min	: Minimum bait region size to allow tiling
 			  --By default will be set to bait length <-b> + overlap <-O>
 			  --Asserts <-T> is turned on
