@@ -881,3 +881,56 @@ def regionSelect_MINVAR_TR(conn):
 
 	#Push modified DF to SQL as temp table
 	updateChosenFromPandas(conn, df)
+
+#Function for resolving conflict blocks by minimizing number of flanking SNPs
+def regionSelect_MINSNP(conn, dist):
+	cur = conn.cursor()
+
+	#Fetch number of entries in conflict tables
+	rows = getConflictNumRows(conn)
+
+	#Make sure there is some data to work on
+	if rows <= 0 :
+		raise ValueError("There are no rows in <conflicts>!")
+
+	#Check that dist value is acceptable
+	if isinstance(dist, int) == False:
+		raise ValueError("Flanking distance does not appear to be an integer")
+	if dist <= 0:
+		raise ValueError("Flanking distance for counting SNPs cannot be less than 1")
+
+	#-Use RANDOM to resolve any remaining NULLs.
+	#print("DIST IS ",dist)
+	#Query conflicts temp table to make a pandas dataframe for parsing
+	sql = '''
+		SELECT
+			c.regid,
+			conflict_block,
+			choose,
+			COUNT(v.value) as counts
+		FROM
+			(conflicts AS c INNER JOIN regions AS r USING (regid))
+			INNER JOIN variants as v USING (locid)
+		WHERE
+			c.choose="NULL"
+		AND
+			v.value !="N" AND v.value != "-"
+		AND
+			v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+		GROUP BY
+			c.regid
+	'''%(dist, dist)
+
+	#printFlankingSNPs_conflicts(conn, dist)
+	#printFlankingSNPCounts_conflicts(conn, dist)
+	df = pd.read_sql_query(sql, conn)
+
+	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
+	#Loop through groups and select highest
+	try:
+		df = parseCountsMin(df)
+	except:
+		raise
+
+	#Push modified DF to SQL as temp table
+	updateChosenFromPandas(conn, df)
