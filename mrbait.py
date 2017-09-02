@@ -160,6 +160,10 @@ def selectTargetRegions(conn, params):
 	elif params.select_r == "c":
 		#Select based on minimizing SNPs in flanking region
 		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
+		try:
+			m.regionSelect_MINSNP(conn,params.select_r_dist)
+		except ValueError as err:
+			sys.exit(err.args)
 	else:
 		assert False, "Unhandled option %r"%params.select_r
 
