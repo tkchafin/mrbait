@@ -78,7 +78,7 @@ Target Region options:
 			  --By default will be set to 1/2 of the bait length <-b>
 			  --Asserts <-T> is turned on
 	-x,--max_r	: Maximum length of target region to retain [500]
-	-y,--min_r	: Minimum length of target region to retain [80]
+	-y,--min_r	: Minimum length of target region to retain 
 			  --Default will be set to bait length <-b,--bait>
 	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
 			  --Individual baits are constrained by <-v>
