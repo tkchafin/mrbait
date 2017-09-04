@@ -937,7 +937,7 @@ def regionSelect_MINSNP(conn, dist):
 
 #Function to push resolved TR conflicts to the regions table
 def pushResolvedConflicts(conn):
-
+	
 	#Check that all conflicts are resolved
 	cur = conn.cursor()
 	unres = pd.read_sql_query("SELECT COUNT(*) FROM conflicts WHERE choose='NULL'", conn)
@@ -960,6 +960,6 @@ def pushResolvedConflicts(conn):
 		'''
 		cur.execute(sql_update)
 
-		#Clear up the temp table t
-		cur.execute("DROP TABLE IF EXISTS t")
+		#Clear up the temp table conflicts
+		cur.execute("DROP TABLE IF EXISTS conflicts")
 		conn.commit()
