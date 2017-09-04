@@ -177,7 +177,7 @@ def selectTargetRegions(conn, params):
 	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 	#NEXT: Push conflicts to change "pass" attribute in regions table
-	#m.pushResolvedConflicts(conn)
+	m.pushResolvedConflicts(conn)
 
 #Function to check that target regions table is valid to continue
 def checkTargetRegions(conn):

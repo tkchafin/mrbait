@@ -934,3 +934,32 @@ def regionSelect_MINSNP(conn, dist):
 
 	#Push modified DF to SQL as temp table
 	updateChosenFromPandas(conn, df)
+
+#Function to push resolved TR conflicts to the regions table
+def pushResolvedConflicts(conn):
+
+	#Check that all conflicts are resolved
+	cur = conn.cursor()
+	unres = pd.read_sql_query("SELECT COUNT(*) FROM conflicts WHERE choose='NULL'", conn)
+	rows = unres.shape[0]
+	if rows <= 0:
+		print("Unresolved conflicts:")
+		print(unres)
+		raise RuntimeError("Error: There are still unresolved conflicts")
+	else:
+		#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+		sql_update = '''
+			UPDATE
+				regions
+			SET
+				pass = (SELECT c.choose FROM conflicts c WHERE c.regid = regions.regid)
+			WHERE
+				regions.regid in (SELECT c.regid FROM conflicts c WHERE c.regid = regions.regid)
+			AND
+				pass = 1
+		'''
+		cur.execute(sql_update)
+
+		#Clear up the temp table t
+		cur.execute("DROP TABLE IF EXISTS t")
+		conn.commit()
