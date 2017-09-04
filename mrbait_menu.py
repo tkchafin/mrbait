@@ -335,7 +335,9 @@ class parseArgs():
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask','len'):
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
-					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
+						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+					else:
+						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
 				elif subopts[0] in ('rand','gap','bad'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
@@ -372,7 +374,9 @@ class parseArgs():
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					if subopts[0] in ('gc', 'mask'):
 						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"mask\" and \"gc\": Min must be less than max"
-					self.filter_b_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
+						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+					else:
+						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
 				elif (subopts[0] is 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))
