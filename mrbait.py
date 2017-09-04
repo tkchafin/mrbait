@@ -80,6 +80,40 @@ def read_loci(infile):
 				yield(loci)
 				loci = Bio.Align.MultipleSeqAlignment([])
 
+#Function to discover target regions using a sliding windows through passedLoci
+def targetDiscoverySlidingWindow(conn, params):
+	
+	#looping through passedLoci only
+	for seq in passedLoci.itertuples():
+		start = 0
+		stop = 0
+		print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
+		generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
+		for window_seq in generator():
+
+			seq_norm = s.simplifySeq(window_seq[0])
+			counts = s.seqCounterSimple(seq_norm)
+
+			#If window passes filters, extend current bait region
+			#print("Start is ", start, " and stop is ",stop) #debug print
+			if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
+				stop = window_seq[2]
+			else:
+				#If window fails, check if previous bait region passes to submit to DB
+				#print (stop-start)
+				if (stop - start) > params.blen:
+					target = (seq[2])[start:stop]
+					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+					#Check that there aren't too many SNPs
+					#if tr_counts["*"] <= params.vmax_r:
+					print("	Target region: ", target)
+					#Submit target region to database
+					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)
+					#set start of next window to end of current TR
+					generator.setI(stop)
+
+				#If bait fails, set start to start point of next window
+				start = generator.getI()+params.win_shift
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):
@@ -232,37 +266,7 @@ if passedLoci.shape[0] <= 0:
 	sys.exit("Program killed: No loci passed filtering.")
 
 #Target region discovery according to params set
-#looping through passedLoci only
-for seq in passedLoci.itertuples():
-	start = 0
-	stop = 0
-	print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
-	generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
-	for window_seq in generator():
-
-		seq_norm = s.simplifySeq(window_seq[0])
-		counts = s.seqCounterSimple(seq_norm)
-
-		#If window passes filters, extend current bait region
-		#print("Start is ", start, " and stop is ",stop) #debug print
-		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
-			stop = window_seq[2]
-		else:
-			#If window fails, check if previous bait region passes to submit to DB
-			#print (stop-start)
-			if (stop - start) > params.blen:
-				target = (seq[2])[start:stop]
-				tr_counts = s.seqCounterSimple(s.simplifySeq(target))
-				#Check that there aren't too many SNPs
-				#if tr_counts["*"] <= params.vmax_r:
-				print("	Target region: ", target)
-				#Submit target region to database
-				m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)
-				#set start of next window to end of current TR
-				generator.setI(stop)
-
-			#If bait fails, set start to start point of next window
-			start = generator.getI()+params.win_shift
+targetDiscoverySlidingWindow(conn, params)
 print()
 
 #Assert that there are TRs chosen, and that not all have been filtered out
