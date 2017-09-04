@@ -124,7 +124,7 @@ def filterTargetRegions(conn, params):
 	m.lengthFilterTR(conn, params.max_r, params.min_r)
 
 	#Filter by --vmax_r
-	#m.varFilterTR(conn, params.vmax_r)
+	m.varMaxFilterTR(conn, params.vmax_r)
 
 	for option in params.filter_r_objects:
 		print("Select Region Option: ", option.o1)
@@ -230,7 +230,7 @@ def checkTargetRegions(conn):
 	passed = m.getNumPassedTRs(conn)
 	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
-	print("Checking target regions")
+
 
 ############################### MAIN ###################################
 

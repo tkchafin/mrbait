@@ -980,3 +980,19 @@ def lengthFilterTR(conn, maxlen, minlen):
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
+
+#Functon to filter targets by --vmax_r
+def varMaxFilterTR(conn, varmax):
+	cur = conn.cursor()
+
+	sql = '''
+	UPDATE
+		regions
+	SET
+		pass=0
+	WHERE
+		vars > %s
+	'''%(varmax)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
