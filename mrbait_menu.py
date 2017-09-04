@@ -44,7 +44,8 @@ Locus filtering/ consensus options:
 
 	-c,--cov	: Minimum number of sequences per alignment, for MAF or LOCI input [1]
 	-l,--len	: Minimum alignment length to attempt bait design [80]
-	-t,--thresh	: Minimum proportion for gap/N to include in consensus [0.1]""")
+	-t,--thresh	: Minimum proportion for gap/N to include in consensus [0.1]
+	-r,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]""")
 
 	print("""
 General Bait Design options:
@@ -78,7 +79,7 @@ Target Region options:
 			  --By default will be set to 1/2 of the bait length <-b>
 			  --Asserts <-T> is turned on
 	-x,--max_r	: Maximum length of target region to retain [500]
-	-y,--min_r	: Minimum length of target region to retain 
+	-y,--min_r	: Minimum length of target region to retain
 			  --Default will be set to bait length <-b,--bait>
 	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
 			  --Individual baits are constrained by <-v>
@@ -91,21 +92,23 @@ Target Region options:
 			  --Asserts <-T> is turned on
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 			  --Options
-				s=[d]   : Most SNPs w/in \"d\" bases
-				b=[d]   : Least Ns and gaps w/n \"d\" bases
-				c=[d]   : Most conserved w/in \"d\" bases
-				m       : Least SNP, N, or gap bases in bait region
-				r       : Randomly choose a bait region [default]
+				snp=[d]    : Most SNPs w/in \"d\" bases
+				bad=[d]    : Least Ns and gaps w/n \"d\" bases
+				conf=[d]   : Most conserved w/in \"d\" bases
+				conw       : Least SNP, N, or gap bases in bait region
+				rand       : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>
 			  --Options
-				g=[x]   : Maximum of \"x\" gaps in target region
-				b=[x]   : Maximum of \"x\" Ns in target region
-				m=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
-				M=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=[x]   : Randomly retain \"x\" target regions w/ baits
-				Ex: -F m=100,1 -F M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+				gap=[x]    : Maximum of \"x\" gaps in target region
+				bad=[x]    : Maximum of \"x\" Ns in target region
+				min=[d,x]  : Minimum of \"x\" SNPs within \"d\" bases
+				max=[d,x]  : Maximum of \"x\" SNPs within \"d\" bases
+				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
+				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+				rand=[x]   : Randomly retain \"x\" target regions w/ baits
+				Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 	#Need -s option for picking baits within bait regions and for picking bait regions within loci
 	print("""
 Bait Selection/ Optimization options:
@@ -114,25 +117,28 @@ Bait Selection/ Optimization options:
 	-s,--select_b	: Which criterion to select a bait for target region
 			  --NOTE: This option is ignored when <-T> or <-W>
 			  --Options
-				s=[d]   : Most SNPs w/in \"d\" bases
-				b=[d]   : Least Ns and gaps w/in \"d\" bases
-				c=[d]   : Most conserved w/in \"d\" bases
-				m       : Least SNP, N, or gap bases in bait region
-				r       : Randomly choose a bait [default]
-				Ex: -S s=100 to choose region with most SNPs within 100 bases
+				snp=[d]    : Most SNPs w/in \"d\" bases
+				bad=[d]    : Least Ns and gaps w/in \"d\" bases
+				conf=[d]   : Most conserved w/in \"d\" bases
+				conw       : Least SNP, N, or gap bases in bait region
+				rand       : Randomly choose a bait [default]
+				Ex: -S snp=100 to choose region with most SNPs within 100 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 			  --Warning: May mask selections made using <-S> or <-F>
 			  --Options
-				m=[d,x] : Minimum of \"x\" SNPs within \"d\" bases
-				M=[d,x] : Maximum of \"x\" SNPs within \"d\" bases
-				r=[x]   : Randomly retain \"x\" baits OVERALL
-				Ex: -f m=100,1 -f M=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+				min=[d,x]  : Minimum of \"x\" SNPs within \"d\" bases
+				max=[d,x]  : Maximum of \"x\" SNPs within \"d\" bases
+ 				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
+ 				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+				rand=[x]   : Randomly retain \"x\" baits OVERALL
+				Ex: -f min=100,1 -f max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 
 
 	print("""
 Running options/ shortcuts:
 	-W,--tile_all	: Tile baits across all target regions
 			  --Relevant arguments to set: -b, -O, -v, -n, -g, -f
+	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
 			  --Errors and assertions are not affected""")
 	print("""
@@ -166,7 +172,7 @@ class parseArgs():
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","tiling","overlap=","max_r",
 			"min_r=","vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
-			"balign=","select_b=","filter_b=","tile_all","queit","expand","out=",
+			"balign=","select_b=","filter_b=","tile_all","quiet","expand","out=",
 			"plot_all", "win_width="])
 		except getopt.GetoptError as err:
 			print(err)
@@ -301,10 +307,10 @@ class parseArgs():
 			elif opt in ('-S', '--select_r'):
 				temp = arg.split('=')
 				self.select_r = (temp[0]).lower()
-				chars = (['s','b','c','m','r'])
+				chars = (['snp','bad','conf','conw','rand'])
 				if self.select_r not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-				subchars = (['s','b','c'])
+				subchars = (['snp','bad','conw'])
 				if string_containsAny(self.select_r, subchars) == 0:
 					if (len(temp) > 1):
 						assert len(temp) is 2, "invalid use of <--select_r>"
@@ -323,10 +329,12 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('m','M'):
+				if subopts[0] in ('min','max','mask','gc'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
+					if subopts[0] in ('gc', 'mask'):
+						assert subopts[1] < subopts[2], "In <--filter_r> for suboptions \"mask\" and \"gc\": Min must be less than max"
 					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
-				elif subopts[0] in ('r','g','n'):
+				elif subopts[0] in ('rand','gap','bad'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
 				else:
@@ -338,10 +346,10 @@ class parseArgs():
 			elif opt in ('-s', '--select_b'):
 				temp = arg.split('=')
 				self.select_b = (temp[0]).lower()
-				chars = (['s','b','c','m','r'])
+				chars = (['snp','bad','conf','conw','rand'])
 				if self.select_b not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-				subchars = (['s','b','c'])
+				subchars = (['snp','bad','conf'])
 				if string_containsAny(self.select_b, subchars) == 0:
 					if (len(temp) > 1):
 						self.select_b_dist = int(temp[1])
@@ -358,10 +366,12 @@ class parseArgs():
 				self.filter_b_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('m','M'):
+				if subopts[0] in ('min','max','mask','gc'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
+					if subopts[0] in ('gc', 'mask'):
+						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"mask\" and \"gc\": Min must be less than max"
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1],subopts[2]))
-				elif (subopts[0] is 'r'):
+				elif (subopts[0] is 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))
 				else:

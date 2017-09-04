@@ -996,3 +996,4 @@ def varMaxFilterTR(conn, varmax):
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
+	

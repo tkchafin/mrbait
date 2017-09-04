@@ -128,19 +128,27 @@ def filterTargetRegions(conn, params):
 
 	for option in params.filter_r_objects:
 		print("Select Region Option: ", option.o1)
-		if option.o1 == "r":
+		if option.o1 == "rand":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand_num = int(option.o2)
 			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
-		elif option.o1 == "g":
+		elif option.o1 == "gap":
 			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
-		elif option.o1 == "n":
+		elif option.o1 == "bad":
 			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
-		elif option.o1 == "m":
+		elif option.o1 == "min":
 			m.regionFilterMinVar(conn, option.o2, option.o3)
-		elif option.o1 == "M":
+		elif option.o1 == "max":
 			m.regionFilterMaxVar(conn, option.o2, option.o3)
 			#m.printVarCounts(conn, option.o3)
+		elif option.o1 == "mask":
+			min_mask_prop = option.o2
+			max_mask_prop = option.o3
+			print("Filter regions by MASK, but option not yet implemented")
+		elif option.o1 == "gc":
+			min_mask_prop = option.o2
+			max_mask_prop = option.o3
+			print("Filter regions by GC, but option not yet implemented")
 		else:
 			assert False, "Unhandled option %r"%option
 
@@ -172,11 +180,11 @@ def selectTargetRegions(conn, params):
 	#TODO: First fetch how many conflicts, if there are none, then EXIT FUNCTION
 
 	#Apply select_r filters for all conflicting TRs
-	if params.select_r == "r":
+	if params.select_r == "rand":
 		print("--select_r is RANDOM")
 		#Do it later
 		pass
-	elif params.select_r == "s":
+	elif params.select_r == "snp":
 		#Select based on SNPs flanking in "d" dist
 		print("--select_r is SNP, dist is ",params.select_r_dist)
 		try:
@@ -185,21 +193,21 @@ def selectTargetRegions(conn, params):
 			sys.exit(err.args)
 	#	except:
 		#	sys.exit(sys.exc_info()[0])
-	elif params.select_r == "m":
+	elif params.select_r == "conw":
 		#Select based on minimizing SNPs, Ns and gaps in TR region, otherwise randomly
 		print("--select_r is MINVAR_TR")
 		try:
 			m.regionSelect_MINVAR_TR(conn)
 		except ValueError as err:
 			sys.exit(err.args)
-	elif params.select_r == "b":
+	elif params.select_r == "bad":
 		#Select based on least Ns and gaps in "d" flanking bases
 		print("--select_r is MINBAD, dist is ", params.select_r_dist)
 		try:
 			m.regionSelect_MINBAD(conn,params.select_r_dist)
 		except ValueError as err:
 			sys.exit(err.args)
-	elif params.select_r == "c":
+	elif params.select_r == "conf":
 		#Select based on minimizing SNPs in flanking region
 		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
 		try:
@@ -248,6 +256,8 @@ def checkTargetRegions(conn):
 #------------Should also have option to turn it off, and set thresholds for keeping in consensus
 #TODO: Track GC content/percentage and set max/min values for Target filtering
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
+#TODO: Implement i,j,k,z options
+#TODO: If --no_mask, set mask_thresh to 1.0, convert all consensus to uppercase
 
 #Parse Command line arguments
 params = parseArgs()
