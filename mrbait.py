@@ -144,11 +144,12 @@ def filterTargetRegions(conn, params):
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
-			print("Filter regions by MASK, but option not yet implemented")
+			m.regionFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
 			print("Filter regions by GC, but option not yet implemented")
+			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "len":
 			minlen = option.o2
 			maxlen= option.o3
@@ -256,13 +257,9 @@ def checkTargetRegions(conn):
 #TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
 #TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
 #TODO: Could also set minimum coverage thresholds for whole genome?
-#TODO: Update locus parsing to keep masking information
-#TODO: Set mask filter (can be used to communicate repeats, etc).
-#------------Should also have option to turn it off, and set thresholds for keeping in consensus
-#TODO: Track GC content/percentage and set max/min values for Target filtering
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
-#TODO: Implement i,j,k,z options
-#TODO: If --no_mask, set mask_thresh to 1.0, convert all consensus to uppercase
+#TODO: Way to filter targets by maskin in flanking region???
+#TODO: Directional bait filtering (left, center, end, right) -- keep baits by position in target???
 
 #Parse Command line arguments
 params = parseArgs()

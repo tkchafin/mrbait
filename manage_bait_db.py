@@ -34,7 +34,7 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
 			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
-			bad INTEGER, gap INTEGER, mask INTEGER, gc INTEGER, start INTEGER NOT NULL,
+			bad INTEGER, gap INTEGER, mask REAL, gc REAL, start INTEGER NOT NULL,
 			stop INTEGER NOT NULL,pass INTEGER NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
@@ -136,10 +136,12 @@ def add_region_record(conn, locid, start, stop, seq, counts, mask, gc):
 	#Establish cursor
 	cur = conn.cursor()
 
+	mask_p = float(mask/len(seq))
+	gc_p = float(gc/len(seq))
 	#build sql and pack values to insert
 	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap, mask, gc,
 		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,?,?,1)'''
-	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], mask, gc, start, stop]
+	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], mask_p, gc_p, start, stop]
 
 	#insert
 	cur.execute(sql, stuff)
@@ -993,6 +995,34 @@ def varMaxFilterTR(conn, varmax):
 	WHERE
 		vars > %s
 	'''%(varmax)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
+
+def regionFilterMask(conn, minprop, maxprop):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		regions
+	SET
+		pass=0
+	WHERE
+		(mask > %s) OR (mask < %s)
+	'''%(maxprop, minprop)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
+
+def regionFilterGC(conn, minprop, maxprop):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		regions
+	SET
+		pass=0
+	WHERE
+		(gc > %s) OR (gc < %s)
+	'''%(maxprop, minprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
