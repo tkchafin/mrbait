@@ -25,7 +25,7 @@ def loadMAF(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
 
@@ -44,7 +44,7 @@ def loadLOCI(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
 
@@ -85,6 +85,7 @@ def targetDiscoverySlidingWindow(conn, params):
 
 	#looping through passedLoci only
 	for seq in passedLoci.itertuples():
+		print(seq)
 		start = 0
 		stop = 0
 		print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
@@ -104,11 +105,13 @@ def targetDiscoverySlidingWindow(conn, params):
 				if (stop - start) > params.blen:
 					target = (seq[2])[start:stop]
 					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+					n_mask = a.n_lower_chars(target)
+					n_gc = s.gc_content(target)
 					#Check that there aren't too many SNPs
 					#if tr_counts["*"] <= params.vmax_r:
 					print("	Target region: ", target)
 					#Submit target region to database
-					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts)
+					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
 					#set start of next window to end of current TR
 					generator.setI(stop)
 
@@ -119,9 +122,6 @@ def targetDiscoverySlidingWindow(conn, params):
 def filterTargetRegions(conn, params):
 	rand = 0 #false
 	rand_num = 0
-
-	#First, filter by --max_r and --min_r
-	m.lengthFilterTR(conn, params.max_r, params.min_r)
 
 	#Filter by --vmax_r
 	m.varMaxFilterTR(conn, params.vmax_r)
@@ -137,9 +137,9 @@ def filterTargetRegions(conn, params):
 		elif option.o1 == "bad":
 			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
 		elif option.o1 == "min":
-			m.regionFilterMinVar(conn, option.o2, option.o3)
+			m.regionFilterMinVar(conn, val=option.o2, flank=option.o3)
 		elif option.o1 == "max":
-			m.regionFilterMaxVar(conn, option.o2, option.o3)
+			m.regionFilterMaxVar(conn, val=option.o2, flank=option.o3)
 			#m.printVarCounts(conn, option.o3)
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
@@ -149,6 +149,11 @@ def filterTargetRegions(conn, params):
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
 			print("Filter regions by GC, but option not yet implemented")
+		elif option.o1 == "len":
+			minlen = option.o2
+			maxlen= option.o3
+			assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
+			m.lengthFilterTR(conn, maxlen, minlen)
 		else:
 			assert False, "Unhandled option %r"%option
 
@@ -281,6 +286,8 @@ else:
 	#Option to load .loci alignment goes here!
 	print("No alignment input found. .fasta, .gff, and .phylip support not added yet!")
 
+print (pd.read_sql_query("SELECT * FROM loci", conn))
+
 
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE
@@ -290,6 +297,7 @@ passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
 if passedLoci.shape[0] <= 0:
 	sys.exit("Program killed: No loci passed filtering.")
 
+print (pd.read_sql_query("SELECT * FROM loci", conn))
 #Target region discovery according to params set
 targetDiscoverySlidingWindow(conn, params)
 print()
@@ -326,7 +334,7 @@ checkTargetRegions(conn)
 
 print("\n\nProgram ending...Here are some results\n\n")
 #c.execute("SELECT * FROM loci")
-#print (pd.read_sql_query("SELECT * FROM loci", conn))
+print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))
 #print (pd.read_sql_query("SELECT * FROM variants", conn))
 conn.commit()

@@ -34,8 +34,8 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
 			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
-			bad INTEGER, gap INTEGER, start INTEGER NOT NULL, stop INTEGER NOT NULL,
-			pass INTEGER NOT NULL,
+			bad INTEGER, gap INTEGER, mask INTEGER, gc INTEGER, start INTEGER NOT NULL,
+			stop INTEGER NOT NULL,pass INTEGER NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
 
@@ -132,14 +132,14 @@ def add_variant_record(conn, loc, pos, val):
 	conn.commit()
 
 #Function to add region to regions table
-def add_region_record(conn, locid, start, stop, seq, counts):
+def add_region_record(conn, locid, start, stop, seq, counts, mask, gc):
 	#Establish cursor
 	cur = conn.cursor()
 
 	#build sql and pack values to insert
-	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap,
-		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,1)'''
-	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], start, stop]
+	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap, mask, gc,
+		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,?,?,1)'''
+	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], mask, gc, start, stop]
 
 	#insert
 	cur.execute(sql, stuff)
@@ -996,4 +996,3 @@ def varMaxFilterTR(conn, varmax):
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
-	

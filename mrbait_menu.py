@@ -45,7 +45,7 @@ Locus filtering/ consensus options:
 	-c,--cov	: Minimum number of sequences per alignment, for MAF or LOCI input [1]
 	-l,--len	: Minimum alignment length to attempt bait design [80]
 	-t,--thresh	: Minimum proportion for gap/N to include in consensus [0.1]
-	-r,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]""")
+	-k,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]""")
 
 	print("""
 General Bait Design options:
@@ -78,9 +78,6 @@ Target Region options:
 	-O,--overlap	: Overlap for tiled baits within target regions [40]
 			  --By default will be set to 1/2 of the bait length <-b>
 			  --Asserts <-T> is turned on
-	-x,--max_r	: Maximum length of target region to retain [500]
-	-y,--min_r	: Minimum length of target region to retain
-			  --Default will be set to bait length <-b,--bait>
 	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
 			  --Individual baits are constrained by <-v>
 			  --By default set to the value of <-v, --var_max>
@@ -101,10 +98,11 @@ Target Region options:
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>
 			  --Options
+			    len=[x,y]  : Target length between \"x\" (min) and \"y\" (max)
 				gap=[x]    : Maximum of \"x\" gaps in target region
 				bad=[x]    : Maximum of \"x\" Ns in target region
-				min=[d,x]  : Minimum of \"x\" SNPs within \"d\" bases
-				max=[d,x]  : Maximum of \"x\" SNPs within \"d\" bases
+				min=[x,d]  : Minimum of \"x\" SNPs within \"d\" bases
+				max=[x,d]  : Maximum of \"x\" SNPs within \"d\" bases
 				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
 				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]   : Randomly retain \"x\" target regions w/ baits
@@ -126,8 +124,8 @@ Bait Selection/ Optimization options:
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 			  --Warning: May mask selections made using <-S> or <-F>
 			  --Options
-				min=[d,x]  : Minimum of \"x\" SNPs within \"d\" bases
-				max=[d,x]  : Maximum of \"x\" SNPs within \"d\" bases
+				min=[x,d]  : Minimum of \"x\" SNPs within \"d\" bases
+				max=[x,d]  : Maximum of \"x\" SNPs within \"d\" bases
  				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
  				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]   : Randomly retain \"x\" baits OVERALL
@@ -167,13 +165,13 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:x:y:V:D:p:S:F:a:s:f:WQXo:Pd:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:V:D:p:S:F:a:s:f:WQXo:Pd:k:K', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
-			"callN","numG=","callG","gff_type=","tiling","overlap=","max_r",
-			"min_r=","vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
+			"callN","numG=","callG","gff_type=","tiling","overlap=",
+			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
 			"balign=","select_b=","filter_b=","tile_all","quiet","expand","out=",
-			"plot_all", "win_width="])
+			"plot_all", "win_width=","mask=","no_mask"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -191,6 +189,7 @@ class parseArgs():
 		self.cov=1
 		self.minlen=None
 		self.thresh=0.1
+		self.mask=0.1
 
 		#Bait params
 		self.blen=80
@@ -229,6 +228,7 @@ class parseArgs():
 
 		#Running options/ shortcuts
 		self.tile_all = 0
+		self.no_mask = 0
 		self.stfu = 0
 
 		#Output options
@@ -262,6 +262,8 @@ class parseArgs():
 				self.minlen = int(arg)
 			elif opt in ('-t', '--thresh'):
 				self.thresh = float(arg)
+			elif opt in ('-k', '--mask'):
+				self.mask = float(arg)
 
 			#Bait general params
 			elif opt in ('-b', '--bait'):
@@ -329,10 +331,10 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('min','max','mask','gc'):
+				if subopts[0] in ('min','max','mask','gc','len'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					if subopts[0] in ('gc', 'mask'):
-						assert subopts[1] < subopts[2], "In <--filter_r> for suboptions \"mask\" and \"gc\": Min must be less than max"
+					if subopts[0] in ('gc', 'mask','len'):
+						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
 				elif subopts[0] in ('rand','gap','bad'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
@@ -382,6 +384,8 @@ class parseArgs():
 				self.tile_all = 1
 			elif opt in ('-Q', '--quiet'):
 				self.stfu = 1
+			elif opt in ('-K', '--no_mask'):
+				self.no_mask = 1
 
 			#output options
 			elif opt in ('-X', '--expand'):
@@ -427,6 +431,10 @@ class parseArgs():
 		#set default of min_mult
 		if self.min_mult is None:
 			self.min_mult = 1000
+
+		#if --no_mask, set mask thresh to 1.0
+		if self.no_mask:
+			self.mask = 1.0
 
 		#Assert that win_shift cannot be larger than blen
 		if self.minlen is None:

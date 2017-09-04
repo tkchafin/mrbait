@@ -27,7 +27,7 @@ def seqCounter(seq):
 		"D"	: 0,
 		"H"	: 0,
 		"V"	: 0
-	}	
+	}
 	for c in seq:
 		if c in d:
 			d[c] += 1
@@ -43,11 +43,16 @@ def seqCounterSimple(seq):
 		'N':0,
 		'-':0,
 		'*':0
-	}	
+	}
 	for c in seq:
 		if c in d:
 			d[c] += 1
 	return d
+
+#Function to get GC content of a provided sequence
+def gc_content(string):
+	new = re.sub('[GCgc]','#',string)
+	return sum(1 for c in new if c == '#')
 
 #generator to create sliding windows by slicing out substrings
 def seqSlidingWindowString(seq, shift, width=2):
@@ -58,8 +63,8 @@ def seqSlidingWindowString(seq, shift, width=2):
 		else:
 			j = i + width
 		yield seq[i:j]
-		if j==seqlen: break	
-		
+		if j==seqlen: break
+
 #generator to create sliding windows by slicing out substrings, returns substring indices
 def seqSlidingWindow(seq, shift, width=2):
 	seqlen = len(seq)
@@ -69,8 +74,8 @@ def seqSlidingWindow(seq, shift, width=2):
 		else:
 			j = i + width
 		yield [seq[i:j], i, j]
-		if j==seqlen: break	
-	
+		if j==seqlen: break
+
 
 #Function to simplify a sequence to SNP, gaps, and Ns and get counts of sliding windows
 def countSlidingWindow(seq, shift, width):
@@ -81,50 +86,36 @@ def countSlidingWindow(seq, shift, width):
 		window_seq = "".join(i)
 		seqCounterSimple(window_seq)
 
-#Object for creating an iterable slidinw window sampling			
+#Object for creating an iterable slidinw window sampling
 class slidingWindowGenerator():
-	#Need to come back and comment better... 
+	#Need to come back and comment better...
 	def __init__(self, seq, shift, width):
 		self.__seq = seq
 		self.__seqlen = len(self.__seq)
 		self.__shift = shift
 		self.__width = width
 		self.__i = 0
-		
+
 	def __call__(self):
 		self.__seqlen
-		while self.__i < self.__seqlen: 
+		while self.__i < self.__seqlen:
 			#print("i is ", self.__i, " : Base is ", self.__seq[self.__i]) #debug print
 			if self.__i+self.__width > self.__seqlen:
 				j = self.__seqlen
 			else:
 				j = self.__i + self.__width
 			yield [self.__seq[self.__i:j], self.__i, j]
-			if j==self.__seqlen: break	
+			if j==self.__seqlen: break
 			self.__i += self.__shift
 	@classmethod
 	def setI(self, value):
 		self.__i = value
-		
+
 	@classmethod
 	def getI(self):
-		return self.__i	
-	
+		return self.__i
+
 	def __getattr__(self, name):
 		return getattr(self.__class__, name)
 	def __setattr__(self, name, val):
 		return setattr(self.__class__, name, val)
-	
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
