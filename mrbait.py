@@ -82,7 +82,7 @@ def read_loci(infile):
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params):
-	
+
 	#looping through passedLoci only
 	for seq in passedLoci.itertuples():
 		start = 0
@@ -119,9 +119,15 @@ def targetDiscoverySlidingWindow(conn, params):
 def filterTargetRegions(conn, params):
 	rand = 0 #false
 	rand_num = 0
+
+	#First, filter by --max_r and --min_r
+	m.lengthFilterTR(conn, params.max_r, params.min_r)
+
+	#Filter by --vmax_r
+	#m.varFilterTR(conn, params.vmax_r)
+
 	for option in params.filter_r_objects:
 		print("Select Region Option: ", option.o1)
-
 		if option.o1 == "r":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand_num = int(option.o2)
@@ -163,6 +169,8 @@ def selectTargetRegions(conn, params):
 		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 
 	#NEXT: Need to select TRs within conflict_blocks
+	#TODO: First fetch how many conflicts, if there are none, then EXIT FUNCTION
+
 	#Apply select_r filters for all conflicting TRs
 	if params.select_r == "r":
 		print("--select_r is RANDOM")
@@ -233,6 +241,13 @@ def checkTargetRegions(conn):
 #TODO: Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
 #TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
 #TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
+#TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
+#TODO: Could also set minimum coverage thresholds for whole genome?
+#TODO: Update locus parsing to keep masking information
+#TODO: Set mask filter (can be used to communicate repeats, etc).
+#------------Should also have option to turn it off, and set thresholds for keeping in consensus
+#TODO: Track GC content/percentage and set max/min values for Target filtering
+#TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
 
 #Parse Command line arguments
 params = parseArgs()
@@ -279,6 +294,9 @@ print("Starting: Target Region Selection...")
 #First pass filtering of target regions
 rand = filterTargetRegions(conn, params)
 
+#Check again that not all have been filtered out
+checkTargetRegions(conn)
+
 #Apply --select_r filters to sort any conflicting TRs
 selectTargetRegions(conn, params)
 
@@ -287,16 +305,16 @@ if rand:
 	print("randomly filtering all TRs")
 	m.regionFilterRandom(conn, rand)
 
-#Pre-filters: Length, alignment depth
-#c.execute("UPDATE loci SET pass=1 WHERE length < %s OR depth < %s"""%(params.minlen,params.cov))
-#passedLoci = pd.read_sql_query("""SELECT consensus FROM loci WHERE pass=0""", conn)
+#Bait discovery
+print("Starting probe design...")
+
+#Check again that not all have been filtered out
+checkTargetRegions(conn)
+
 
 #NOTE: parallelize bait discovery in future!!
-#NOTE: Add option for end-trimming off of baits/regions to remove Ns, gaps, etc
 
 print("\n\nProgram ending...Here are some results\n\n")
-#Next:
-#	Find all possible bait regions: Contiguous bases
 #c.execute("SELECT * FROM loci")
 #print (pd.read_sql_query("SELECT * FROM loci", conn))
 print (pd.read_sql_query("SELECT * FROM regions", conn))

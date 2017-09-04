@@ -937,7 +937,7 @@ def regionSelect_MINSNP(conn, dist):
 
 #Function to push resolved TR conflicts to the regions table
 def pushResolvedConflicts(conn):
-	
+
 	#Check that all conflicts are resolved
 	cur = conn.cursor()
 	unres = pd.read_sql_query("SELECT COUNT(*) FROM conflicts WHERE choose='NULL'", conn)
@@ -963,3 +963,20 @@ def pushResolvedConflicts(conn):
 		#Clear up the temp table conflicts
 		cur.execute("DROP TABLE IF EXISTS conflicts")
 		conn.commit()
+
+
+#Functon to filter targets by length
+def lengthFilterTR(conn, maxlen, minlen):
+	cur = conn.cursor()
+
+	sql = '''
+	UPDATE
+		regions
+	SET
+		pass=0
+	WHERE
+		length > %s OR length < %s
+	'''%(maxlen, minlen)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
