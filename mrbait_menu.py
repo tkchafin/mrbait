@@ -115,6 +115,8 @@ Bait Selection/ Optimization options:
 	-s,--select_b	: Which criterion to select a bait for target region
 			  --NOTE: This option is ignored when <-T> or <-W>
 			  --Options
+			  	center=[x] : Retain \"x\" baits most centered (within target)
+				flank=[x]  : Retain \"x\" baits on both ends of target
 				snp=[d]    : Most SNPs w/in \"d\" bases
 				bad=[d]    : Least Ns and gaps w/in \"d\" bases
 				conf=[d]   : Most conserved w/in \"d\" bases
@@ -206,7 +208,7 @@ class parseArgs():
 
 		#target region options
 		self.tiling=0 #bool
-		self.overlap=40
+		self.overlap=None
 		self.max_r=500
 		self.min_r=None
 		self.vmax_r=None
@@ -431,6 +433,10 @@ class parseArgs():
 		#Default of dist_r
 		if self.dist_r is None:
 			self.dist_r = 100
+
+		#Default of overlap
+		if self.overlap is None:
+			self.overlap = (self.blen // 2)
 
 		#set default of min_mult
 		if self.min_mult is None:

@@ -81,14 +81,14 @@ def read_loci(infile):
 				loci = Bio.Align.MultipleSeqAlignment([])
 
 #Function to discover target regions using a sliding windows through passedLoci
-def targetDiscoverySlidingWindow(conn, params):
+def targetDiscoverySlidingWindow(conn, params, loci):
 
 	#looping through passedLoci only
-	for seq in passedLoci.itertuples():
-		print(seq)
+	for seq in loci.itertuples():
+		#print(seq)
 		start = 0
 		stop = 0
-		print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
+		#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
 		generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
 		for window_seq in generator():
 
@@ -109,7 +109,7 @@ def targetDiscoverySlidingWindow(conn, params):
 					n_gc = s.gc_content(target)
 					#Check that there aren't too many SNPs
 					#if tr_counts["*"] <= params.vmax_r:
-					print("	Target region: ", target)
+					#print("	Target region: ", target)
 					#Submit target region to database
 					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
 					#set start of next window to end of current TR
@@ -245,6 +245,24 @@ def checkTargetRegions(conn):
 	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 
+#Function to discover target regions using a sliding windows through target regions
+def baitDiscoverySlidingWindow(conn, params, targets):
+
+	#looping through passedLoci only
+	for seq in targets.itertuples():
+
+		start = 0
+		stop = 0
+		print("\nTarget: ", seq[2], "ID is: ", seq[1], "\n")
+
+		generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.blen)
+
+		for window_seq in generator():
+			#Don't need to do a bunch of filtering, because all was checked when TRs built
+			print(window_seq)
+			#m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
+
+
 
 ############################### MAIN ###################################
 
@@ -258,8 +276,11 @@ def checkTargetRegions(conn):
 #TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
 #TODO: Could also set minimum coverage thresholds for whole genome?
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
-#TODO: Way to filter targets by maskin in flanking region???
+#TODO: Way to filter targets by masking in flanking region???
 #TODO: Directional bait filtering (left, center, end, right) -- keep baits by position in target???
+#TODO: Parallelize loadLOCI and loadMAF
+#TODO: Parallelize TR discovery somehow??
+#TODO: FIlter by flanking masked, and flanking GFF elements
 
 #Parse Command line arguments
 params = parseArgs()
@@ -283,9 +304,6 @@ else:
 	#Option to load .loci alignment goes here!
 	print("No alignment input found. .fasta, .gff, and .phylip support not added yet!")
 
-print (pd.read_sql_query("SELECT * FROM loci", conn))
-
-
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE
 #Pre-filters: Length, alignment depth
@@ -294,9 +312,8 @@ passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
 if passedLoci.shape[0] <= 0:
 	sys.exit("Program killed: No loci passed filtering.")
 
-print (pd.read_sql_query("SELECT * FROM loci", conn))
 #Target region discovery according to params set
-targetDiscoverySlidingWindow(conn, params)
+targetDiscoverySlidingWindow(conn, params, passedLoci)
 print()
 
 #Assert that there are TRs chosen, and that not all have been filtered out
@@ -326,13 +343,16 @@ print("Starting probe design...")
 #Check again that not all have been filtered out
 checkTargetRegions(conn)
 
-
-#NOTE: parallelize bait discovery in future!!
+#Sliding window bait discovery
+passedTargets = m.getPassedTRs(conn)
+if passedTargets.shape[0] <= 0:
+	sys.exit("Program killed: No targets passed filtering.")
+baitDiscoverySlidingWindow(conn, params, passedTargets)
 
 print("\n\nProgram ending...Here are some results\n\n")
-#c.execute("SELECT * FROM loci")
-print (pd.read_sql_query("SELECT * FROM loci", conn))
-print (pd.read_sql_query("SELECT * FROM regions", conn))
-#print (pd.read_sql_query("SELECT * FROM variants", conn))
+
+print(m.getLoci(conn))
+print(m.getRegions(conn))
+
 conn.commit()
 conn.close()

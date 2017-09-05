@@ -75,6 +75,10 @@ def filterLoci(conn, minlen, mincov):
 def getPassedLoci(conn):
 	return(pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=1""", conn))
 
+#Function returns pandas dataframe of passed targets
+def getPassedTRs(conn):
+	return(pd.read_sql_query("""SELECT regid, sequence FROM regions WHERE pass=1""", conn))
+
 #Function returns pandas dataframe of passedLoci
 def getNumTRs(conn):
 	cur = conn.cursor()
@@ -102,6 +106,18 @@ def getNumPassedTRs(conn):
 	cur.execute(check)
 
 	return((cur.fetchone()[0]))
+
+#Function to return loci table
+def getLoci(conn):
+	return(pd.read_sql_query("""SELECT * FROM loci """, conn))
+
+#Function to return regions table
+def getRegions(conn):
+	return(pd.read_sql_query("""SELECT * FROM regions """, conn))
+
+#Function to return variants table
+def getVariants(conn):
+	return(pd.read_sql_query("""SELECT * FROM variants """, conn))
 
 #Code to add record to 'loci' table
 def add_locus_record(conn, depth, consensus, passed=1):
