@@ -191,11 +191,8 @@ class parseArgs():
 
 		#target region options
 
-		self.max_r=500
-		self.min_r=None
 		self.vmax_r=None
 		self.dist_r=None
-		self.tile_min=None
 		self.select_r="rand"
 		self.select_r_dist=None
 		self.filter_r=0 #bool
@@ -275,10 +272,6 @@ class parseArgs():
 				self.anchor = arg
 
 			#target region opts
-			elif opt in ('-x', '--max_r'):
-				self.max_r = int(arg)
-			elif opt in ('-y', '--min_r'):
-				self.min_r = int(arg)
 			elif opt in ('-V', '--vmax_r'):
 				self.vmax_r = int(arg)
 			elif opt in ('-D', '--dist_r'):
@@ -426,14 +419,6 @@ class parseArgs():
 		elif self.blen > self.minlen:
 			self.minlen = self.blen
 
-
-		#Set minimum target region size
-		if self.min_r is None:
-			self.min_r = self.blen
-
-		#Set tile_min default if not given
-		if (self.tiling == 1) and (self.tile_min is None):
-			self.tile_min = self.blen + self.overlap
 
 		#Call help menu if prompted
 		if call_help is 1:
