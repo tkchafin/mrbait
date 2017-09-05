@@ -65,7 +65,7 @@ General Bait Design options:
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
 			  --These will be inserted as \"N\" unless <-N> is used
 	-N,--callN	: For Ns in bait sequence, call majority nucleotide if possible
-	-g,--numG	: Number of consensus gaps (\"-\") allowed in bait [0]
+	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]
 	-G,--callG	: For gaps in bait, call as majority nucleotide if possible
 	-E,--gff_type	: Constrain bait design to within element type of GFF
 			  --COMING SOON, NOT WORKING YET""")
@@ -73,66 +73,49 @@ General Bait Design options:
 	print("""
 Target Region options:
 
-	-T,--tiling	: Turn on tiling to design multiple baits per bait region
-			  --When tiling is off, see Bait Selection options below
-	-O,--overlap	: Overlap for tiled baits within target regions [40]
-			  --By default will be set to 1/2 of the bait length <-b>
-			  --Asserts <-T> is turned on
 	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
 			  --Individual baits are constrained by <-v>
 			  --By default set to the value of <-v, --var_max>
 			  --Also controllable with -F M=0,[x] where x is maximum value
 	-D,--dist_r	: Minimum distance between target regions [100]
 			  --Conflicts will be resolved according to --select_r
-	-p,--tile_min	: Minimum bait region size to allow tiling
-			  --By default will be set to bait length <-b> + overlap <-O>
-			  --Asserts <-T> is turned on
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 			  --Options
-				snp=[d]    : Most SNPs w/in \"d\" bases
-				bad=[d]    : Least Ns and gaps w/n \"d\" bases
-				conf=[d]   : Most conserved w/in \"d\" bases
-				conw       : Least SNP, N, or gap bases in bait region
-				rand       : Randomly choose a bait region [default]
+				snp=[d]      : Most SNPs w/in \"d\" bases
+				bad=[d]      : Least Ns and gaps w/n \"d\" bases
+				conf=[d]     : Most conserved w/in \"d\" bases
+				conw         : Least SNP, N, or gap bases in bait region
+				rand         : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>
 			  --Options
-			    len=[x,y]  : Target length between \"x\" (min) and \"y\" (max)
-				gap=[x]    : Maximum of \"x\" gaps in target region
-				bad=[x]    : Maximum of \"x\" Ns in target region
-				min=[x,d]  : Minimum of \"x\" SNPs within \"d\" bases
-				max=[x,d]  : Maximum of \"x\" SNPs within \"d\" bases
-				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
-				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-				rand=[x]   : Randomly retain \"x\" target regions w/ baits
+			    len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
+				gap=[x]      : Maximum of \"x\" indels in target region
+				bad=[x]      : Maximum of \"x\" Ns in target region
+				min=[x,d]    : Minimum of \"x\" SNPs within \"d\" bases
+				max=[x,d]    : Maximum of \"x\" SNPs within \"d\" bases
+				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+				rand=[x]     : Randomly retain \"x\" target regions w/ baits
 				Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 	#Need -s option for picking baits within bait regions and for picking bait regions within loci
 	print("""
-Bait Selection/ Optimization options:
-	-a,--balign	: Maximum allowable alignment length between baits [40]
-			  --By default is set to 1/2 bait length
+Bait Design / Selection options:
+
 	-s,--select_b	: Which criterion to select a bait for target region
 			  --NOTE: This option is ignored when <-T> or <-W>
 			  --Options
-			  	center=[x] : Retain \"x\" baits most centered (within target)
-				flank=[x]  : Retain \"x\" baits on both ends of target
-				snp=[d]    : Most SNPs w/in \"d\" bases
-				bad=[d]    : Least Ns and gaps w/in \"d\" bases
-				conf=[d]   : Most conserved w/in \"d\" bases
-				conw       : Least SNP, N, or gap bases in bait region
-				rand       : Randomly choose a bait [default]
-				Ex: -S snp=100 to choose region with most SNPs within 100 bases
+			  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
+			  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
+				flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
+				rand=[n,x]   : Randomly design \"n\" baits with \"x\" maximum overlap
+				Ex: -s tile=40 to tile baits with an overlap of 40 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
-			  --Warning: May mask selections made using <-S> or <-F>
 			  --Options
-				min=[x,d]  : Minimum of \"x\" SNPs within \"d\" bases
-				max=[x,d]  : Maximum of \"x\" SNPs within \"d\" bases
- 				mask=[x,y] : Proportion masked bases between \"x\" (min) and \"y\" (max)
- 				gc=[x,y]   : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-				rand=[x]   : Randomly retain \"x\" baits OVERALL
-				Ex: -f min=100,1 -f max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
-
+ 				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+ 				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+				rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
 Running options/ shortcuts:
@@ -167,12 +150,12 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:TO:V:D:p:S:F:a:s:f:WQXo:Pd:k:K', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:V:D:p:S:F:s:f:QXo:Pd:k:K', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
-			"callN","numG=","callG","gff_type=","tiling","overlap=",
+			"callN","numG=","callG","gff_type=",
 			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
-			"balign=","select_b=","filter_b=","tile_all","quiet","expand","out=",
+			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all", "win_width=","mask=","no_mask"])
 		except getopt.GetoptError as err:
 			print(err)
@@ -207,29 +190,28 @@ class parseArgs():
 		self.anchor=None
 
 		#target region options
-		self.tiling=0 #bool
-		self.overlap=None
+
 		self.max_r=500
 		self.min_r=None
 		self.vmax_r=None
 		self.dist_r=None
 		self.tile_min=None
-		self.select_r="r"
+		self.select_r="rand"
 		self.select_r_dist=None
 		self.filter_r=0 #bool
 		self.filter_t_whole=None
 		self.filter_r_objects=[]
 
 		#Bait selection options
-		self.balign=None
-		self.select_b="r"
-		self.select_b_dist=None
+		self.tiling=0 #bool
+		self.overlap=None
+		self.select_b="tile"
+		self.select_b_num=None
 		self.filter_b=0 #bool
 		self.filter_b_whole=None
 		self.filter_b_objects=[]
 
 		#Running options/ shortcuts
-		self.tile_all = 0
 		self.no_mask = 0
 		self.stfu = 0
 
@@ -293,10 +275,6 @@ class parseArgs():
 				self.anchor = arg
 
 			#target region opts
-			elif opt in ('-T', '--tiling'):
-				self.tiling = 1
-			elif opt in ('-O', '--overlap'):
-				self.overlap = int(arg)
 			elif opt in ('-x', '--max_r'):
 				self.max_r = int(arg)
 			elif opt in ('-y', '--min_r'):
@@ -347,25 +325,23 @@ class parseArgs():
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
 			#Bait selection options
-			elif opt in ('-a', '--balign'):
-				self.balign = int(arg)
 			elif opt in ('-s', '--select_b'):
-				temp = arg.split('=')
-				self.select_b = (temp[0]).lower()
-				chars = (['snp','bad','conf','conw','rand'])
+				subopts = arg.split('=')
+				self.select_b = (subopts[0]).lower()
+				chars = (['tile', 'center', 'flank', 'rand'])
 				if self.select_b not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-				subchars = (['snp','bad','conf'])
-				if string_containsAny(self.select_b, subchars) == 0:
-					if (len(temp) > 1):
-						self.select_b_dist = int(temp[1])
-						assert self.select_b_dist >= 0, "select_b_dist must be an integer greater than zero!"
-					else:
-						self.select_b_dist = 100
-				else:
-					self.select_b_dist = None
-				print("select_b is %r" %self.select_b)
-				print("select_b_dist is %r"%self.select_b_dist)
+				subchars = (['center','flank','rand'])
+				if self.select_b in subchars:
+					assert len(subopts) == 3, "Incorrect specification of option %r for <--select_b>" %subopts[0]
+					self.overlap = subopts[2]
+					self.select_b_num = subopts[1]
+					assert self.overlap < self.blen, "Overlap distance cannot be greater than bait length"
+				elif self.select_b == "tile":
+					self.select_b_num = None
+					self.overlap = subopts[1]
+				#print("select_b is %r" %self.select_b)
+				#print("select_b_dist is %r"%self.select_b_dist)
 			elif opt in ('-f', '--filter_b'):
 				self.filter_b = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
@@ -386,8 +362,6 @@ class parseArgs():
 					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
 			#Running options
-			elif opt in ('-W', '--tile_all'):
-				self.tile_all = 1
 			elif opt in ('-Q', '--quiet'):
 				self.stfu = 1
 			elif opt in ('-K', '--no_mask'):
@@ -452,9 +426,6 @@ class parseArgs():
 		elif self.blen > self.minlen:
 			self.minlen = self.blen
 
-		#Set default value for balign
-		if self.balign is None:
-			self.balign = self.blen / 2
 
 		#Set minimum target region size
 		if self.min_r is None:
