@@ -245,22 +245,28 @@ def checkTargetRegions(conn):
 	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 
+#function for sliding window bait generation
+def baitSlidingWindow(conn, source, sequence, overlap, length):
+	generator = s.slidingWindowGenerator(sequence, overlap, length)
+	for window_seq in generator():
+		#Don't need to do a bunch of filtering, because all was checked when TRs built
+		print(window_seq)
+		if (len(window_seq[0]) == params.blen):
+			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2])
+
 #Function to discover target regions
 def baitDiscovery(conn, params, targets):
 	#Design baits based on specified selection criterion (default is to tile at 2X)
 	if params.select_b == "tile":
 		#looping through passedLoci only
 		for seq in targets.itertuples():
-			start = 0
-			stop = 0
-			print("\nTarget: ", seq[2], "ID is: ", seq[1], "\n")
-
-			generator = s.slidingWindowGenerator(seq[2], params.overlap, params.blen)
-			for window_seq in generator():
-				#Don't need to do a bunch of filtering, because all was checked when TRs built
-				print(window_seq)
-				if (len(window_seq[0]) == params.blen):
-					m.add_bait_record(conn, seq[1], window_seq[0], window_seq[1], window_seq[2])
+			#seq[1] is the regid; seq[2] is the target sequence 
+			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+	elif params.select_b == 'center':
+		#looping through passedLoci only
+		for seq in targets.itertuples():
+			center = len(seq) // 2 #Divide by two and round down
+			print(params.select_b_num * params.overlap)
 	else:
 		assert False, "Unhandled option %r"%params.select_b
 
@@ -280,7 +286,7 @@ def baitDiscovery(conn, params, targets):
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
 #TODO: Way to filter targets by masking in flanking region???
 #TODO: Filter targets by distance to GFF element
-#TODO: Option to constrain targets to ONLY in GFF elements 
+#TODO: Option to constrain targets to ONLY in GFF elements
 #TODO: Parallelize loadLOCI and loadMAF
 #TODO: Parallelize TR discovery somehow??
 #TODO: FIlter by flanking masked, and flanking GFF elements
