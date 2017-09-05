@@ -245,22 +245,24 @@ def checkTargetRegions(conn):
 	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 
-#Function to discover target regions using a sliding windows through target regions
-def baitDiscoverySlidingWindow(conn, params, targets):
+#Function to discover target regions
+def baitDiscovery(conn, params, targets):
+	#Design baits based on specified selection criterion (default is to tile at 2X)
+	if params.select_b == "tile":
+		#looping through passedLoci only
+		for seq in targets.itertuples():
+			start = 0
+			stop = 0
+			print("\nTarget: ", seq[2], "ID is: ", seq[1], "\n")
 
-	#looping through passedLoci only
-	for seq in targets.itertuples():
-		start = 0
-		stop = 0
-		print("\nTarget: ", seq[2], "ID is: ", seq[1], "\n")
-
-		generator = s.slidingWindowGenerator(seq[2], params.overlap, params.blen)
-		for window_seq in generator():
-			#Don't need to do a bunch of filtering, because all was checked when TRs built
-			print(window_seq)
-			if (len(window_seq[0]) == params.blen):
-				m.add_bait_record(conn, seq[1], window_seq[0], window_seq[1], window_seq[2])
-
+			generator = s.slidingWindowGenerator(seq[2], params.overlap, params.blen)
+			for window_seq in generator():
+				#Don't need to do a bunch of filtering, because all was checked when TRs built
+				print(window_seq)
+				if (len(window_seq[0]) == params.blen):
+					m.add_bait_record(conn, seq[1], window_seq[0], window_seq[1], window_seq[2])
+	else:
+		assert False, "Unhandled option %r"%params.select_b
 
 
 ############################### MAIN ###################################
@@ -272,14 +274,18 @@ def baitDiscoverySlidingWindow(conn, params, targets):
 #TODO: Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
 #TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
 #TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
+#TODO: Add BRANCHING option for Flow Control. e.g. Branch RUN1 from Regions level to try new method of bait design, etc
 #TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
 #TODO: Could also set minimum coverage thresholds for whole genome?
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
 #TODO: Way to filter targets by masking in flanking region???
-#TODO: Directional bait filtering (left, center, end, right) -- keep baits by position in target???
+#TODO: Filter targets by distance to GFF element
+#TODO: Option to constrain targets to ONLY in GFF elements 
 #TODO: Parallelize loadLOCI and loadMAF
 #TODO: Parallelize TR discovery somehow??
 #TODO: FIlter by flanking masked, and flanking GFF elements
+#TODO: Dedup Targets using either smith-waterman or needleman-wunsch (from Bio.EMBOSS)
+#TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
 
 #Parse Command line arguments
 params = parseArgs()
@@ -346,7 +352,7 @@ checkTargetRegions(conn)
 passedTargets = m.getPassedTRs(conn)
 if passedTargets.shape[0] <= 0:
 	sys.exit("Program killed: No targets passed filtering.")
-baitDiscoverySlidingWindow(conn, params, passedTargets)
+baitDiscovery(conn, params, passedTargets)
 
 print("\n\nProgram ending...Here are some results\n\n")
 

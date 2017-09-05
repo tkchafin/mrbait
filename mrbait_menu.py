@@ -200,7 +200,6 @@ class parseArgs():
 		self.filter_r_objects=[]
 
 		#Bait selection options
-		self.tiling=0 #bool
 		self.overlap=None
 		self.select_b="tile"
 		self.select_b_num=None
@@ -394,8 +393,6 @@ class parseArgs():
 		if self.mult_reg is 0:
 			if self.dist_r is not None:
 				print("Warning: You have set <--dist_r/-D>, but it is ignored when <--mult_reg/-R> is off. ")
-			if self.min_mult is not None:
-				print("Warning: You have set <--min_mult/-m>, but it is ignored when <--mult_reg/-R> is off. ")
 
 		#Default of dist_r
 		if self.dist_r is None:
@@ -419,6 +416,9 @@ class parseArgs():
 		elif self.blen > self.minlen:
 			self.minlen = self.blen
 
+		#Default bait design behavior
+		if self.select_b == "tile" and self.overlap is None:
+			self.overlap = self.blen // 2
 
 		#Call help menu if prompted
 		if call_help is 1:
