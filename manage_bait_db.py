@@ -21,7 +21,7 @@ def init_new_db(connection):
 	cursor.execute('''DROP TABLE IF EXISTS loci''')
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
 	cursor.execute('''DROP TABLE IF EXISTS regions''')
-	cursor.execute('''DROP TABLE IF EXISTS samples''')
+	cursor.execute('''DROP TABLE IF EXISTS baits''')
 
 	#Table holding records for each locus
 	cursor.execute('''
@@ -48,6 +48,13 @@ def init_new_db(connection):
 			UNIQUE(varid))
 	''')
 
+	cursor.execute('''
+		CREATE TABLE baits(baitid INTEGER NOT NULL, regid INTEGER NOT NULL,
+			sequence TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
+			pass INTEGER NOT NULL, PRIMARY KEY(baitid),
+			FOREIGN KEY (regid) REFERENCES regions(regid)
+		)
+	''')
 	#Table holding records for each locus
 	#cursor.execute('''
 	#	CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL,
@@ -115,6 +122,14 @@ def getLoci(conn):
 def getRegions(conn):
 	return(pd.read_sql_query("""SELECT * FROM regions """, conn))
 
+#Function to return baits table
+def getBaits(conn):
+	return(pd.read_sql_query("""SELECT * FROM baits """, conn))
+
+#Function to return baits table
+def getPassedBaits(conn):
+	return(pd.read_sql_query("""SELECT * FROM baits WHERE pass=1""", conn))
+
 #Function to return variants table
 def getVariants(conn):
 	return(pd.read_sql_query("""SELECT * FROM variants """, conn))
@@ -124,6 +139,16 @@ def add_locus_record(conn, depth, consensus, passed=1):
 	stuff = [depth, int(len(consensus)), str(consensus), int(passed)]
 	sql = ''' INSERT INTO loci(depth, length, consensus, pass)
 				VALUES(?,?,?,?) '''
+	cur = conn.cursor()
+	cur.execute(sql, stuff)
+	conn.commit()
+	return cur.lastrowid
+
+#Code to add record to 'bait' table
+def add_bait_record(conn, reg, seq, start, stop):
+	stuff = [int(reg), seq, int(start), int(stop)]
+	sql = ''' INSERT INTO baits(regid, sequence, start, stop, pass)
+				VALUES(?,?,?,?,1) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
 	conn.commit()

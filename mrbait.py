@@ -250,17 +250,16 @@ def baitDiscoverySlidingWindow(conn, params, targets):
 
 	#looping through passedLoci only
 	for seq in targets.itertuples():
-
 		start = 0
 		stop = 0
 		print("\nTarget: ", seq[2], "ID is: ", seq[1], "\n")
 
-		generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.blen)
-
+		generator = s.slidingWindowGenerator(seq[2], params.overlap, params.blen)
 		for window_seq in generator():
 			#Don't need to do a bunch of filtering, because all was checked when TRs built
 			print(window_seq)
-			#m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
+			if (len(window_seq[0]) == params.blen):
+				m.add_bait_record(conn, seq[1], window_seq[0], window_seq[1], window_seq[2])
 
 
 
@@ -353,6 +352,7 @@ print("\n\nProgram ending...Here are some results\n\n")
 
 print(m.getLoci(conn))
 print(m.getRegions(conn))
+print(m.getBaits(conn))
 
 conn.commit()
 conn.close()
