@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import misc_utils as utils
 from Bio import AlignIO
 
 ############################# CLASSES ##################################
@@ -80,7 +81,7 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 		nuc_types = 0 #track number of things we found
 		ismask = 0 #Track if we should mask this column
 		#Check number of masked bases
-		nlower = n_lower_chars(alignment[:,i])
+		nlower = utils.n_lower_chars(alignment[:,i])
 		prop_mask = float(nlower/aln_depth)
 		if prop_mask > mask:
 			ismask = 1
@@ -121,10 +122,6 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 			#print(temp)
 			consensus+=reverse_iupac_case(temp)
 	return(consensus)
-
-#Function to count number of lower case in a string
-def n_lower_chars(string):
-    return sum(1 for c in string if c.islower())
 
 #Function to split character to IUPAC codes, assuing diploidy
 def get_iupac(char):

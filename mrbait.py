@@ -10,6 +10,7 @@ from mrbait_menu import parseArgs
 import manage_bait_db as m
 import alignment_tools as a
 import sequence_tools as s
+import misc_utils as utils
 import pandas as pd
 import numpy as np
 
@@ -105,7 +106,7 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 				if (stop - start) > params.blen:
 					target = (seq[2])[start:stop]
 					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
-					n_mask = a.n_lower_chars(target)
+					n_mask = utils.n_lower_chars(target)
 					n_gc = s.gc_content(target)
 					#Check that there aren't too many SNPs
 					#if tr_counts["*"] <= params.vmax_r:
@@ -250,9 +251,20 @@ def baitSlidingWindow(conn, source, sequence, overlap, length):
 	generator = s.slidingWindowGenerator(sequence, overlap, length)
 	for window_seq in generator():
 		#Don't need to do a bunch of filtering, because all was checked when TRs built
-		print(window_seq)
-		if (len(window_seq[0]) == params.blen):
+		#print(window_seq)
+		if (len(window_seq[0]) == length):
 			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2])
+
+#function for sliding window bait generation, with custom coordinates
+def baitSlidingWindowCoord(conn, source, sequence, overlap, length, start):
+	generator = s.slidingWindowGenerator(sequence, overlap, length)
+	for window_seq in generator():
+		#Don't need to do a bunch of filtering, because all was checked when TRs built
+		#print(window_seq)
+		if (len(window_seq[0]) == length):
+			start_coord = start + window_seq[1]
+			stop_coord = start_coord + length
+			m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord)
 
 #Function to discover target regions
 def baitDiscovery(conn, params, targets):
@@ -260,16 +272,34 @@ def baitDiscovery(conn, params, targets):
 	if params.select_b == "tile":
 		#looping through passedLoci only
 		for seq in targets.itertuples():
-			#seq[1] is the regid; seq[2] is the target sequence 
+			#seq[1] is the regid; seq[2] is the target sequence
 			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
 	elif params.select_b == 'center':
+		print("Designing centered baits...")
+		#First calculate union length needed, if this is longer than target, just
+		#tile all of it
+
+		union = utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap)
+		print("Union length is",union)
 		#looping through passedLoci only
 		for seq in targets.itertuples():
-			center = len(seq) // 2 #Divide by two and round down
-			print(params.select_b_num * params.overlap)
+			length = len(seq[2])
+			#If the target is too short, just do a full sliding window
+			if union >= length:
+				baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+			else:
+				center = len(seq[2]) // 2 #Divide by two and round down
+				start = center - (union // 2)
+				stop = start+union
+				#print("Starting at:",start," and stopping at:",stop)
+				subseq = (seq[2])[start:stop]
+				#print(subseq)
+				baitSlidingWindowCoord(conn, seq[1], subseq, params.overlap, params.blen, start)
+
 	else:
 		assert False, "Unhandled option %r"%params.select_b
 
+	#At end, make sure to filter out any baits which are too short
 
 ############################### MAIN ###################################
 
