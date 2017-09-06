@@ -120,7 +120,7 @@ Bait Design / Selection options:
 	print("""
 Running options/ shortcuts:
 	-W,--tile_all	: Tile baits across all target regions
-			  --Relevant arguments to set: -b, -O, -v, -n, -g, -f
+			  --Skips target filtering and selection, and just tiles all 
 	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
 			  --Errors and assertions are not affected""")
@@ -318,20 +318,20 @@ class parseArgs():
 
 			#Bait selection options
 			elif opt in ('-s', '--select_b'):
-				subopts = arg.split('=')
+				subopts = re.split('=|,',arg)
 				self.select_b = (subopts[0]).lower()
 				chars = (['tile', 'center', 'flank', 'rand'])
 				if self.select_b not in chars:
-					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
+					raise ValueError("Invalid option \"%r\" for <--select_b>" % self.select_b)
 				subchars = (['center','flank','rand'])
 				if self.select_b in subchars:
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--select_b>" %subopts[0]
-					self.overlap = subopts[2]
-					self.select_b_num = subopts[1]
+					self.overlap = int(subopts[2])
+					self.select_b_num = int(subopts[1])
 					assert self.overlap < self.blen, "Overlap distance cannot be greater than bait length"
 				elif self.select_b == "tile":
 					self.select_b_num = None
-					self.overlap = subopts[1]
+					self.overlap = int(subopts[1])
 				#print("select_b is %r" %self.select_b)
 				#print("select_b_dist is %r"%self.select_b_dist)
 			elif opt in ('-f', '--filter_b'):
