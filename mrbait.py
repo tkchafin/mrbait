@@ -275,12 +275,11 @@ def baitDiscovery(conn, params, targets):
 			#seq[1] is the regid; seq[2] is the target sequence
 			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
 	elif params.select_b == 'center':
-		print("Designing centered baits...")
+		#print("Designing centered baits...")
 		#First calculate union length needed, if this is longer than target, just
 		#tile all of it
-
 		union = utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap)
-		print("Union length is",union)
+		#print("Union length is",union)
 		#looping through passedLoci only
 		for seq in targets.itertuples():
 			length = len(seq[2])
@@ -295,6 +294,28 @@ def baitDiscovery(conn, params, targets):
 				subseq = (seq[2])[start:stop]
 				#print(subseq)
 				baitSlidingWindowCoord(conn, seq[1], subseq, params.overlap, params.blen, start)
+	elif params.select_b == "flank":
+		#First calculate union length needed, if this is longer than target, just
+		#tile all of it
+		#union x 2 because we do this on both sides
+		union = (utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap))
+		#looping through passedLoci only
+		for seq in targets.itertuples():
+			length = len(seq[2])
+			#If the target is too short, just do a full sliding window
+			if union*2 >= length:
+				baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+			else:
+				pass
+				#Need to: Substring both ends (start + union and stop - union)
+				subseq1 = (seq[2])[0:union] #right
+				subseq2 = (seq[2])[length-union:] #left
+				print(subseq1)
+				print(subseq2)
+				#Right side
+				baitSlidingWindowCoord(conn, seq[1], subseq1, params.overlap, params.blen, 0)
+				#Left side
+				baitSlidingWindowCoord(conn, seq[1], subseq2, params.overlap, params.blen, length-union)
 
 	else:
 		assert False, "Unhandled option %r"%params.select_b
