@@ -109,7 +109,6 @@ Bait Design / Selection options:
 			  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
 			  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
 				flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
-				rand=[n,x]   : Randomly design \"n\" baits with \"x\" maximum overlap
 				Ex: -s tile=40 to tile baits with an overlap of 40 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 			  --Options
@@ -120,7 +119,7 @@ Bait Design / Selection options:
 	print("""
 Running options/ shortcuts:
 	-W,--tile_all	: Tile baits across all target regions
-			  --Skips target filtering and selection, and just tiles all 
+			  --Skips target filtering and selection, and just tiles all
 	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
 			  --Errors and assertions are not affected""")
@@ -201,6 +200,7 @@ class parseArgs():
 
 		#Bait selection options
 		self.overlap=None
+		self.bait_shift=None
 		self.select_b="tile"
 		self.select_b_num=None
 		self.filter_b=0 #bool
@@ -320,10 +320,10 @@ class parseArgs():
 			elif opt in ('-s', '--select_b'):
 				subopts = re.split('=|,',arg)
 				self.select_b = (subopts[0]).lower()
-				chars = (['tile', 'center', 'flank', 'rand'])
+				chars = (['tile', 'center', 'flank'])
 				if self.select_b not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_b>" % self.select_b)
-				subchars = (['center','flank','rand'])
+				subchars = (['center','flank'])
 				if self.select_b in subchars:
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--select_b>" %subopts[0]
 					self.overlap = int(subopts[2])
@@ -401,6 +401,7 @@ class parseArgs():
 		#Default of overlap
 		if self.overlap is None:
 			self.overlap = (self.blen // 2)
+		self.bait_shift = self.blen - self.overlap
 
 		#set default of min_mult
 		if self.min_mult is None:
