@@ -1,3 +1,5 @@
 #!/usr/bin/python
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
+
+def vsearchALL(seqpath, cov, )

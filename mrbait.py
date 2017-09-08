@@ -250,9 +250,8 @@ def checkTargetRegions(conn):
 
 #Function for deduplication of targets by pairwise alignment
 def pairwiseAlignDedup(params, seqs):
-	for a in seqs:
-		for b in seqs:
-			emb.needleAlign(a[2],b[2],10,0.5)
+	for a in seqs.itertuples():
+		print(a[2])
 
 
 
