@@ -14,7 +14,8 @@ import sequence_tools as s
 import misc_utils as utils
 import pandas as pd
 import numpy as np
-import emboss_align as emb
+import vsearch
+import subprocess
 
 
 ############################# FUNCTIONS ################################
@@ -250,10 +251,42 @@ def checkTargetRegions(conn):
 
 #Function for deduplication of targets by pairwise alignment
 def pairwiseAlignDedup(params, seqs):
+	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
+	fas = params.workdir + "/.temp.fasta"
+	file_object = open(".temp.fasta","w")
+	#Write seqs to FASTA first
 	for a in seqs.itertuples():
-		print(a[2])
+		name = ">regid_" + str(a[1]) + "\n"
+		seq = a[2] + "\n"
+		file_object.write(name)
+		file_object.write(seq)
+	file_object.close()
+	#First sort FASTA by size
 
+	sor = params.workdir + "/.temp.sort"
+	try:
+		vsearch.sortByLength("./bin/vsearch-2.4.4-macos", fas, sor)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except NameError as err:
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
 
+	pw = params.workdir + "/.temp.pw"
+	try:
+		vsearch.allpairsGlobal("./bin/vsearch-2.4.4-macos", params.vthreads, sor, 0.8, 0.8, pw)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
+	file_object.close()
 
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
@@ -383,6 +416,7 @@ def baitDiscovery(conn, params, targets):
 #TODO: FIlter by flanking masked, and flanking GFF elements
 #TODO: Dedup Targets using either smith-waterman or needleman-wunsch (from Bio.EMBOSS)
 #TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
+#TODO: Functions to read and write params as JSON? Or maybe just stick in database?
 
 #Parse Command line arguments
 params = parseArgs()
