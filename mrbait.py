@@ -261,8 +261,8 @@ def pairwiseAlignDedup(params, seqs):
 		file_object.write(name)
 		file_object.write(seq)
 	file_object.close()
-	#First sort FASTA by size
 
+	#First sort FASTA by size
 	sor = params.workdir + "/.temp.sort"
 	try:
 		vsearch.sortByLength("./bin/vsearch-2.4.4-macos", fas, sor)
@@ -275,6 +275,7 @@ def pairwiseAlignDedup(params, seqs):
 		sys.exit(err.args)
 	except:
 		sys.exit(sys.exc_info()[0])
+	os.remove(fas)
 
 	pw = params.workdir + "/.temp.pw"
 	try:
@@ -286,7 +287,7 @@ def pairwiseAlignDedup(params, seqs):
 		sys.exit(err.args)
 	except:
 		sys.exit(sys.exc_info()[0])
-	file_object.close()
+	os.remove(sor)
 
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
