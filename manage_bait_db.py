@@ -318,6 +318,7 @@ def randomChooseRegionMINLEN(conn, min_len):
 
 #Internal function for checking if TRs overlap within distance buffer
 def checkOverlap(row1, row2, dist):
+	#This could be made much more concise 
 	x2 = row2["start"]
 	y2 = row2["stop"]
 	x1 = (row1["start"]-dist)
@@ -330,7 +331,6 @@ def checkOverlap(row1, row2, dist):
 	# print("y1=",y1)
 	# print("x2=",x2)
 	# print("y2=",y2)
-
 	#Left edge of row1 overlaps right edge of row2
 	if (x2 < x1) and (y2 >= x1):
 		return 1

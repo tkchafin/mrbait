@@ -107,6 +107,7 @@ class slidingWindowGenerator():
 			yield [self.__seq[self.__i:j], self.__i, j]
 			if j==self.__seqlen: break
 			self.__i += self.__shift
+
 	@classmethod
 	def setI(self, value):
 		self.__i = value

@@ -7,6 +7,7 @@ import Bio
 from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
+from substring import SubString
 import manage_bait_db as m
 import alignment_tools as a
 import sequence_tools as s
@@ -268,24 +269,26 @@ def baitSlidingWindowCoord(conn, source, sequence, overlap, length, start):
 
 #Function to discover target regions
 def baitDiscovery(conn, params, targets):
+	print("Params.overlap is ", params.overlap)
+	print("Params.bait_shift is", params.bait_shift)
 	#Design baits based on specified selection criterion (default is to tile at 2X)
 	if params.select_b == "tile":
 		#looping through passedLoci only
 		for seq in targets.itertuples():
 			#seq[1] is the regid; seq[2] is the target sequence
-			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+			baitSlidingWindow(conn, seq[1], seq[2], params.bait_shift, params.blen)
 	elif params.select_b == 'center':
 		#print("Designing centered baits...")
 		#First calculate union length needed, if this is longer than target, just
 		#tile all of it
 		union = utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap)
-		#print("Union length is",union)
+		print("Union length is",union)
 		#looping through passedLoci only
 		for seq in targets.itertuples():
 			length = len(seq[2])
 			#If the target is too short, just do a full sliding window
 			if union >= length:
-				baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+				baitSlidingWindow(conn, seq[1], seq[2], params.bait_shift, params.blen)
 			else:
 				center = len(seq[2]) // 2 #Divide by two and round down
 				start = center - (union // 2)
@@ -293,7 +296,7 @@ def baitDiscovery(conn, params, targets):
 				#print("Starting at:",start," and stopping at:",stop)
 				subseq = (seq[2])[start:stop]
 				#print(subseq)
-				baitSlidingWindowCoord(conn, seq[1], subseq, params.overlap, params.blen, start)
+				baitSlidingWindowCoord(conn, seq[1], subseq, params.bait_shift, params.blen, start)
 	elif params.select_b == "flank":
 		#First calculate union length needed, if this is longer than target, just
 		#tile all of it
@@ -303,7 +306,7 @@ def baitDiscovery(conn, params, targets):
 			length = len(seq[2])
 			#If the target is too short, just do a full sliding window
 			if union*2 >= length:
-				baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+				baitSlidingWindow(conn, seq[1], seq[2], params.bait_shift, params.blen)
 			else:
 				#Need to: Substring both ends (start + union and stop - union)
 				subseq1 = (seq[2])[0:union] #right
@@ -311,19 +314,41 @@ def baitDiscovery(conn, params, targets):
 				#print(subseq1)
 				#print(subseq2)
 				#Right side
-				baitSlidingWindowCoord(conn, seq[1], subseq1, params.overlap, params.blen, 0)
+				baitSlidingWindowCoord(conn, seq[1], subseq1, params.bait_shift, params.blen, 0)
 				#Left side
-				baitSlidingWindowCoord(conn, seq[1], subseq2, params.overlap, params.blen, length-union)
-	elif params.select_b == "rand":
-		#Here, union is the MINIMUM length required to make the specified number of baits with maximum overlap
-		union = (utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap))
-		for seq in targets.itertuples():
-			length = len(seq[2])
-			#If the target is too short, just do a full sliding window
-			if union*2 >= length:
-				baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
-			else:
-				pass
+				baitSlidingWindowCoord(conn, seq[1], subseq2, params.bait_shift, params.blen, length-union)
+	# elif params.select_b == "rand":
+	# 	#Here, union is the MINIMUM length required to make the specified number of baits with maximum overlap
+	# 	union = (utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap))
+	# 	union_noOverlap = (params.select_b_num * params.blen)
+	# 	for seq in targets.itertuples():
+	# 		length = len(seq[2])
+	# 		print("Union is ",union, ", and seq length is ", length)
+	# 		#If the target is too short, just do a full sliding window
+	# 		if union >= length:
+	# 			print("Too short, make all.")
+	# 			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
+	# 		else:
+	# 			pass
+	# 			#TODO: Make substring class, with method to search list of already gathered substring to check for overlap
+	# 			#While overlap is to high, generate and add/check another random substring until X passing are gathered.
+	# 			#Loop through that list and commit all to table
+	# 			subseqs = []
+	# 			while len(subseqs) < 3:
+	# 				new = SubString()
+	# 				new.randomDrawSubstring(seq[2], params.blen)
+	# 				#Check if new substring overlaps with already picked substrings
+	# 				if new.checkMatch(subseqs, params.overlap) == 0:
+	# 					subseqs.append(new)
+	# 					print("Length of subseqs is now: ", len(subseqs))
+	# 					print("Desired length is ", params.select_b_num)
+	# 			#if (len(subseqs) > 1):
+	# 				#SubString.sortSubStrings(subseqs)
+	# 			for s in subseqs:
+	# 				print("From regid:",seq[1], " -- ",s.string, ":", s.start, s.stop)
+				#new.printAll()
+
+			#	randomDrawSubstring
 	else:
 		assert False, "Unhandled option %r"%params.select_b
 
