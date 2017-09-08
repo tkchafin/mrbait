@@ -14,6 +14,7 @@ import sequence_tools as s
 import misc_utils as utils
 import pandas as pd
 import numpy as np
+import emboss_align as emb
 
 
 ############################# FUNCTIONS ################################
@@ -247,6 +248,14 @@ def checkTargetRegions(conn):
 	if (int(passed) <= 0):
 		sys.exit("Program killed: No Target Regions passed selection/filtering.")
 
+#Function for deduplication of targets by pairwise alignment
+def pairwiseAlignDedup(params, seqs):
+	for a in seqs:
+		for b in seqs:
+			emb.needleAlign(a[2],b[2],10,0.5)
+
+
+
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
 	generator = s.slidingWindowGenerator(sequence, overlap, length)
@@ -431,6 +440,10 @@ if rand:
 	print("randomly filtering all TRs")
 	m.regionFilterRandom(conn, rand)
 
+#Target region deduplication by pairwise alignment
+passedTargets = m.getPassedTRs(conn)
+pairwiseAlignDedup(params, passedTargets)
+sys.exit()
 #Bait discovery
 print("Starting probe design...")
 

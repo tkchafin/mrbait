@@ -90,7 +90,7 @@ Target Region options:
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
 			  --Warning: May mask selections made using <-S> or <-f>
 			  --Options
-			    len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
+				len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
 				gap=[x]      : Maximum of \"x\" indels in target region
 				bad=[x]      : Maximum of \"x\" Ns in target region
 				min=[x,d]    : Minimum of \"x\" SNPs within \"d\" bases
@@ -99,7 +99,17 @@ Target Region options:
 				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]     : Randomly retain \"x\" target regions w/ baits
 				Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
-	#Need -s option for picking baits within bait regions and for picking bait regions within loci
+	print("""
+Target Region Deduplication:
+
+	--dedup		: Turns on pairwise-alignment deduplication
+	--score		: Threshold alignment score to remove targets
+	--dedup_b	:
+	--vsearch	: Path to VSEARCH executable if other than provided
+			  --MrBait uses the EMBOSS implementations (\"needle\" and \"water\")
+	--gapopen	: Gap open penalty [default 10]
+	--gapextend	: Gap extend penalty [default 0.5]""")
+
 	print("""
 Bait Design / Selection options:
 
@@ -115,6 +125,7 @@ Bait Design / Selection options:
  				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
  				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]     : Randomly retain \"x\" baits""")
+
 
 	print("""
 Running options/ shortcuts:
