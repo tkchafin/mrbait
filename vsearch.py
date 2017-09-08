@@ -17,9 +17,8 @@ def allpairsGlobal(binary, threads, seqpath, qid, qcov, outpath):
     command = " ".join(vsearch)
 
     #Vsearch subprocess
-    print("Calling sub.Popen: ", command)
-    proc = Popen(vsearch, env={'PATH': os.getenv('PATH')})
-    print("Call is done ")
+    proc = Popen(vsearch, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
+
     #WRap to enable keyboard interrupe
     try:
         t = proc.communicate()[0]
@@ -38,9 +37,8 @@ def sortByLength(binary, seqpath, outpath):
     command = " ".join(vsearch)
 
     #Vsearch subprocess
-    print("Calling sub.Popen: ", command)
     proc = Popen(vsearch, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
-    print("Call is done ")
+
     #WRap to enable keyboard interrupe
     try:
         t = proc.communicate()[0]
