@@ -3,6 +3,8 @@
 import getopt
 import sys
 import re
+import os
+import ntpath
 
 def string_containsAny(str, set):
 	for c in set:
@@ -64,9 +66,7 @@ General Bait Design options:
 			  --Can be expanded in final output using the <--expand> flag
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
 			  --These will be inserted as \"N\" unless <-N> is used
-	-N,--callN	: For Ns in bait sequence, call majority nucleotide if possible
 	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]
-	-G,--callG	: For gaps in bait, call as majority nucleotide if possible
 	-E,--gff_type	: Constrain bait design to within element type of GFF
 			  --COMING SOON, NOT WORKING YET""")
 
@@ -98,17 +98,11 @@ Target Region options:
 				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
 				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]     : Randomly retain \"x\" target regions w/ baits
+				aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+				blast=[i,q]  : ADD LATER!!! Keep targets hitting BLAST db
+				blast=[i,q]  : ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
+				gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
 				Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
-	print("""
-Target Region Deduplication:
-
-	--dedup		: Turns on pairwise-alignment deduplication
-	--score		: Threshold alignment score to remove targets
-	--dedup_b	:
-	--vsearch	: Path to VSEARCH executable if other than provided
-			  --MrBait uses the EMBOSS implementations (\"needle\" and \"water\")
-	--gapopen	: Gap open penalty [default 10]
-	--gapextend	: Gap extend penalty [default 0.5]""")
 
 	print("""
 Bait Design / Selection options:
@@ -124,26 +118,32 @@ Bait Design / Selection options:
 			  --Options
  				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
  				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+
 				rand=[x]     : Randomly retain \"x\" baits""")
 
-
 	print("""
-Running options/ shortcuts:
-	-W,--tile_all	: Tile baits across all target regions
-			  --Skips target filtering and selection, and just tiles all
-	-K, --no_mask	: Ignore all masking information [boolean]
-	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
-			  --Errors and assertions are not affected""")
+Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
+
+	--vsearch	: Path to VSEARCH executable if other than provided
+			  --MrBait will try to detect OS and appropriate exectable to use
+	--vthreads	: Number of threads for VSEARCH to run in parallel [default=4]""")
+
+
 	print("""
 Output options:
 	-X,--expand	: In output bait table, expand all ambiguities
 			  --Gaps are expanded as [ACGT] and absent
 			  --\"N\"s are expanded as [ACGT]
-	-o,--out	: Prefix for outputs [\"mrbait\"]""")
+	-o,--out	: Output directory and prefix [e.g. ./baits/run1]""")
 
 	#SPLIT option not figured out yet
 	print("""
 General options:
+	-W,--tile_all	: Tile baits across all target regions
+			  --Skips target filtering and selection, and just tiles all
+	-K, --no_mask	: Ignore all masking information [boolean]
+	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
+			  --Errors and assertions are not affected
 	-h,--help	: Displays this help menu
 	""")
 	print()
@@ -166,7 +166,8 @@ class parseArgs():
 			"callN","numG=","callG","gff_type=",
 			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
 			"select_b=","filter_b=","quiet","expand","out=",
-			"plot_all", "win_width=","mask=","no_mask"])
+			"plot_all", "win_width=","mask=","no_mask", "vsearch=",
+			"vthreads="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -200,7 +201,6 @@ class parseArgs():
 		self.anchor=None
 
 		#target region options
-
 		self.vmax_r=None
 		self.dist_r=None
 		self.select_r="rand"
@@ -208,6 +208,11 @@ class parseArgs():
 		self.filter_r=0 #bool
 		self.filter_t_whole=None
 		self.filter_r_objects=[]
+
+		#VSEARCH options - deduplication
+		self.vsearch = None
+		self.dedup = None
+		self.vthreads = 4
 
 		#Bait selection options
 		self.overlap=None
@@ -224,8 +229,8 @@ class parseArgs():
 
 		#Output options
 		self.expand = 0
-		self.out = "mrbait"
-
+		self.out = None
+		self.workdir = None
 
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
@@ -314,10 +319,12 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('min','max','mask','gc','len'):
+				if subopts[0] in ('min','max','mask','gc','len', "aln"):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask','len'):
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
+						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+					elif subopts[0] == "aln":
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 					else:
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
@@ -370,6 +377,12 @@ class parseArgs():
 			elif opt in ('-K', '--no_mask'):
 				self.no_mask = 1
 
+			#vsearch options
+			elif opt in ("--vsearch"):
+				self.vsearch = str(arg)
+			elif opt in ("--vthreads"):
+				self.vthreads = int(arg)
+
 			#output options
 			elif opt in ('-X', '--expand'):
 				self.expand = 1
@@ -382,6 +395,7 @@ class parseArgs():
 		#DEBUG PRINTS
 		for subopt in self.filter_r_objects:
 			print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
+
 		#for subopt in self.filter_b_objects:
 			#print("filter_b: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
 
@@ -421,6 +435,20 @@ class parseArgs():
 		#if --no_mask, set mask thresh to 1.0
 		if self.no_mask:
 			self.mask = 1.0
+
+		#Get working dir path and output prefix
+		if self.out is None:
+			self.out = "mrbait"
+			self.workdir = os.getcwd()
+		else:
+			self.workdir, self.out = ntpath.split(self.out)
+			if self.out == "":
+				self.out = "mrbait"
+			if self.workdir == "":
+				self.workdir = os.getcwd()
+		print("Path is: ", self.workdir)
+		print("Prefix is: ", self.out)
+
 
 		#Assert that win_shift cannot be larger than blen
 		if self.minlen is None:
