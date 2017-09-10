@@ -38,7 +38,7 @@ def sortByLength(binary, seqpath, outpath):
             "--output", outpath,
             "--quiet"]
     command = " ".join(vsearch)
-
+    #print(command)
     #Vsearch subprocess
     proc = Popen(vsearch, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
 
