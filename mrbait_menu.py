@@ -58,7 +58,7 @@ General Bait Design options:
 			  --Cannot be longer than bait length <-b,--bait>
 	-R,--mult_reg	: Allow multiple target regions per locus [false]
 			  --See \"Target Region options\" below
-	-m,--min_mult	: Minimum alignment length to allow multiple regions [1000]
+	-m,--min_mult	: Minimum alignment length to allow multiple regions
 			  --By default is set to the value of <-l>. Only applies when <-R>
 			  --When -R and -T are off, only one bait is selected per locus
 	-v,--var_max	: Maximum number of SNP columns to be included in a bait [0]
@@ -428,10 +428,6 @@ class parseArgs():
 			self.overlap = (self.blen // 2)
 		self.bait_shift = self.blen - self.overlap
 
-		#set default of min_mult
-		if self.min_mult is None:
-			self.min_mult = 1000
-
 		#if --no_mask, set mask thresh to 1.0
 		if self.no_mask:
 			self.mask = 1.0
@@ -456,6 +452,10 @@ class parseArgs():
 		elif self.blen > self.minlen:
 			self.minlen = self.blen
 
+		#set default of min_mult
+		if self.min_mult is None:
+			self.min_mult = self.minlen
+			
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
 			self.overlap = self.blen // 2
