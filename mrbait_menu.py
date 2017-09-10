@@ -3,8 +3,8 @@
 import getopt
 import sys
 import re
-import os
 import ntpath
+import misc_utils as utils
 
 def string_containsAny(str, set):
 	for c in set:
@@ -118,7 +118,9 @@ Bait Design / Selection options:
 			  --Options
  				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
  				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-
+				aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+				blast=[i,q]  : ADD LATER!!! Keep targets hitting BLAST db
+				blast=[i,q]  : ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
 				rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
@@ -211,7 +213,6 @@ class parseArgs():
 
 		#VSEARCH options - deduplication
 		self.vsearch = None
-		self.dedup = None
 		self.vthreads = 4
 
 		#Bait selection options
@@ -435,7 +436,7 @@ class parseArgs():
 		#Get working dir path and output prefix
 		if self.out is None:
 			self.out = "mrbait"
-			self.workdir = os.getcwd()
+			self.workdir = utils.getWorkingDir()
 		else:
 			self.workdir, self.out = ntpath.split(self.out)
 			if self.out == "":
@@ -455,7 +456,18 @@ class parseArgs():
 		#set default of min_mult
 		if self.min_mult is None:
 			self.min_mult = self.minlen
-			
+
+		#If vsearch path not given, try to figure it out
+		if self.vsearch is None:
+			os_platform = utils.getOS()
+			print("Found OS platform:", os_platform)
+			if os_platform == "linux" or os_platform == "unknown":
+				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX VSEARCH executable.")
+				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-linux"
+			elif os_platform == "darwin": #mac os
+				print("Automatically detected MACOS platform: Using MACOS VSEARCH executable.")
+				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-macos"
+
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
 			self.overlap = self.blen // 2
