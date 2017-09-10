@@ -1096,3 +1096,31 @@ def removeRegionsByList(conn, blacklist):
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS tt")
 	conn.commit()
+
+#Function to remove baits given a list of blacklisted regids
+def removeBaitsByList(conn, blacklist):
+
+	cur = conn.cursor()
+
+	#If nothing in list, no need to do any work:
+	if len(blacklist) <= 0:
+		return(0)
+	df = pd.DataFrame({"baitid" : blacklist})
+	print(df)
+
+	df.to_sql('b', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			baits
+		SET
+			pass = 0
+		WHERE
+			EXISTS(SELECT * FROM b WHERE b.baitid = baits.baitid)
+	'''
+	cur.execute(sql_update)
+
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS b")
+	conn.commit()
