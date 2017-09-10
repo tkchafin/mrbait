@@ -2,6 +2,7 @@
 
 from subprocess import Popen, PIPE, CalledProcessError
 import os
+import re
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
 
@@ -30,10 +31,12 @@ def allpairsGlobal(binary, threads, seqpath, qid, qcov, outpath):
     if proc.returncode:
         raise CalledProcessError ("VSEARCH exited with non-zero status")
 
+#Function to sort FASTA by length, needed before allpairsGlobal call
 def sortByLength(binary, seqpath, outpath):
     vsearch = [binary,
             "--sortbylength", seqpath,
-            "--output", outpath]
+            "--output", outpath,
+            "--quiet"]
     command = " ".join(vsearch)
 
     #Vsearch subprocess
@@ -49,3 +52,18 @@ def sortByLength(binary, seqpath, outpath):
     #Get return code from process
     if proc.returncode:
         raise CalledProcessError ("VSEARCH exited with non-zero status")
+
+#Function to parse output of allpairsGlobal
+def parsePairwiseAlign(filename):
+    #Function assumes id's are the first 2 positions, and prepended with "id_"
+    #Also assumes file is tab delimited
+    print("parsing pw file")
+    bad_ids = []
+    filehandle = open(filename, "r")
+    for line in filehandle:
+        array = re.split(r'\t+', line)
+        bad1 = re.sub('id_', '', array[0])
+        bad2 = re.sub('id_', '', array[1])
+        bad_ids.append(bad1)
+        bad_ids.append(bad2)
+    return(bad_ids)
