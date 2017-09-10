@@ -13,6 +13,8 @@ Unfortunately, this problem is NP-hard and can't be done efficiently... """
 
 """Conclusions: My naive version seems to be faster somehow."""
 
+#TODO: Test that nodes retained in NAIVE definitely dont have any edges!!!
+
 def time_me(method):
     def wrapper(*args, **kw):
         startTime = int(round(time.time() * 1000))
