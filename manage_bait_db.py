@@ -318,7 +318,7 @@ def randomChooseRegionMINLEN(conn, min_len):
 
 #Internal function for checking if TRs overlap within distance buffer
 def checkOverlap(row1, row2, dist):
-	#This could be made much more concise 
+	#This could be made much more concise
 	x2 = row2["start"]
 	y2 = row2["stop"]
 	x1 = (row1["start"]-dist)
@@ -1066,4 +1066,33 @@ def regionFilterGC(conn, minprop, maxprop):
 	'''%(maxprop, minprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
+	conn.commit()
+
+
+#Function to remove Target Regions given a list of blacklisted regids
+def removeRegionsByList(conn, blacklist):
+
+	cur = conn.cursor()
+
+	#If nothing in list, no need to do any work:
+	if len(blacklist) <= 0:
+		return(0)
+	df = pd.DataFrame({"regid" : blacklist})
+	print(df)
+
+	df.to_sql('tt', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			regions
+		SET
+			pass = 0
+		WHERE
+			EXISTS(SELECT * FROM tt WHERE tt.regid = regions.regid)
+	'''
+	cur.execute(sql_update)
+
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS tt")
 	conn.commit()
