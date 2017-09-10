@@ -319,23 +319,27 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
-	generator = s.slidingWindowGenerator(sequence, overlap, length)
-	for window_seq in generator():
-		#Don't need to do a bunch of filtering, because all was checked when TRs built
-		#print(window_seq)
-		if (len(window_seq[0]) == length):
-			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2])
+    generator = s.slidingWindowGenerator(sequence, overlap, length)
+    for window_seq in generator():
+    #Don't need to do a bunch of filtering, because all was checked when TRs built
+    #print(window_seq)
+        if (len(window_seq[0]) == length):
+            n_mask = utils.n_lower_chars(window_seq[0])
+            n_gc = s.gc_content(window_seq[0])
+            m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2], n_mask, n_gc)
 
 #function for sliding window bait generation, with custom coordinates
 def baitSlidingWindowCoord(conn, source, sequence, overlap, length, start):
-	generator = s.slidingWindowGenerator(sequence, overlap, length)
-	for window_seq in generator():
-		#Don't need to do a bunch of filtering, because all was checked when TRs built
-		#print(window_seq)
-		if (len(window_seq[0]) == length):
-			start_coord = start + window_seq[1]
-			stop_coord = start_coord + length
-			m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord)
+    generator = s.slidingWindowGenerator(sequence, overlap, length)
+    for window_seq in generator():
+        #Don't need to do a bunch of filtering, because all was checked when TRs built
+        #print(window_seq)
+        if (len(window_seq[0]) == length):
+            start_coord = start + window_seq[1]
+            stop_coord = start_coord + length
+            n_mask = utils.n_lower_chars(window_seq[0])
+            n_gc = s.gc_content(window_seq[0])
+            m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord, n_mask, n_gc)
 
 #Function to discover target regions
 def baitDiscovery(conn, params, targets):
@@ -434,20 +438,11 @@ def filterBaits(conn, params):
 		if option.o1 == "rand":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
-		elif option.o1 == "gap":
-			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
-		elif option.o1 == "bad":
-			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
-		elif option.o1 == "min":
-			m.regionFilterMinVar(conn, val=option.o2, flank=option.o3)
-		elif option.o1 == "max":
-			m.regionFilterMaxVar(conn, val=option.o2, flank=option.o3)
-			#m.printVarCounts(conn, option.o3)
+			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
-			m.regionFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
