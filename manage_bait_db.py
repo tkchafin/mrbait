@@ -1132,7 +1132,7 @@ def baitFilterMask(conn, minprop, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
-		bait
+		baits
 	SET
 		pass=0
 	WHERE
@@ -1141,3 +1141,49 @@ def baitFilterMask(conn, minprop, maxprop):
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
+
+def baitFilterGC(conn, minprop, maxprop):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		baits
+	SET
+		pass=0
+	WHERE
+		(gc > %s) OR (gc < %s)
+	'''%(maxprop, minprop)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
+	conn.commit()
+
+#Function for random selection of baits
+def baitFilterRandom(conn, num):
+	cur = conn.cursor()
+	num = int(num) #number to keep
+
+	#Fetch number of total
+	cur.execute("SELECT COUNT(*) FROM baits")
+	rows = int(cur.fetchone()[0])
+
+	#fetch number already failed
+	cur.execute("SELECT COUNT(*) FROM baits WHERE pass=0")
+	fails = int(cur.fetchone()[0])
+
+	if rows is 0 or rows is None:
+		raise ValueError("There are no rows in <baits>!")
+	if num < rows-fails:
+		sql = '''
+			UPDATE baits
+			SET pass = 0
+			WHERE baitid in
+				(SELECT
+					baitid
+				FROM
+					baits
+				WHERE
+					pass=1
+				ORDER BY RANDOM() LIMIT(%s - %s - %s)
+				)
+		'''%(rows,fails,num)
+		cur.execute(sql)
+		conn.commit()

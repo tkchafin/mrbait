@@ -27,9 +27,10 @@ import mrbait_corefuncs as core
 #TODO: Parallelize loadLOCI and loadMAF
 #TODO: Parallelize TR discovery somehow??
 #TODO: FIlter by flanking masked, and flanking GFF elements
-#TODO: Dedup Targets using either smith-waterman or needleman-wunsch (from Bio.EMBOSS)
 #TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
+#TODO: In PW Align filtering, keep IDs that have the least conflicts.
+#TODO: Make adjacency list from PW Align, prune to remove all connections. 
 
 #Parse Command line arguments
 params = parseArgs()

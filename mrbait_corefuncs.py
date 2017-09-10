@@ -152,7 +152,6 @@ def filterTargetRegions(conn, params):
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
-			print("Filter regions by GC, but option not yet implemented")
 			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "len":
 			minlen = option.o2
@@ -313,6 +312,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
     #Finally, parse the output of pairwise alignment, to get 'bad matches'
     #Function returns a list of bad id's
     blacklist = vsearch.parsePairwiseAlign(pw)
+
     m.removeRegionsByList(conn, blacklist)
     #os.remove(pw)
 
@@ -427,47 +427,42 @@ def baitDiscovery(conn, params, targets):
 
 #Function to filter target regions by --filter_R arguments
 def filterBaits(conn, params):
-	rand = 0 #false
-	rand_num = 0
-	aln = 0
-	#Filter by --vmax_r
-	m.varMaxFilterTR(conn, params.vmax_r)
+    rand = 0 #false
+    rand_num = 0
+    aln = 0
+    #Filter by --vmax_r
+    m.varMaxFilterTR(conn, params.vmax_r)
 
-	for option in params.filter_r_objects:
-		print("Select Region Option: ", option.o1)
-		if option.o1 == "rand":
-			#Set 'rand' to TRUE for random selection AFTER other filters
-			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
-		elif option.o1 == "mask":
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "gc":
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			print("Filter regions by GC, but option not yet implemented")
-			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "len":
-			minlen = option.o2
-			maxlen= option.o3
-			assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
-			m.lengthFilterTR(conn, maxlen, minlen)
-		elif option.o1 == "aln":
-			aln = 1
-		else:
-			assert False, "Unhandled option %r"%option
+    for option in params.filter_r_objects:
+        print("Select Region Option: ", option.o1)
+        if option.o1 == "rand":
+        #Set 'rand' to TRUE for random selection AFTER other filters
+            rand_num = int(option.o2)
+            assert rand_num > 0, "Number for random bait selection must be greater than zero!"
+        elif option.o1 == "mask":
+            min_mask_prop = option.o2
+            max_mask_prop = option.o3
+            m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+        elif option.o1 == "gc":
+            min_mask_prop = option.o2
+            max_mask_prop = option.o3
+            m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+        elif option.o1 == "aln":
+            aln = 1
+        else:
+            assert False, "Unhandled option %r"%option
 
-	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	#Target region deduplication by pairwise alignment
-	if aln:
-		passedTargets = m.getPassedTRs(conn)
-		minid = option.o2
-		mincov= option.o3
-		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		pairwiseAlignDedup(params, passedTargets, minid, mincov)
 
-	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
-	if rand_num:
-		return(rand_num)
+    #Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+    #Target region deduplication by pairwise alignment
+    if aln:
+        passedTargets = m.getPassedTRs(conn)
+        minid = option.o2
+        mincov= option.o3
+        assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+        assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+        pairwiseAlignDedup(params, passedTargets, minid, mincov)
+
+    #If 'random' select is turned on, then apply AFTER all other options
+    if rand and not rand_num:
+        m.baitFilterRandom(conn, rand_num)
