@@ -295,9 +295,8 @@ def pairwiseAlignDedup(params, seqs):
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Function returns a list of bad id's
 	blacklist = vsearch.parsePairwiseAlign(pw)
-	for i in blacklist:
-		print(i)
-	#os.remove(pw)
+	m.removeRegionsByList(conn, blacklist)
+	os.remove(pw)
 
 
 
