@@ -51,7 +51,8 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE baits(baitid INTEGER NOT NULL, regid INTEGER NOT NULL,
 			sequence TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
-			pass INTEGER NOT NULL, PRIMARY KEY(baitid),
+			mask REAL, gc REAL, pass INTEGER NOT NULL,
+			PRIMARY KEY(baitid),
 			FOREIGN KEY (regid) REFERENCES regions(regid)
 		)
 	''')
@@ -145,10 +146,12 @@ def add_locus_record(conn, depth, consensus, passed=1):
 	return cur.lastrowid
 
 #Code to add record to 'bait' table
-def add_bait_record(conn, reg, seq, start, stop):
-	stuff = [int(reg), seq, int(start), int(stop)]
-	sql = ''' INSERT INTO baits(regid, sequence, start, stop, pass)
-				VALUES(?,?,?,?,1) '''
+def add_bait_record(conn, reg, seq, start, stop, mask, gc):
+	mask_p = float(mask/len(seq))
+	gc_p = float(gc/len(seq))
+	stuff = [int(reg), seq, int(start), int(stop), float(mask_p), float(gc_p)]
+	sql = ''' INSERT INTO baits(regid, sequence, start, stop, mask, gc, pass)
+				VALUES(?,?,?,?,?,?,1) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
 	conn.commit()
@@ -1123,4 +1126,18 @@ def removeBaitsByList(conn, blacklist):
 
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS b")
+	conn.commit()
+
+def baitFilterMask(conn, minprop, maxprop):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		bait
+	SET
+		pass=0
+	WHERE
+		(mask > %s) OR (mask < %s)
+	'''%(maxprop, minprop)
+	#print(pd.read_sql_query(sql, conn))
+	cur.execute(sql)
 	conn.commit()
