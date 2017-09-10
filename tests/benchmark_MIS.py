@@ -4,10 +4,14 @@ import networkx as nx
 import time
 import networkx.algorithms.approximation as nxaa
 import matplotlib.pyplot as plt
+import numpy as np
+from networkx.utils import powerlaw_sequence
 
 """Code for ATTEMPTING to approximate the maximal independent set in a graph
 of conflicting sequences (e.g. aligned > threshold in pairwise alignment).
 Unfortunately, this problem is NP-hard and can't be done efficiently... """
+
+"""Conclusions: My naive version seems to be faster somehow."""
 
 def time_me(method):
     def wrapper(*args, **kw):
@@ -29,14 +33,28 @@ def multiGraphFromList(data):
 
 @time_me
 #Function to use the built-in independent set function in networkx
-def approximateIndependentSet(graph, num):
+def approximateIndependentSet(nodes, num):
+    array = np.empty(num)
     for i in range(num):
+        z = nx.utils.create_degree_sequence(nodes,powerlaw_sequence)
+        G = nx.configuration_model(z)
+        graph=nx.Graph(G)
+        graph.remove_edges_from(graph.selfloop_edges())
         new = nxaa.maximum_independent_set(graph)
+        array[i] = len(new)
+    avg = np.average(array)
+    print("Average number of nodes: ",avg)
 
 @time_me
 #Function to use VERY SLOW version I made
-def naiveIndependentSet(G, num):
+def naiveIndependentSet(nodes, num):
+    array = np.empty(num)
+    edges = np.empty(num)
     for i in range(num):
+        z = nx.utils.create_degree_sequence(nodes,powerlaw_sequence)
+        G = nx.configuration_model(z)
+        G=nx.Graph(G)
+        G.remove_edges_from(G.selfloop_edges())
         #Make a copy of graph
         C = G.copy()
 
@@ -55,6 +73,12 @@ def naiveIndependentSet(G, num):
                     C.remove_node(right)
                 else:
                     C.remove_node(left)
+        array[i] = C.number_of_nodes()
+        edges[i] = C.number_of_edges()
+    avg = np.average(array)
+    eavg = np.average(edges)
+    print("Average number of nodes: ",avg)
+    print("Average number of edges: ",eavg)
 
 
 #Tests of functions
@@ -74,12 +98,13 @@ example_100 = [(19,29),(28,48),(17,36),(16,72),(33,2),(1,47),(55,66),(62,87),(53
 G10 = multiGraphFromList(example_10)
 G100 = multiGraphFromList(example_100)
 
+
 print("Approximate, Nodes=10, 100 reps")
-approximateIndependentSet(G10,100)
+approximateIndependentSet(10,100)
 print("Approximate, Nodes=100, 100 reps")
-approximateIndependentSet(G100,100)
+approximateIndependentSet(100,100)
 
 print("Naive, Nodes=10, 100 reps")
-naiveIndependentSet(G10,100)
+naiveIndependentSet(10,100)
 print("Naive, Nodes=100, 100 reps")
-naiveIndependentSet(G100,100)
+naiveIndependentSet(100,100)
