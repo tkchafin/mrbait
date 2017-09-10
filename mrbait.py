@@ -4,6 +4,7 @@ import sys
 import sqlite3
 import getopt
 import Bio
+import os
 from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
@@ -253,10 +254,11 @@ def checkTargetRegions(conn):
 def pairwiseAlignDedup(params, seqs):
 	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
 	fas = params.workdir + "/.temp.fasta"
-	file_object = open(".temp.fasta","w")
+	file_object = open(fas, "w")
 	#Write seqs to FASTA first
+	#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
 	for a in seqs.itertuples():
-		name = ">regid_" + str(a[1]) + "\n"
+		name = ">id_" + str(a[1]) + "\n"
 		seq = a[2] + "\n"
 		file_object.write(name)
 		file_object.write(seq)
@@ -277,6 +279,7 @@ def pairwiseAlignDedup(params, seqs):
 		sys.exit(sys.exc_info()[0])
 	os.remove(fas)
 
+	#Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
 	pw = params.workdir + "/.temp.pw"
 	try:
 		vsearch.allpairsGlobal("./bin/vsearch-2.4.4-macos", params.vthreads, sor, 0.8, 0.8, pw)
@@ -288,6 +291,15 @@ def pairwiseAlignDedup(params, seqs):
 	except:
 		sys.exit(sys.exc_info()[0])
 	os.remove(sor)
+
+	#Finally, parse the output of pairwise alignment, to get 'bad matches'
+	#Function returns a list of bad id's
+	blacklist = vsearch.parsePairwiseAlign(pw)
+	for i in blacklist:
+		print(i)
+	#os.remove(pw)
+
+
 
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
@@ -372,7 +384,6 @@ def baitDiscovery(conn, params, targets):
 	# 			baitSlidingWindow(conn, seq[1], seq[2], params.overlap, params.blen)
 	# 		else:
 	# 			pass
-	# 			#TODO: Make substring class, with method to search list of already gathered substring to check for overlap
 	# 			#While overlap is to high, generate and add/check another random substring until X passing are gathered.
 	# 			#Loop through that list and commit all to table
 	# 			subseqs = []
@@ -477,7 +488,7 @@ if rand:
 #Target region deduplication by pairwise alignment
 passedTargets = m.getPassedTRs(conn)
 pairwiseAlignDedup(params, passedTargets)
-sys.exit()
+
 #Bait discovery
 print("Starting probe design...")
 
