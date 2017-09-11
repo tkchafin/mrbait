@@ -79,11 +79,14 @@ Target Region options:
 			  --Also controllable with -F M=0,[x] where x is maximum value
 	-D,--dist_r	: Minimum distance between target regions [100]
 			  --Conflicts will be resolved according to --select_r
+	-d,--flank_dist	: Distance flanking target regions [default = 1000]
+			  --Will be used to calculate number of variants
+			  --For use with <--select_r> and <--filter_r>
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 			  --Options
-				snp=[d]      : Most SNPs w/in \"d\" bases
-				bad=[d]      : Least Ns and gaps w/n \"d\" bases
-				conf=[d]     : Most conserved w/in \"d\" bases
+				snp          : Most SNPs w/in \"d\" bases
+				bad          : Least Ns and gaps w/n \"d\" bases
+				conf         : Most conserved w/in \"d\" bases
 				conw         : Least SNP, N, or gap bases in bait region
 				rand         : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases

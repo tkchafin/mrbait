@@ -30,7 +30,9 @@ import mrbait_corefuncs as core
 #TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
 #TODO: In PW Align filtering, keep IDs that have the least conflicts.
-#TODO: Make adjacency list from PW Align, prune to remove all connections. 
+#TODO: Make adjacency list from PW Align, prune to remove all connections.
+#TODO: Store flanking var, etc information in regions table.
+#TODO: Can use variant information to weight nodes for keeping (networkx)
 
 #Parse Command line arguments
 params = parseArgs()
