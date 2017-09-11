@@ -15,6 +15,42 @@ Unfortunately, this problem is NP-hard and can't be done efficiently... """
 
 #TODO: Test that nodes retained in NAIVE definitely dont have any edges!!!
 
+"""RESULTS: Mine is slighlty faster and finds more nodes at smaller network sizes. 
+
+Approximate, Nodes=10, 100 reps
+Average number of nodes:  5.07
+24 ms
+Approximate, Nodes=100, 100 reps
+Average number of nodes:  56.09
+228 ms
+Approximate, Nodes=1000, 100 reps
+Average number of nodes:  632.4
+3529 ms
+Approximate, Nodes=10000, 100 reps
+Average number of nodes:  6828.18
+95647 ms
+
+------
+
+Naive, Nodes=10, 100 reps
+Average number of nodes:  5.62
+Average number of edges:  0.0
+40 ms
+Naive, Nodes=100, 100 reps
+Average number of nodes:  62.5
+Average number of edges:  0.0
+344 ms
+Naive, Nodes=1000, 100 reps
+Average number of nodes:  676.74
+Average number of edges:  0.0
+4313 ms
+Approximate, Nodes=10000, 100 reps
+Average number of nodes:  6796.16
+93200 ms
+
+"""
+
+
 def time_me(method):
     def wrapper(*args, **kw):
         startTime = int(round(time.time() * 1000))
