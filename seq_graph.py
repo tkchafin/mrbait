@@ -84,4 +84,4 @@ C = naiveIndependentSet(G)
 
 nodes = C.nodes()
 #nodes = approximateIndependentSet(G)
-plotColorNodes(G, nodes)
+#plotColorNodes(G, nodes)
