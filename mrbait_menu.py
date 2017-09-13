@@ -172,7 +172,7 @@ class parseArgs():
 			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all", "win_width=","mask=","no_mask", "vsearch=",
-			"vthreads="])
+			"vthreads=","hacker"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -238,6 +238,12 @@ class parseArgs():
 
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
+
+		#HACKER ONLY OPTIONS
+		self.__noGraph = 0
+		self.__graphApproximate = 0
+		self.__graphMax= 10000
+
 				#Parse through arguments and set params
 		for opt, arg_raw in options:
 			arg = arg_raw.replace(" ","")
@@ -393,6 +399,18 @@ class parseArgs():
 			elif opt in ('-o', '--out'):
 				self.out = arg
 
+			#HACKER ONLY OPTIONS
+			elif opt in ('--hacker'):
+				subopts = re.split('=|,',arg)
+				main = subopts[0]
+				if main == "noGraph":
+					self.__noGraph = 1
+				elif main == "graphApproximate"
+					self.__graphApproximate = 1
+				elif main == "graphMax":
+					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
+				else
+					assert False, "Unhandled option %r"%main
 			else:
 				assert False, "Unhandled option %r"%opt
 
