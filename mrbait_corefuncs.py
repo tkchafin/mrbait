@@ -130,6 +130,8 @@ def filterTargetRegions(conn, params):
 	rand = 0 #false
 	rand_num = 0
 	aln = 0
+	minid = None
+	mincov = None
 
 	for option in params.filter_r_objects:
 		print("Filter Region Option: ", option.o1)
@@ -158,6 +160,8 @@ def filterTargetRegions(conn, params):
 			m.lengthFilterTR(conn, maxlen, minlen)
 		elif option.o1 == "aln":
 			aln = 1
+			minid = option.o2
+			mincov= option.o3
 			print("Align option not fully impleneted yet")
 		else:
 			assert False, "Unhandled option %r"%option
@@ -168,9 +172,10 @@ def filterTargetRegions(conn, params):
 		passedTargets = m.getPassedTRs(conn)
 		minid = option.o2
 		mincov= option.o3
-		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+		assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+		assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
 		pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
+		dupEdgeResolution(params)
 
 	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
 	if rand_num:
@@ -205,27 +210,24 @@ def selectTargetRegions(conn, params):
 		pass
 	elif params.select_r == "snp":
 		#Select based on SNPs flanking in "d" dist
-		print("--select_r is SNP, dist is ",params.select_r_dist)
 		try:
 			#TODO: Change to parse flank first and populate in table
-			m.regionSelect_SNP(conn,params.select_r_dist)
+			m.regionSelect_SNP(conn)
 		except ValueError as err:
 			sys.exit(err.args)
 	#	except:
 		#	sys.exit(sys.exc_info()[0])
 	elif params.select_r == "bad":
 		#Select based on least Ns and gaps in "d" flanking bases
-		print("--select_r is MINBAD, dist is ", params.select_r_dist)
 		try:
-			m.regionSelect_MINBAD(conn,params.select_r_dist)
+			m.regionSelect_MINBAD(conn)
 		except ValueError as err:
 			sys.exit(err.args)
 	elif params.select_r == "cons":
 		#Select based on minimizing SNPs in flanking region
 		#TODO: Implement flankDistParser first!!!
-		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
 		try:
-			m.regionSelect_MINSNP(conn,params.select_r_dist)
+			m.regionSelect_MINSNP(conn)
 		except ValueError as err:
 			sys.exit(err.args)
 	else:
@@ -301,12 +303,31 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 		sys.exit(sys.exc_info()[0])
 	#os.remove(sor)
 
+
+#Function to perform conflict resolution based on VSEARCH results
+def dupEdgeResolution(params):
+	#OUTLINE:
+	#--Get blacklist
+	#--Query table to get weights (number of vars)
+	#	If --noGraph:
+	#		Remove all blacklist
+	#	Else:
+	#		if --noWeights:
+	#			conflict resolve, keeping right neighbor
+	#		else:
+	#			query table to get weights
+	#			conflict resolve with list of weights (make a hash lookup in-function)
+	#		In above:
+	#			Keep in mind the --graphApproximate and --graphMax, which determine
+	#			which algorithm for finding the maximal independent set we will use.
+
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Function returns a list of bad id's
 	blacklist = vsearch.parsePairwiseAlign(pw)
-
-	m.removeRegionsByList(conn, blacklist)
+	if (params.__noGraph):
+		m.removeRegionsByList(conn, blacklist)
 	#os.remove(pw)
+
 
 
 #function for sliding window bait generation

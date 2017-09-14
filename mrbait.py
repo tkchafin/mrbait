@@ -29,12 +29,8 @@ import mrbait_corefuncs as core
 #TODO: FIlter by flanking masked, and flanking GFF elements
 #TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
-#TODO: In PW Align filtering, keep IDs that have the least conflicts.
-#TODO: Make adjacency list from PW Align, prune to remove all connections.
-#TODO: Store flanking var, etc information in regions table.
 #TODO: Can use variant information to weight nodes for keeping (networkx)
-#TODO: Convert flank dist parsing, filter_r min and max replaced with SNP options
-#TODO: Calculate flanking stats and put into DB
+#TODO: Convert --select_r based on flanking info to new scheme!!
 
 #Parse Command line arguments
 params = parseArgs()
@@ -69,10 +65,6 @@ if passedLoci.shape[0] <= 0:
 #Target region discovery according to params set
 core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
-print("-------------AFTER SELECTION-----------------")
-print(m.getRegions(conn))
-print("\n\n\n")
-
 #Assert that there are TRs chosen, and that not all have been filtered out
 #core.checkTargetRegions(conn)
 
@@ -83,7 +75,6 @@ print("Starting: Target Region Selection...")
 #First pass filtering of target regions
 rand = core.filterTargetRegions(conn, params)
 
-sys.exit()
 #Check again that not all have been filtered out
 core.checkTargetRegions(conn)
 
