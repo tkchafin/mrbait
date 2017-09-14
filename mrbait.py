@@ -33,6 +33,8 @@ import mrbait_corefuncs as core
 #TODO: Make adjacency list from PW Align, prune to remove all connections.
 #TODO: Store flanking var, etc information in regions table.
 #TODO: Can use variant information to weight nodes for keeping (networkx)
+#TODO: Convert flank dist parsing, filter_r min and max replaced with SNP options
+#TODO: Calculate flanking stats and put into DB 
 
 #Parse Command line arguments
 params = parseArgs()
