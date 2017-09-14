@@ -1263,6 +1263,7 @@ def parseFlankGap(conn, dist):
 	'''%(dist, dist)
 	cur.execute(sql3)
 	conn.commit()
+	
 #Function to parse variants table to population flanking character columns for regions table
 def flankDistParser(conn, dist):
 	parseFlankVars(conn, dist)
