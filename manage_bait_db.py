@@ -1187,3 +1187,95 @@ def baitFilterRandom(conn, num):
 		'''%(rows,fails,num)
 		cur.execute(sql)
 		conn.commit()
+
+#Function to parse variants table to update regions VARS for flanking information
+def parseFlankVars(conn, dist):
+	cur = conn.cursor()
+	sql = '''
+		WITH other AS
+			(SELECT
+				r.regid,
+				COUNT(v.value) as counts
+			FROM
+				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+			WHERE
+				v.value !="N" AND v.value != "-"
+			AND
+				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+			GROUP BY
+				r.regid)
+		UPDATE
+			regions
+		SET
+			vars = vars + (SELECT counts FROM other WHERE regions.regid = other.regid)
+		WHERE
+			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+	'''%(dist, dist)
+	cur.execute(sql)
+	conn.commit()
+
+def parseFlankBad(conn, dist):
+	cur = conn.cursor()
+	sql2 = '''
+		WITH other AS
+			(SELECT
+				r.regid,
+				COUNT(v.value) as counts
+			FROM
+				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+			WHERE
+				v.value ="N"
+			AND
+				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+			GROUP BY
+				r.regid)
+		UPDATE
+			regions
+		SET
+			bad = bad + (SELECT counts FROM other WHERE regions.regid = other.regid)
+		WHERE
+			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+	'''%(dist, dist)
+	cur.execute(sql2)
+	conn.commit()
+
+def parseFlankGap(conn, dist):
+	cur = conn.cursor()
+	sql3 = '''
+		WITH other AS
+			(SELECT
+				r.regid,
+				COUNT(v.value) as counts
+			FROM
+				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+			WHERE
+				v.value = "-"
+			AND
+				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+			GROUP BY
+				r.regid)
+		UPDATE
+			regions
+		SET
+			gap = gap + (SELECT counts FROM other WHERE regions.regid = other.regid)
+		WHERE
+			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+	'''%(dist, dist)
+	cur.execute(sql3)
+	conn.commit()
+#Function to parse variants table to population flanking character columns for regions table
+def flankDistParser(conn, dist):
+	parseFlankVars(conn, dist)
+	parseFlankBad(conn, dist)
+	parseFlankGap(conn, dist)
+
+#Function to return a pandas DF of regions, vars, and 'bad bases'
+def getRegionWeights(conn):
+	sql = """
+	SELECT
+		regid
+		SUM(bad, gap) AS sum_bad
+	FROM
+		regions
+	"""
+	return(pd.read_sql_query(sql ,conn))
