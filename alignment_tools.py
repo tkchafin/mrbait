@@ -23,7 +23,7 @@ class consensAlign():
 			#print(i, " is ", con[i])
 			#If not monomorphic
 			if con[i] not in {"A", "G", "T", "C"}:
-				var_objects.append(variablePosition(i, con[i]))
+				var_objects.append(variablePosition(i, con[i].upper()))
 				#continue
 			#else:
 			'''
