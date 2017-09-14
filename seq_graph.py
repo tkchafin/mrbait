@@ -24,7 +24,6 @@ def multiGraphFromList(data):
 def approximateIndependentSet(G):
     return(nx.maximal_independent_set(G, nodes=None))
 
-
 #Function
 def naiveIndependentSet(G):
     #Make a copy of graph
