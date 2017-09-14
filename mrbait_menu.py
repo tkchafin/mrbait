@@ -73,10 +73,6 @@ General Bait Design options:
 	print("""
 Target Region options:
 
-	-V,--vmax_r	: Maximumum SNPs allowed in a target region [0]
-			  --Individual baits are constrained by <-v>
-			  --By default set to the value of <-v, --var_max>
-			  --Also controllable with -F M=0,[x] where x is maximum value
 	-D,--dist_r	: Minimum distance between target regions [100]
 			  --Conflicts will be resolved according to --select_r
 	-d,--flank_dist	: Distance in flanking regions selection and filtering targets
@@ -164,11 +160,11 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:V:D:p:S:F:s:f:QXo:Pk:Kd:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
-			"callN","numG=","callG","gff_type=",
-			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
+			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
+			"select_r=","filter_r=",
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
 			"vthreads=","hacker"])
@@ -205,7 +201,6 @@ class parseArgs():
 		self.anchor=None
 
 		#target region options
-		self.vmax_r=None
 		self.dist_r=None
 		self.flank_dist=500
 		self.select_r="rand"
@@ -294,8 +289,6 @@ class parseArgs():
 				self.anchor = arg
 
 			#target region opts
-			elif opt in ('-V', '--vmax_r'):
-				self.vmax_r = int(arg)
 			elif opt in ('-D', '--dist_r'):
 				self.dist_r = int(arg)
 			elif opt in ('-p', '--tile_min'):
@@ -429,10 +422,6 @@ class parseArgs():
 		#Set default win_width
 		if self.win_width is None:
 			self.win_width = self.blen
-
-		#Default vmax_r
-		if self.vmax_r is None:
-			self.vmax_r = self.var_max
 
 		#Warn of argument masking
 		if self.mult_reg is 0:
