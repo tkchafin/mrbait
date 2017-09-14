@@ -235,6 +235,7 @@ class parseArgs():
 
 		#HACKER ONLY OPTIONS
 		self.__noGraph = 0
+		self.__noWeightGraph = 0
 		self.__graphApproximate = 0
 		self.__graphMax= 10000
 
@@ -397,6 +398,8 @@ class parseArgs():
 					win_width = int(subopts[1])
 				elif main == "graphApproximate":
 					self.__graphApproximate = 1
+				elif main == "noWeightGraph":
+					self.__noWeightGraph = 1
 				elif main == "graphMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
 					self.__graphMax = int(subopts[1])
