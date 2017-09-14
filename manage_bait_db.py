@@ -1263,7 +1263,7 @@ def parseFlankGap(conn, dist):
 	'''%(dist, dist)
 	cur.execute(sql3)
 	conn.commit()
-	
+
 #Function to parse variants table to population flanking character columns for regions table
 def flankDistParser(conn, dist):
 	parseFlankVars(conn, dist)
@@ -1280,3 +1280,23 @@ def getRegionWeights(conn):
 		regions
 	"""
 	return(pd.read_sql_query(sql ,conn))
+
+
+#Function to update REGIONS table based on existing Gap attribute
+def simpleFilterTargets_gap(conn, thresh):
+	cur = conn.cursor()
+	cur.execute("UPDATE regions SET pass=0 WHERE gap > %s"%thresh)
+	conn.commit()
+
+
+#Function to update REGIONS table based on existing Bad attribute
+def simpleFilterTargets_bad(conn, thresh):
+	cur = conn.cursor()
+	cur.execute("UPDATE regions SET pass=0 WHERE bad > %s"%thresh)
+	conn.commit()
+
+#Function to update REGIONS table based on existing vars attribute
+def simpleFilterTargets_SNP(conn, minS, maxS):
+	cur = conn.cursor()
+	cur.execute("UPDATE regions SET pass=0 WHERE vars < %s OR vars > %s"%(minS,maxS))
+	conn.commit()

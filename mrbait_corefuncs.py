@@ -123,15 +123,13 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 				start = generator.getI()+params.win_shift
 	#Now update regions table to include information for flanking regions if available
 	m.flankDistParser(conn, params.flank_dist)
-	sys.exit(0)
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):
+
 	rand = 0 #false
 	rand_num = 0
 	aln = 0
-	#Filter by --vmax_r
-	m.varMaxFilterTR(conn, params.vmax_r)
 
 	for option in params.filter_r_objects:
 		print("Filter Region Option: ", option.o1)
@@ -140,13 +138,11 @@ def filterTargetRegions(conn, params):
 			rand_num = int(option.o2)
 			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
 		elif option.o1 == "gap":
-			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
+			m.simpleFilterTargets_gap(conn, int(option.o2))
 		elif option.o1 == "bad":
-			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
+			m.simpleFilterTargets_bad(conn, int(option.o2))
 		elif option.o1 == "snp":
-			#TODO: WRITE THIS!!!!!!!!!
-			print("--filter_r option is SNP: Not yet implemented!!!!")
-			#m.printVarCounts(conn, option.o3)
+			m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
@@ -162,6 +158,7 @@ def filterTargetRegions(conn, params):
 			m.lengthFilterTR(conn, maxlen, minlen)
 		elif option.o1 == "aln":
 			aln = 1
+			print("Align option not fully impleneted yet")
 		else:
 			assert False, "Unhandled option %r"%option
 
@@ -178,8 +175,6 @@ def filterTargetRegions(conn, params):
 	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
 	if rand_num:
 		return(rand_num)
-
-
 
 #Function to filter target regions by --filter_R arguments
 def selectTargetRegions(conn, params):
@@ -427,10 +422,8 @@ def filterBaits(conn, params):
 	rand = 0 #false
 	rand_num = 0
 	aln = 0
-	#Filter by --vmax_r
-	m.varMaxFilterTR(conn, params.vmax_r)
 
-	for option in params.filter_r_objects:
+	for option in params.filter_b_objects:
 		print("Select Region Option: ", option.o1)
 		if option.o1 == "rand":
 		#Set 'rand' to TRUE for random selection AFTER other filters

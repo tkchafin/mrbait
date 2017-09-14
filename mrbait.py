@@ -34,7 +34,7 @@ import mrbait_corefuncs as core
 #TODO: Store flanking var, etc information in regions table.
 #TODO: Can use variant information to weight nodes for keeping (networkx)
 #TODO: Convert flank dist parsing, filter_r min and max replaced with SNP options
-#TODO: Calculate flanking stats and put into DB 
+#TODO: Calculate flanking stats and put into DB
 
 #Parse Command line arguments
 params = parseArgs()
@@ -68,10 +68,13 @@ if passedLoci.shape[0] <= 0:
 
 #Target region discovery according to params set
 core.targetDiscoverySlidingWindow(conn, params, passedLoci)
-print()
+
+print("-------------AFTER SELECTION-----------------")
+print(m.getRegions(conn))
+print("\n\n\n")
 
 #Assert that there are TRs chosen, and that not all have been filtered out
-core.checkTargetRegions(conn)
+#core.checkTargetRegions(conn)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
@@ -80,6 +83,7 @@ print("Starting: Target Region Selection...")
 #First pass filtering of target regions
 rand = core.filterTargetRegions(conn, params)
 
+sys.exit()
 #Check again that not all have been filtered out
 core.checkTargetRegions(conn)
 
