@@ -121,6 +121,9 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 
 				#If bait fails, set start to start point of next window
 				start = generator.getI()+params.win_shift
+	#Now update regions table to include information for flanking regions if available
+	m.flankDistParser(conn, params.flank_dist)
+	sys.exit(0)
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):
@@ -131,7 +134,7 @@ def filterTargetRegions(conn, params):
 	m.varMaxFilterTR(conn, params.vmax_r)
 
 	for option in params.filter_r_objects:
-		print("Select Region Option: ", option.o1)
+		print("Filter Region Option: ", option.o1)
 		if option.o1 == "rand":
 			#Set 'rand' to TRUE for random selection AFTER other filters
 			rand_num = int(option.o2)
@@ -140,10 +143,9 @@ def filterTargetRegions(conn, params):
 			c.execute("UPDATE regions SET pass=0 WHERE gap > %s"%int(option.o2))
 		elif option.o1 == "bad":
 			c.execute("UPDATE regions SET pass=0 WHERE bad > %s"%int(option.o2))
-		elif option.o1 == "min":
-			m.regionFilterMinVar(conn, val=option.o2, flank=option.o3)
-		elif option.o1 == "max":
-			m.regionFilterMaxVar(conn, val=option.o2, flank=option.o3)
+		elif option.o1 == "snp":
+			#TODO: WRITE THIS!!!!!!!!!
+			print("--filter_r option is SNP: Not yet implemented!!!!")
 			#m.printVarCounts(conn, option.o3)
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
@@ -184,7 +186,7 @@ def selectTargetRegions(conn, params):
 	#For all alignments over --min_mult:
 		#If TRs are within --dist
 	print("Select TR criterion is: ",params.select_r)
-	print("Select dist is: ", params.select_r_dist)
+	print("Flank dist is: ", params.flank_dist)
 	print("Minimum mult_reg dist is: ",params.min_mult)
 
 	#Build conflict tables
@@ -210,18 +212,12 @@ def selectTargetRegions(conn, params):
 		#Select based on SNPs flanking in "d" dist
 		print("--select_r is SNP, dist is ",params.select_r_dist)
 		try:
+			#TODO: Change to parse flank first and populate in table
 			m.regionSelect_SNP(conn,params.select_r_dist)
 		except ValueError as err:
 			sys.exit(err.args)
 	#	except:
 		#	sys.exit(sys.exc_info()[0])
-	elif params.select_r == "conw":
-		#Select based on minimizing SNPs, Ns and gaps in TR region, otherwise randomly
-		print("--select_r is MINVAR_TR")
-		try:
-			m.regionSelect_MINVAR_TR(conn)
-		except ValueError as err:
-			sys.exit(err.args)
 	elif params.select_r == "bad":
 		#Select based on least Ns and gaps in "d" flanking bases
 		print("--select_r is MINBAD, dist is ", params.select_r_dist)
@@ -229,8 +225,9 @@ def selectTargetRegions(conn, params):
 			m.regionSelect_MINBAD(conn,params.select_r_dist)
 		except ValueError as err:
 			sys.exit(err.args)
-	elif params.select_r == "conf":
+	elif params.select_r == "cons":
 		#Select based on minimizing SNPs in flanking region
+		#TODO: Implement flankDistParser first!!!
 		print("select_r is MINVAR_FLANK, dist is ", params.select_r_dist)
 		try:
 			m.regionSelect_MINSNP(conn,params.select_r_dist)
@@ -263,83 +260,83 @@ def checkTargetRegions(conn):
 
 #Function for deduplication of targets by pairwise alignment
 def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
-    """Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
-    fas = params.workdir + "/.temp.fasta"
-    file_object = open(fas, "w")
-    #Write seqs to FASTA first
-    #Assumes that a[0] is index, a[1] is id, and a[2] is sequence
-    for a in seqs.itertuples():
-        name = ">id_" + str(a[1]) + "\n"
-        seq = a[2] + "\n"
-        file_object.write(name)
-        file_object.write(seq)
-    file_object.close()
+	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
+	fas = params.workdir + "/.temp.fasta"
+	file_object = open(fas, "w")
+	#Write seqs to FASTA first
+	#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
+	for a in seqs.itertuples():
+		name = ">id_" + str(a[1]) + "\n"
+		seq = a[2] + "\n"
+		file_object.write(name)
+		file_object.write(seq)
+	file_object.close()
 
-    #First sort FASTA by size
-    sor = params.workdir + "/.temp.sort"
-    try:
-        vsearch.sortByLength(params.vsearch, fas, sor)
-    except KeyboardInterrupt:
-        sys.exit("Process aborted: Keyboard Interrupt")
-    except subprocess.CalledProcessError as err:
-        print("VSEARCH encountered a problem.")
-        sys.exit(err.args)
-    except NameError as err:
-        sys.exit(err.args)
-    except OSError as err:
-        print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
-        sys.exit(err.args)
-    except:
-        sys.exit(sys.exc_info()[0])
-    os.remove(fas)
+	#First sort FASTA by size
+	sor = params.workdir + "/.temp.sort"
+	try:
+		vsearch.sortByLength(params.vsearch, fas, sor)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except NameError as err:
+		sys.exit(err.args)
+	except OSError as err:
+		print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
+	os.remove(fas)
 
-    #Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
-    pw = params.workdir + "/.temp.pw"
-    try:
-        vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw)
-    except KeyboardInterrupt:
-        sys.exit("Process aborted: Keyboard Interrupt")
-    except subprocess.CalledProcessError as err:
-        print("VSEARCH encountered a problem.")
-        sys.exit(err.args)
-    except OSError as err:
-        print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
-        sys.exit(err.args)
-    except:
-        sys.exit(sys.exc_info()[0])
-    #os.remove(sor)
+	#Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
+	pw = params.workdir + "/.temp.pw"
+	try:
+		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except OSError as err:
+		print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
+	#os.remove(sor)
 
-    #Finally, parse the output of pairwise alignment, to get 'bad matches'
-    #Function returns a list of bad id's
-    blacklist = vsearch.parsePairwiseAlign(pw)
+	#Finally, parse the output of pairwise alignment, to get 'bad matches'
+	#Function returns a list of bad id's
+	blacklist = vsearch.parsePairwiseAlign(pw)
 
-    m.removeRegionsByList(conn, blacklist)
-    #os.remove(pw)
+	m.removeRegionsByList(conn, blacklist)
+	#os.remove(pw)
 
 
 #function for sliding window bait generation
 def baitSlidingWindow(conn, source, sequence, overlap, length):
-    generator = s.slidingWindowGenerator(sequence, overlap, length)
-    for window_seq in generator():
-    #Don't need to do a bunch of filtering, because all was checked when TRs built
-    #print(window_seq)
-        if (len(window_seq[0]) == length):
-            n_mask = utils.n_lower_chars(window_seq[0])
-            n_gc = s.gc_content(window_seq[0])
-            m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2], n_mask, n_gc)
+	generator = s.slidingWindowGenerator(sequence, overlap, length)
+	for window_seq in generator():
+	#Don't need to do a bunch of filtering, because all was checked when TRs built
+	#print(window_seq)
+		if (len(window_seq[0]) == length):
+			n_mask = utils.n_lower_chars(window_seq[0])
+			n_gc = s.gc_content(window_seq[0])
+			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2], n_mask, n_gc)
 
 #function for sliding window bait generation, with custom coordinates
 def baitSlidingWindowCoord(conn, source, sequence, overlap, length, start):
-    generator = s.slidingWindowGenerator(sequence, overlap, length)
-    for window_seq in generator():
-        #Don't need to do a bunch of filtering, because all was checked when TRs built
-        #print(window_seq)
-        if (len(window_seq[0]) == length):
-            start_coord = start + window_seq[1]
-            stop_coord = start_coord + length
-            n_mask = utils.n_lower_chars(window_seq[0])
-            n_gc = s.gc_content(window_seq[0])
-            m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord, n_mask, n_gc)
+	generator = s.slidingWindowGenerator(sequence, overlap, length)
+	for window_seq in generator():
+		#Don't need to do a bunch of filtering, because all was checked when TRs built
+		#print(window_seq)
+		if (len(window_seq[0]) == length):
+			start_coord = start + window_seq[1]
+			stop_coord = start_coord + length
+			n_mask = utils.n_lower_chars(window_seq[0])
+			n_gc = s.gc_content(window_seq[0])
+			m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord, n_mask, n_gc)
 
 #Function to discover target regions
 def baitDiscovery(conn, params, targets):
@@ -427,42 +424,42 @@ def baitDiscovery(conn, params, targets):
 
 #Function to filter target regions by --filter_R arguments
 def filterBaits(conn, params):
-    rand = 0 #false
-    rand_num = 0
-    aln = 0
-    #Filter by --vmax_r
-    m.varMaxFilterTR(conn, params.vmax_r)
+	rand = 0 #false
+	rand_num = 0
+	aln = 0
+	#Filter by --vmax_r
+	m.varMaxFilterTR(conn, params.vmax_r)
 
-    for option in params.filter_r_objects:
-        print("Select Region Option: ", option.o1)
-        if option.o1 == "rand":
-        #Set 'rand' to TRUE for random selection AFTER other filters
-            rand_num = int(option.o2)
-            assert rand_num > 0, "Number for random bait selection must be greater than zero!"
-        elif option.o1 == "mask":
-            min_mask_prop = option.o2
-            max_mask_prop = option.o3
-            m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-        elif option.o1 == "gc":
-            min_mask_prop = option.o2
-            max_mask_prop = option.o3
-            m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-        elif option.o1 == "aln":
-            aln = 1
-        else:
-            assert False, "Unhandled option %r"%option
+	for option in params.filter_r_objects:
+		print("Select Region Option: ", option.o1)
+		if option.o1 == "rand":
+		#Set 'rand' to TRUE for random selection AFTER other filters
+			rand_num = int(option.o2)
+			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
+		elif option.o1 == "mask":
+			min_mask_prop = option.o2
+			max_mask_prop = option.o3
+			m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+		elif option.o1 == "gc":
+			min_mask_prop = option.o2
+			max_mask_prop = option.o3
+			m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+		elif option.o1 == "aln":
+			aln = 1
+		else:
+			assert False, "Unhandled option %r"%option
 
 
-    #Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-    #Target region deduplication by pairwise alignment
-    if aln:
-        passedTargets = m.getPassedTRs(conn)
-        minid = option.o2
-        mincov= option.o3
-        assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-        assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-        pairwiseAlignDedup(params, passedTargets, minid, mincov)
+	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+	#Target region deduplication by pairwise alignment
+	if aln:
+		passedTargets = m.getPassedTRs(conn)
+		minid = option.o2
+		mincov= option.o3
+		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+		pairwiseAlignDedup(params, passedTargets, minid, mincov)
 
-    #If 'random' select is turned on, then apply AFTER all other options
-    if rand and not rand_num:
-        m.baitFilterRandom(conn, rand_num)
+	#If 'random' select is turned on, then apply AFTER all other options
+	if rand and not rand_num:
+		m.baitFilterRandom(conn, rand_num)
