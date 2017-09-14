@@ -79,15 +79,14 @@ Target Region options:
 			  --Also controllable with -F M=0,[x] where x is maximum value
 	-D,--dist_r	: Minimum distance between target regions [100]
 			  --Conflicts will be resolved according to --select_r
-	-d,--flank_dist	: Distance flanking target regions [default = 1000]
-			  --Will be used to calculate number of variants
-			  --For use with <--select_r> and <--filter_r>
+	-d,--flank_dist	: Distance in flanking regions selection and filtering targets
+			  --See relevant options in <--select_r> and <--filter_r>
+			  --By default will be set to [500]
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 			  --Options
 				snp          : Most SNPs w/in \"d\" bases
 				bad          : Least Ns and gaps w/n \"d\" bases
-				conf         : Most conserved w/in \"d\" bases
-				conw         : Least SNP, N, or gap bases in bait region
+				cons         : Most conserved w/in \"d\" bases
 				rand         : Randomly choose a bait region [default]
 				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
@@ -96,8 +95,8 @@ Target Region options:
 				len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
 				gap=[x]      : Maximum of \"x\" indels in target region
 				bad=[x]      : Maximum of \"x\" Ns in target region
-				min=[x,d]    : Minimum of \"x\" SNPs within \"d\" bases
-				max=[x,d]    : Maximum of \"x\" SNPs within \"d\" bases
+				min=[x]      : Minimum of \"x\" SNPs within \"d\" bases
+				max=[x]      : Maximum of \"x\" SNPs within \"d\" bases
 				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
 				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 				rand=[x]     : Randomly retain \"x\" target regions w/ baits
@@ -165,13 +164,13 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:V:D:p:S:F:s:f:QXo:Pd:k:K', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:V:D:p:S:F:s:f:QXo:Pk:Kd:', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=",
 			"vmax_r=","dist_r=","tile_min=","select_r=","filter_r=",
 			"select_b=","filter_b=","quiet","expand","out=",
-			"plot_all", "win_width=","mask=","no_mask", "vsearch=",
+			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
 			"vthreads=","hacker"])
 		except getopt.GetoptError as err:
 			print(err)
@@ -208,8 +207,8 @@ class parseArgs():
 		#target region options
 		self.vmax_r=None
 		self.dist_r=None
+		self.flank_dist=500
 		self.select_r="rand"
-		self.select_r_dist=None
 		self.filter_r=0 #bool
 		self.filter_t_whole=None
 		self.filter_r_objects=[]
@@ -246,6 +245,7 @@ class parseArgs():
 
 				#Parse through arguments and set params
 		for opt, arg_raw in options:
+			print(opt)
 			arg = arg_raw.replace(" ","")
 			arg = arg.strip()
 			if opt in ('-M', '--maf'):
@@ -278,9 +278,6 @@ class parseArgs():
 				self.win_shift = int(arg)
 			elif opt in ('-R', '--mult_reg'):
 				self.mult_reg = 1
-			elif opt in ('-d', '--win_width'):
-				print("Warning: You are setting a hidden option <-d/--win_width>")
-				self.win_width = int(arg)
 			elif opt in ('-m', '--min_mult'):
 				self.min_mult = int(arg)
 			elif opt in ('-v', '--var_max'):
@@ -304,39 +301,34 @@ class parseArgs():
 			elif opt in ('-p', '--tile_min'):
 				self.tile_min = int(arg)
 				self.tiling = 1
+			elif opt in ('-d', '--flank_dist'):
+				print("opt is d")
+				self.flank_dist = int(arg)
+				assert isinstance(self.flank_dist, int), "<--flank_dist> must be an integer"
+				assert self.flank_dist >= 0, "<--flank_dist> must be an integer greater than zero!"
 			elif opt in ('-S', '--select_r'):
 				temp = arg.split('=')
 				self.select_r = (temp[0]).lower()
-				chars = (['snp','bad','conf','conw','rand'])
+				chars = (['snp','bad','cons','rand'])
 				if self.select_r not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-				subchars = (['snp','bad','conw'])
-				if string_containsAny(self.select_r, subchars) == 0:
-					if (len(temp) > 1):
-						assert len(temp) is 2, "invalid use of <--select_r>"
-						self.select_r_dist = int(temp[1])
-						assert isinstance(self.select_r_dist, int), "select_r_dist must be an integer"
-						assert self.select_r_dist >= 0, "select_r_dist must be an integer greater than zero!"
-					else:
-						self.select_r_dist = 100
-				else:
-					self.select_r_dist = None
-				#print("select_r is %r" %self.select_r)
-				#print("select_r_dist is %r"%self.select_r_dist)
 			elif opt in ('-F', '--filter_r'):
 				self.filter_r = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('min','max','mask','gc','len', "aln"):
+				if subopts[0] in ('snp','mask','gc','len', "aln"):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask','len'):
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 					elif subopts[0] == "aln":
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
-					else:
+					elif subopts[0] == "snp":
+						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
+						assert isinstance(subopts[2], int), "--filter_r suboption snp: Minimum must be an integer"
+						assert isinstance(subopts[2], int), "--filter_r suboption snp: Maximum must be an integer"
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
 				elif subopts[0] in ('rand','gap','bad'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
@@ -405,11 +397,15 @@ class parseArgs():
 				main = subopts[0]
 				if main == "noGraph":
 					self.__noGraph = 1
-				elif main == "graphApproximate"
+				elif main == "win_width":
+					assert len(subopts) == 2, "Warning: HACKER option <win_width> must have two arguments separated by \"=\""
+					win_width = int(subopts[1])
+				elif main == "graphApproximate":
 					self.__graphApproximate = 1
 				elif main == "graphMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
-				else
+					self.__graphMax = int(subopts[1])
+				else:
 					assert False, "Unhandled option %r"%main
 			else:
 				assert False, "Unhandled option %r"%opt
