@@ -236,9 +236,9 @@ class parseArgs():
 		self.db="./mrbait.sqlite"
 
 		#HACKER ONLY OPTIONS
-		self.__noGraph = 0
-		self.__noWeightGraph = 0
-		self.__weightMax = 50000 #maximum size to attempt weighted edge resolution
+		self._noGraph = 0
+		self._noWeightGraph = 0
+		self._weightMax = 50000 #maximum size to attempt weighted edge resolution
 
 				#Parse through arguments and set params
 		for opt, arg_raw in options:
@@ -394,15 +394,15 @@ class parseArgs():
 				main = subopts[0]
 				print("Warning: Using \"hacker only\" option <%s>. Be careful."%main)
 				if main == "noGraph":
-					self.__noGraph = 1
+					self._noGraph = 1
 				elif main == "win_width":
 					assert len(subopts) == 2, "Warning: HACKER option <win_width> must have two arguments separated by \"=\""
 					win_width = int(subopts[1])
 				elif main == "noWeightGraph":
-					self.__noWeightGraph = 1
+					self._noWeightGraph = 1
 				elif main == "weightMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
-					self.__weightMax = int(subopts[1])
+					self._weightMax = int(subopts[1])
 				else:
 					assert False, "Unhandled option %r"%main
 			else:
