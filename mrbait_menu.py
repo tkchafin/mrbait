@@ -131,6 +131,7 @@ Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
 
 	print("""
 Output options:
+
 	-X,--expand	: In output bait table, expand all ambiguities
 			  --Gaps are expanded as [ACGT] and absent
 			  --\"N\"s are expanded as [ACGT]
@@ -139,6 +140,7 @@ Output options:
 	#SPLIT option not figured out yet
 	print("""
 General options:
+
 	-W,--tile_all	: Tile baits across all target regions
 			  --Skips target filtering and selection, and just tiles all
 	-K, --no_mask	: Ignore all masking information [boolean]
@@ -167,7 +169,7 @@ class parseArgs():
 			"select_r=","filter_r=",
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
-			"vthreads=","hacker"])
+			"vthreads=","hacker="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -236,12 +238,10 @@ class parseArgs():
 		#HACKER ONLY OPTIONS
 		self.__noGraph = 0
 		self.__noWeightGraph = 0
-		self.__graphApproximate = 0
-		self.__graphMax= 10000
+		self.__weightMax = 50000 #maximum size to attempt weighted edge resolution
 
 				#Parse through arguments and set params
 		for opt, arg_raw in options:
-			print(opt)
 			arg = arg_raw.replace(" ","")
 			arg = arg.strip()
 			if opt in ('-M', '--maf'):
@@ -296,12 +296,12 @@ class parseArgs():
 				self.tile_min = int(arg)
 				self.tiling = 1
 			elif opt in ('-d', '--flank_dist'):
-				print("opt is d")
 				self.flank_dist = int(arg)
 				assert isinstance(self.flank_dist, int), "<--flank_dist> must be an integer"
 				assert self.flank_dist >= 0, "<--flank_dist> must be an integer greater than zero!"
 			elif opt in ('-S', '--select_r'):
 				temp = arg.split('=')
+				assert len(temp) == 1, "Invalid specification for <--select_r>: %s"%arg
 				self.select_r = (temp[0]).lower()
 				chars = (['snp','bad','cons','rand'])
 				if self.select_r not in chars:
@@ -389,20 +389,20 @@ class parseArgs():
 
 			#HACKER ONLY OPTIONS
 			elif opt in ('--hacker'):
-				subopts = re.split('=|,',arg)
+				print(opt, arg)
+				subopts = re.split('=|, ',arg)
 				main = subopts[0]
+				print("Warning: Using \"hacker only\" option <%s>. Be careful."%main)
 				if main == "noGraph":
 					self.__noGraph = 1
 				elif main == "win_width":
 					assert len(subopts) == 2, "Warning: HACKER option <win_width> must have two arguments separated by \"=\""
 					win_width = int(subopts[1])
-				elif main == "graphApproximate":
-					self.__graphApproximate = 1
 				elif main == "noWeightGraph":
 					self.__noWeightGraph = 1
-				elif main == "graphMax":
+				elif main == "weightMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
-					self.__graphMax = int(subopts[1])
+					self.__weightMax = int(subopts[1])
 				else:
 					assert False, "Unhandled option %r"%main
 			else:
