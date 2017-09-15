@@ -1024,7 +1024,7 @@ def removeRegionsByList(conn, blacklist):
 	if len(blacklist) <= 0:
 		return(0)
 	df = pd.DataFrame({"regid" : blacklist})
-	print(df)
+	#print(df)
 
 	df.to_sql('tt', conn, if_exists='replace')
 
@@ -1217,12 +1217,38 @@ def flankDistParser(conn, dist):
 def getRegionWeights(conn):
 	sql = """
 	SELECT
-		regid
+		regid,
+		vars,
 		SUM(bad + gap) AS sum_bad
 	FROM
 		regions
 	"""
 	return(pd.read_sql_query(sql ,conn))
+
+#Function to return a pandas DF of regions, vars, and 'bad bases' of ONLY regids in a given list
+def getRegionWeightsByList(conn, fetch):
+	if len(fetch) <= 0:
+		return(None)
+	df = pd.DataFrame({"regid" : blacklist})
+	df.to_sql('ttt', conn, if_exists='replace')
+
+	sql = """
+	SELECT
+		regid,
+		vars,
+		SUM(bad + gap) AS sum_bad
+	FROM
+		regions
+	WHERE
+		EXISTS(SELECT * FROM ttt WHERE ttt.regid=regions.regid)
+	"""
+	new_df = pd.read_sql_query(sql ,conn)
+
+	cur.execute("DROP TABLE IF EXISTS ttt")
+	conn.commit()
+
+	return(new_df)
+
 
 
 #Function to update REGIONS table based on existing Gap attribute
