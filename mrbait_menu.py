@@ -239,6 +239,7 @@ class parseArgs():
 		self._noGraph = 0
 		self._noWeightGraph = 0
 		self._weightMax = 50000 #maximum size to attempt weighted edge resolution
+		self._weightByMin = 0
 
 				#Parse through arguments and set params
 		for opt, arg_raw in options:
@@ -400,6 +401,8 @@ class parseArgs():
 					win_width = int(subopts[1])
 				elif main == "noWeightGraph":
 					self._noWeightGraph = 1
+				elif main == "weightByMin":
+					self._weightByMin = 1
 				elif main == "weightMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
 					self._weightMax = int(subopts[1])
