@@ -79,8 +79,7 @@ def weightedNaiveIndependentSet(G, weights):
 					C.remove_node(left) #otherwise default to remove left
 	return(C.nodes()) #returns list of nodes
 
-
-
+#Function to plot a complete graph, coloring a list of 'chosen' or 'excluded' (subset) nodes
 def plotColorNodes(G, listnodes):
 	color_map = []
 	for node in G:
