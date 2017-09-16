@@ -2,6 +2,7 @@
 
 import sys
 import os
+import pandas as pd
 
 #Function calculates union length of overlapping fixed length lines
 def calculateUnionLengthFixed(n, l, o):
@@ -38,3 +39,12 @@ def getScriptPath():
 #Function to get call path
 def getWorkingDir():
     return os.getcwd()
+
+
+#Function to make dict from a 2-column pandas DF (col1=key, col2=val)
+def dictFromDF(df):
+	d = {}
+	for row in df.iterrows():
+		key = int(row[1][0])
+		d[key] = int(row[1][1])
+	return(d)
