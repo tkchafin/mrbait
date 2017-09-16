@@ -176,10 +176,10 @@ def filterTargetRegions(conn, params):
 		assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
 		assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
 		blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
-		if (len(blacklist_edges) > 1):
-			revised_blacklist = dupEdgeResolution(params, blacklist_edges)
-			#if len(revised_blaklist > 1):
-				#m.removeRegionsByList(revised_blacklist)
+		if (len(blacklist_edges) > 0):
+			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+			if len(revised_blacklist) > 0:
+				m.removeRegionsByList(conn, revised_blacklist)
 
 	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
 	if rand_num:
@@ -305,17 +305,17 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 		sys.exit(err.args)
 	except:
 		sys.exit(sys.exc_info()[0])
-	os.remove(sor)
+	#os.remove(sor)
 
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Returns a list of edges
 	ret = vsearch.parsePairwiseAlign(pw)
-	os.remove(pw)
+	#os.remove(pw)
 	return(ret)
 
 
 #Function to perform conflict resolution based on VSEARCH results
-def dupEdgeResolution(params, blacklist):
+def dupEdgeResolution(conn, params, blacklist_edges):
 	#OUTLINE:
 	#--Get blacklist
 	#--Query table to get weights (number of vars)
@@ -331,22 +331,27 @@ def dupEdgeResolution(params, blacklist):
 	#			Keep in mind the --graphApproximate and --graphMax, which determine
 	#			which algorithm for finding the maximal independent set we will use.
 
-	num_nodes = len(blacklist)
+	num_nodes = len(blacklist_edges)
 	if (params._noGraph):
-		pass
-		#graph.listFromEdges() #Should return list of nodes from a list of edges
-		#return(blacklist)
+		#If _noGraph: Just delete them all!
+		blacklist_nodes = graph.listFromEdges(blacklist_edges) #Should return list of nodes from a list of edges
+		return(blacklist_nodes)
 	else:
 		revised = []
-		if (params._noWeightGraph) or (num_nodes > params._graphMax):
-			print("Calling edgeResolveAproximate")
-			revised = graph.edgeResolveApproximate(blacklist) #returns list
-			print(revised)
+		#If _noWeightGraph, or too many nodes, just run the approximate algorithm
+		if (params._noWeightGraph) or (num_nodes > params._weightMax):
+			revised = graph.edgeResolveApproximate(blacklist_edges) #returns list
+			#print(revised)
 		else:
-			weights = m.getRegionWeightsByList(conn, blacklist)
-			#revised = graph.edgeResolveWeighted(blacklist, weights) #returns list
-		print("done")
-		sys.exit()
+			blacklist_nodes = graph.listFromEdges(blacklist_edges)
+			weights_df = m.getRegionWeightsByList_VAR(conn, blacklist_nodes)
+			# print("weights:")
+			# print(weights_df)
+			if params._weightByMin:
+				weights_df = m.getRegionWeightsByList_BAD(conn, blacklist_nodes)
+			#convert pandas df of weights to a dict
+			weights = utils.dictFromDF(weights_df)
+			revised = graph.edgeResolveWeighted(blacklist_edges, weights) #returns list
 		return(revised)
 	#os.remove(pw)
 
