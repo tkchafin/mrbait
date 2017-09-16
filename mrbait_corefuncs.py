@@ -14,6 +14,7 @@ import alignment_tools as a
 import sequence_tools as s
 import misc_utils as utils
 import seq_graph as graph
+import aln_file_tools
 import pandas as pd
 import numpy as np
 import vsearch
@@ -43,7 +44,7 @@ def loadMAF(conn, params):
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
 	#Parse LOCI file and create database
-	for aln in read_loci(params.loci):
+	for aln in aln_file_tools.read_loci(params.loci):
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
@@ -59,31 +60,6 @@ def loadLOCI(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
 
-#Generator function by ZDZ to parse a .loci file
-def read_loci(infile):
-	# make emptyp dictionary
-	loci = Bio.Align.MultipleSeqAlignment([])
-
-	# read file from command line
-	try:
-		f = open(infile)
-	except IOError as err:
-		print("I/O error({0}): {1}".format(err.errno, err.strerror))
-	except:
-		print("Unexpected error:", sys.exec_info()[0])
-
-	with f as file_object:
-
-		for line in file_object:
-
-			if line[0] == ">":
-				identifier = line.split()[0]
-				sequence = line.split()[1]
-				loci.add_sequence(identifier, sequence)
-
-			else:
-				yield(loci)
-				loci = Bio.Align.MultipleSeqAlignment([])
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):
