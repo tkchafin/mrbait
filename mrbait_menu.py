@@ -132,6 +132,10 @@ Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
 BLAST Paramters (use when --select_b or --select_r = \"blast\"):
 
 	--e_value	: Minimum e-value cutoff for reporting BLAST hits
+	--gapopen	: Gap opening penalty for blastn 
+	--gapextend	: Gap extension penatly for blastn
+	--word_size	: Word size for blastn
+	--megablast	: Use megablast rather than blastn
 	--bthreads	: Number of threads for BLAST to run in parallel [default=4]""")
 
 
