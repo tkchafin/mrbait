@@ -1019,7 +1019,6 @@ def regionFilterGC(conn, minprop, maxprop):
 def removeRegionsByList(conn, blacklist):
 
 	cur = conn.cursor()
-
 	#If nothing in list, no need to do any work:
 	if len(blacklist) <= 0:
 		return(0)
@@ -1219,7 +1218,7 @@ def getRegionWeights(conn):
 	SELECT
 		regid,
 		vars,
-		SUM(bad + gap) AS sum_bad
+		(bad + gap) AS sum_bad
 	FROM
 		regions
 	"""
@@ -1227,29 +1226,78 @@ def getRegionWeights(conn):
 
 #Function to return a pandas DF of regions, vars, and 'bad bases' of ONLY regids in a given list
 def getRegionWeightsByList(conn, fetch):
+	cur = conn.cursor()
 	if len(fetch) <= 0:
 		return(None)
-	df = pd.DataFrame({"regid" : blacklist})
+	df = pd.DataFrame({"regid" : fetch})
 	df.to_sql('ttt', conn, if_exists='replace')
 
 	sql = """
 	SELECT
-		regid,
+		regions.regid,
 		vars,
-		SUM(bad + gap) AS sum_bad
+		(bad + gap) as sum_bad
 	FROM
 		regions
 	WHERE
-		EXISTS(SELECT * FROM ttt WHERE ttt.regid=regions.regid)
+		regions.regid IN (SELECT regid FROM ttt)
+	"""
+	new_df = pd.read_sql_query(sql ,conn)
+
+	cur.execute("DROP TABLE IF EXISTS ttt")
+	conn.commit()
+	return(new_df)
+
+#Function to return a pandas DF of regions, vars, and 'bad bases' of ONLY regids in a given list
+def getRegionWeightsByList_BAD(conn, fetch):
+	cur = conn.cursor()
+	if len(fetch) <= 0:
+		return(None)
+	df = pd.DataFrame({"regid" : fetch})
+	df.to_sql('ttt', conn, if_exists='replace')
+
+	sql = """
+	SELECT
+		regions.regid,
+		(bad + gap) AS weight
+	FROM
+		regions
+	WHERE
+		regions.regid IN (SELECT regid FROM ttt)
 	"""
 	new_df = pd.read_sql_query(sql ,conn)
 
 	cur.execute("DROP TABLE IF EXISTS ttt")
 	conn.commit()
 
+	#adjust weights to be: max(weight)-weight:
+	max_weight = new_df["weight"].max()
+	new_df["weight"] = max_weight - new_df["weight"]
+	
 	return(new_df)
 
+#Function to return a pandas DF of regions, vars, and 'bad bases' of ONLY regids in a given list
+def getRegionWeightsByList_VAR(conn, fetch):
+	cur = conn.cursor()
+	if len(fetch) <= 0:
+		return(None)
+	df = pd.DataFrame({"regid" : fetch})
+	df.to_sql('ttt', conn, if_exists='replace')
 
+	sql = """
+	SELECT
+		regions.regid,
+		vars AS weight
+	FROM
+		regions
+	WHERE
+		regions.regid IN (SELECT regid FROM ttt)
+	"""
+	new_df = pd.read_sql_query(sql ,conn)
+
+	cur.execute("DROP TABLE IF EXISTS ttt")
+	conn.commit()
+	return(new_df)
 
 #Function to update REGIONS table based on existing Gap attribute
 def simpleFilterTargets_gap(conn, thresh):
