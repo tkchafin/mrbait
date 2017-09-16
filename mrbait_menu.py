@@ -131,8 +131,10 @@ Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
 	print("""
 BLAST Paramters (use when --select_b or --select_r = \"blast\"):
 
+	--blastdb	: Path and prefix to existing Blast database to use
+	--fastadb	: Path and prefix to FASTA formatted sequences to make blast db
 	--e_value	: Minimum e-value cutoff for reporting BLAST hits
-	--gapopen	: Gap opening penalty for blastn 
+	--gapopen	: Gap opening penalty for blastn
 	--gapextend	: Gap extension penatly for blastn
 	--word_size	: Word size for blastn
 	--megablast	: Use megablast rather than blastn
@@ -323,7 +325,7 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('snp','mask','gc','len', "aln"):
+				if subopts[0] in ('snp','mask','gc','len', "aln"): #TODO: Add blast options
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask','len'):
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]

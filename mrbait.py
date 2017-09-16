@@ -24,13 +24,14 @@ import mrbait_corefuncs as core
 #TODO: Way to filter targets by masking in flanking region???
 #TODO: Filter targets by distance to GFF element
 #TODO: Option to constrain targets to ONLY in GFF elements
-#TODO: Parallelize loadLOCI and loadMAF
+#TODO: Parallelize loadLOCI and loadMAF, implement ZDZ's chunking functions
 #TODO: Parallelize TR discovery somehow??
 #TODO: FIlter by flanking masked, and flanking GFF elements
 #TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
-#TODO: Can use variant information to weight nodes for keeping (networkx)
-#TODO: Convert --select_r based on flanking info to new scheme!!
+#TODO: Option to print LOCI, TARGETS to fasta files?
+#TODO: Keep vsearch and blast outfiles, remain to desired paths.
+#TODO: Incorporate blast options in mrbait_menu 
 
 #Parse Command line arguments
 params = parseArgs()

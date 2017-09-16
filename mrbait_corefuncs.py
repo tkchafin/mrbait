@@ -107,6 +107,7 @@ def filterTargetRegions(conn, params):
 	rand = 0 #false
 	rand_num = 0
 	aln = 0
+	blast = 0
 	minid = None
 	mincov = None
 
@@ -140,6 +141,12 @@ def filterTargetRegions(conn, params):
 			minid = option.o2
 			mincov= option.o3
 			print("Align option not fully impleneted yet")
+		elif option.o1 == "blast_x":
+			pass
+		elif option.o1 == "blast_i":
+			pass
+		elif option.o1 == "blast_a":
+			pass 
 		else:
 			assert False, "Unhandled option %r"%option
 
