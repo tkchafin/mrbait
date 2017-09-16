@@ -54,87 +54,93 @@ General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
 	-w, --win_shift	: Sliding window shift distance [1]
-			  --Increasing will speed up program but could lower accuracy
-			  --Cannot be longer than bait length <-b,--bait>
+		  	--Increasing will speed up program but could lower accuracy
+		  	--Cannot be longer than bait length <-b,--bait>
 	-R,--mult_reg	: Allow multiple target regions per locus [false]
-			  --See \"Target Region options\" below
+			--See \"Target Region options\" below
 	-m,--min_mult	: Minimum alignment length to allow multiple regions
-			  --By default is set to the value of <-l>. Only applies when <-R>
-			  --When -R and -T are off, only one bait is selected per locus
+			--By default is set to the value of <-l>. Only applies when <-R>
+			--When -R and -T are off, only one bait is selected per locus
 	-v,--var_max	: Maximum number of SNP columns to be included in a bait [0]
-			  --These will be coded as the appropriate IUPAC ambiguity code
-			  --Can be expanded in final output using the <--expand> flag
+			--These will be coded as the appropriate IUPAC ambiguity code
+			--Can be expanded in final output using the <--expand> flag
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
-			  --These will be inserted as \"N\" unless <-N> is used
+			--These will be inserted as \"N\" unless <-N> is used
 	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]
 	-E,--gff_type	: Constrain bait design to within element type of GFF
-			  --COMING SOON, NOT WORKING YET""")
+			--COMING SOON, NOT WORKING YET""")
 
 	print("""
 Target Region options:
 
 	-D,--dist_r	: Minimum distance between target regions [100]
-			  --Conflicts will be resolved according to --select_r
+			--Conflicts will be resolved according to --select_r
 	-d,--flank_dist	: Distance in flanking regions selection and filtering targets
-			  --See relevant options in <--select_r> and <--filter_r>
-			  --By default will be set to [500]
+			--See relevant options in <--select_r> and <--filter_r>
+			--By default will be set to [500]
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
-			  --Options
-				snp          : Most SNPs w/in \"d\" bases
-				bad          : Least Ns and gaps w/n \"d\" bases
-				cons         : Most conserved w/in \"d\" bases
-				rand         : Randomly choose a bait region [default]
-				Ex: -S s=100 to choose region with most SNPs w/in 100 bases
+			--Options
+			snp          : Most SNPs w/in \"d\" bases
+			bad          : Least Ns and gaps w/n \"d\" bases
+			cons         : Most conserved w/in \"d\" bases
+			rand         : Randomly choose a bait region [default]
+			Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
-			  --Warning: May mask selections made using <-S> or <-f>
-			  --Options
-				len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
-				gap=[x]      : Maximum of \"x\" indels in target region
-				bad=[x]      : Maximum of \"x\" Ns in target region
-				min=[x]      : Minimum of \"x\" SNPs within \"d\" bases
-				max=[x]      : Maximum of \"x\" SNPs within \"d\" bases
-				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
-				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-				rand=[x]     : Randomly retain \"x\" target regions w/ baits
-				aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
-				blast=[i,q]  : ADD LATER!!! Keep targets hitting BLAST db
-				blast=[i,q]  : ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
-				gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
-				Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+			--Options
+			len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
+			gap=[x]      : Maximum of \"x\" indels in target region
+			bad=[x]      : Maximum of \"x\" Ns in target region
+			min=[x]      : Minimum of \"x\" SNPs within \"d\" bases
+			max=[x]      : Maximum of \"x\" SNPs within \"d\" bases
+			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+			rand=[x]     : Randomly retain \"x\" target regions w/ baits
+			aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
+			gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
+			Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
 
 	print("""
 Bait Design / Selection options:
 
 	-s,--select_b	: Which criterion to select a bait for target region
-			  --NOTE: This option is ignored when <-T> or <-W>
-			  --Options
-			  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
-			  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
-				flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
-				Ex: -s tile=40 to tile baits with an overlap of 40 bases
+			--NOTE: This option is ignored when <-W>
+			--Options
+		  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
+		  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
+			flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
+			Ex: -s tile=40 to tile baits with an overlap of 40 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
-			  --Options
- 				mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
- 				gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-				aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
-				blast=[i,q]  : ADD LATER!!! Keep targets hitting BLAST db
-				blast=[i,q]  : ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
-				rand=[x]     : Randomly retain \"x\" baits""")
+			--Options
+			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
+			aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+			blast_i=[i,q]: ADD LATER!!! Keep targets hitting BLAST db
+			blast_x=[i,q]: ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
+			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
 Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
-			  --MrBait will try to detect OS and appropriate exectable to use
+			--MrBait will try to detect OS and appropriate exectable to use
 	--vthreads	: Number of threads for VSEARCH to run in parallel [default=4]""")
+
+	print("""
+BLAST Paramters (use when --select_b or --select_r = \"blast\"):
+
+	--e_value	: Minimum e-value cutoff for reporting BLAST hits
+	--bthreads	: Number of threads for BLAST to run in parallel [default=4]""")
 
 
 	print("""
 Output options:
 
 	-X,--expand	: In output bait table, expand all ambiguities
-			  --Gaps are expanded as [ACGT] and absent
-			  --\"N\"s are expanded as [ACGT]
+			--Gaps are expanded as [ACGT] and absent
+			--\"N\"s are expanded as [ACGT]
 	-o,--out	: Output directory and prefix [e.g. ./baits/run1]""")
 
 	#SPLIT option not figured out yet
@@ -142,10 +148,10 @@ Output options:
 General options:
 
 	-W,--tile_all	: Tile baits across all target regions
-			  --Skips target filtering and selection, and just tiles all
+			--Skips target filtering and selection, and just tiles all
 	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
-			  --Errors and assertions are not affected
+			--Errors and assertions are not affected
 	-h,--help	: Displays this help menu
 	""")
 	print()
