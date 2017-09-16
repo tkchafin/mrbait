@@ -129,7 +129,7 @@ Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
 	--vthreads	: Number of threads for VSEARCH to run in parallel [default=4]""")
 
 	print("""
-BLAST Paramters (use when --select_b or --select_r = \"blast\"):
+BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 
 	--blastdb	: Path and prefix to existing Blast database to use
 	--fastadb	: Path and prefix to FASTA formatted sequences to make blast db
