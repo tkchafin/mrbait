@@ -136,7 +136,7 @@ def filterTargetRegions(conn, params):
 			maxlen= option.o3
 			assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
 			m.lengthFilterTR(conn, maxlen, minlen)
-		elif option.o1 == "aln":
+		elif option.o1 == "pw":
 			aln = 1
 			minid = option.o2
 			mincov= option.o3
@@ -146,7 +146,7 @@ def filterTargetRegions(conn, params):
 		elif option.o1 == "blast_i":
 			pass
 		elif option.o1 == "blast_a":
-			pass 
+			pass
 		else:
 			assert False, "Unhandled option %r"%option
 

@@ -95,7 +95,7 @@ Target Region options:
 			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
 			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 			rand=[x]     : Randomly retain \"x\" target regions w/ baits
-			aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
@@ -116,29 +116,32 @@ Bait Design / Selection options:
 			--Options
 			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
 			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
-			aln=[i,q]    : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
-			blast_i=[i,q]: ADD LATER!!! Keep targets hitting BLAST db
-			blast_x=[i,q]: ADD LATER!!! Remove targets hitting BLAST db (e.g. contamination)
+			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
 			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
-Pairwise-Alignment Deduplication (use when --select_b or --select_r = \"aln\"):
+VSEARCH Parameters (use when --select_b or --select_r = \"aln\"):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
 			--MrBait will try to detect OS and appropriate exectable to use
-	--vthreads	: Number of threads for VSEARCH to run in parallel [default=4]""")
+	--vthreads	: Number of threads for VSEARCH if different than <--threads>""")
 
 	print("""
 BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 
 	--blastdb	: Path and prefix to existing Blast database to use
 	--fastadb	: Path and prefix to FASTA formatted sequences to make blast db
-	--e_value	: Minimum e-value cutoff for reporting BLAST hits
-	--gapopen	: Gap opening penalty for blastn
-	--gapextend	: Gap extension penatly for blastn
+	--e_value	: Minimum e-value cutoff for reporting BLAST hits [0.000000001]
+	--gapopen	: Gap opening penalty for blastn [5]
+	--gapextend	: Gap extension penatly for blastn [2]
 	--word_size	: Word size for blastn
 	--megablast	: Use megablast rather than blastn
-	--bthreads	: Number of threads for BLAST to run in parallel [default=4]""")
+	--blastn	: Path to blastn binary if different than default
+	--makedb	: Path to makeblastdb binary if different than default
+			--MrBait will try to detect OS and appropriate exectable to use""")
 
 
 	print("""
@@ -158,6 +161,7 @@ General options:
 	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
 			--Errors and assertions are not affected
+	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
 	-h,--help	: Displays this help menu
 	""")
 	print()
@@ -174,14 +178,15 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
-			"select_r=","filter_r=",
+			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb="
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
-			"vthreads=","hacker="])
+			"vthreads=","hacker=", "e_value=", "gapopen=", "gapextend=",
+			"word_size=", "megablast", "blastn=", "makedb="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -225,6 +230,10 @@ class parseArgs():
 		#VSEARCH options - deduplication
 		self.vsearch = None
 		self.vthreads = 4
+
+		#BLAST options - contaminant removal and filtering by specificity
+
+
 
 		#Bait selection options
 		self.overlap=None
@@ -325,12 +334,12 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('snp','mask','gc','len', "aln"): #TODO: Add blast options
+				if subopts[0] in ('snp','mask','gc','len', "pw"): #TODO: Add blast options
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask','len'):
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
-					elif subopts[0] == "aln":
+					elif subopts[0] == "pw":
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 					elif subopts[0] == "snp":
 						minS = int(subopts[1])
