@@ -60,7 +60,7 @@ def makeblastdb(binary, reference, outfile):
 
 	#Get return code from process
 	if proc.returncode:
-		raise CalledProcessError ("BLASTN exited with non-zero status")
+		raise CalledProcessError ("MAKEBLASTDB exited with non-zero status")
 
 
 #TODO: Set "hits" to 2 if looking for seqs with ambiguous mappings
@@ -68,4 +68,4 @@ try:
 	makeblastdb("./bin/ncbi-makeblastdb-2.6.0-macos", "ref.fasta", "/Users/tkchafin/test/test")
 except:
 	sys.exit(sys.exc_info()[0])
-blastn("./bin/ncbi-blastn-2.6.0-macos","baits.fasta","/Users/tkchafin/test/test","blastn", 5, 2, 0.00001, 4, 1, "test.out")
+blastn("./bin/ncbi-blastn-2.6.0-macos","baits.fasta","/Users/tkchafin/test/test","blastn", 5, 2, 0.000001, 4, 1, "test.out")
