@@ -100,7 +100,8 @@ Target Region options:
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
 			gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
-			Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases""")
+			Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases
+			NOTE: Values for gc, mask, pw, and blast* methods are given as proportions (e.g. 90% = 0.9)""")
 
 	print("""
 Bait Design / Selection options:
@@ -127,18 +128,20 @@ VSEARCH Parameters (use when --select_b or --select_r = \"aln\"):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
 			--MrBait will try to detect OS and appropriate exectable to use
-	--vthreads	: Number of threads for VSEARCH if different than <--threads>""")
+	--vthreads	: Number of threads for VSEARCH
+			--Will set to the value of <--threads> if not defined=""")
 
 	print("""
 BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 
 	--blastdb	: Path and prefix to existing Blast database to use
 	--fastadb	: Path and prefix to FASTA formatted sequences to make blast db
-	--e_value	: Minimum e-value cutoff for reporting BLAST hits [0.000000001]
+	--e_value	: Minimum e-value cutoff for reporting BLAST hits [0.000001]
 	--gapopen	: Gap opening penalty for blastn [5]
 	--gapextend	: Gap extension penatly for blastn [2]
 	--word_size	: Word size for blastn
 	--megablast	: Use megablast rather than blastn
+			--Default word size will be set to 28 if not provided
 	--blastn	: Path to blastn binary if different than default
 	--makedb	: Path to makeblastdb binary if different than default
 			--MrBait will try to detect OS and appropriate exectable to use""")
@@ -186,7 +189,8 @@ class parseArgs():
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
 			"vthreads=","hacker=", "e_value=", "gapopen=", "gapextend=",
-			"word_size=", "megablast", "blastn=", "makedb="])
+			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
+			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "--wordsize="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -232,8 +236,15 @@ class parseArgs():
 		self.vthreads = 4
 
 		#BLAST options - contaminant removal and filtering by specificity
-
-
+		self.blastdb=None
+		self.fastadb=None
+		self.evalue = 0.000001
+		self.gapopen = 5
+		self.gapextend=2
+		self.word_size = None
+		self.megablast = 0
+		self.blastn = None
+		self.makedb = None
 
 		#Bait selection options
 		self.overlap=None
@@ -252,6 +263,7 @@ class parseArgs():
 		self.expand = 0
 		self.out = None
 		self.workdir = None
+		self.threads = 1
 
 		self.ploidy=2
 		self.db="./mrbait.sqlite"
@@ -261,16 +273,24 @@ class parseArgs():
 		self._noWeightGraph = 0
 		self._weightMax = 50000 #maximum size to attempt weighted edge resolution
 		self._weightByMin = 0
+		self._os = None
 
-				#Parse through arguments and set params
+
+
+		#First pass to see if help menu was called
+		for o, a in options:
+			if o in ("-h", "-help", "--help"):
+				display_help("Exiting because help menu was called.")
+				sys.exit(0)
+
+		#Second pass to set all args.
 		for opt, arg_raw in options:
 			arg = arg_raw.replace(" ","")
 			arg = arg.strip()
 			if opt in ('-M', '--maf'):
 				self.alignment = arg
 			elif opt in ('-h', '--help'):
-				call_help = 1
-
+				pass
 			#Input params
 			elif opt in ('-e', '--gff'):
 				self.gff = arg
@@ -334,12 +354,17 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('snp','mask','gc','len', "pw"): #TODO: Add blast options
+				if subopts[0] in ('snp','mask','gc','len', "pw", "blast_n", "blast_x", "blast_a"): #TODO: Add blast options
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					if subopts[0] in ('gc', 'mask','len'):
-						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
+					if subopts[0] in ('gc', 'mask'):
+						assert 0.0 <= float(subopts[1]) < float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
-					elif subopts[0] == "pw":
+					elif subopts[0] == "len":
+						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
+						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
+					elif subopts[0] in ("pw", "blast_x", "blast_i", "blast_a"):
+						assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
+						assert 0.0 <= float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 					elif subopts[0] == "snp":
 						minS = int(subopts[1])
@@ -398,10 +423,30 @@ class parseArgs():
 				self.no_mask = 1
 
 			#vsearch options
-			elif opt in ("--vsearch"):
+			elif opt == ("--vsearch"):
 				self.vsearch = str(arg)
-			elif opt in ("--vthreads"):
+			elif opt == ("--vthreads"):
 				self.vthreads = int(arg)
+
+			#BLAST options
+			elif opt in ("--blastdb", "--blast_db"):
+				self.blastdb = arg
+			elif opt in ("--fastadb", "--fasta_db"):
+				self.fastadb = arg
+			elif opt in ("--e_value", "--evalue"):
+				self.evalue = float(arg)
+			elif opt in ("--gapopen", "--gap_open"):
+				self.gapopen = int(arg)
+			elif opt in ("--gapextend", "--gap_extend"):
+				self.gapextend = int(arg)
+			elif opt in ("--word_size", "--word", "--wordsize"):
+				self.word_size = int(arg)
+			elif opt in ("--megablast", "--mega"):
+				self.megablast = 1
+			elif opt == "--blastn":
+				self.blastn = arg
+			elif opt == "--makedb":
+				self.makedb = arg
 
 			#output options
 			elif opt in ('-X', '--expand'):
@@ -427,6 +472,15 @@ class parseArgs():
 				elif main == "weightMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
 					self._weightMax = int(subopts[1])
+				elif main == "os":
+					assert len(subopts) == 2, "Warning: HACKER option <os> must have two arguments separated by \"=\""
+					os_in = subopts[1]
+					if os_in.lower() in ("linux", "ubuntu", "unknown"):
+						self._os = "linux"
+					elif os_in.lower() in ("mac", "apple", "macos", "darwin", "unix"):
+						self_os = "darwin"
+					else:
+						assert False, "Unrecognized option %s for <--hacker os=>"%os_in
 				else:
 					assert False, "Unhandled option %r"%main
 			else:
@@ -478,7 +532,7 @@ class parseArgs():
 				self.out = "mrbait"
 			if self.workdir == "":
 				self.workdir = os.getcwd()
-		print("Path is: ", self.workdir)
+		print("Working directory: ", self.workdir)
 		print("Prefix is: ", self.out)
 
 
@@ -495,7 +549,7 @@ class parseArgs():
 		#If vsearch path not given, try to figure it out
 		if self.vsearch is None:
 			os_platform = utils.getOS()
-			print("Found OS platform:", os_platform)
+			#print("Found OS platform:", os_platform)
 			if os_platform == "linux" or os_platform == "unknown":
 				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX VSEARCH executable.")
 				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-linux"
@@ -503,11 +557,33 @@ class parseArgs():
 				print("Automatically detected MACOS platform: Using MACOS VSEARCH executable.")
 				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-macos"
 
+		#BLAST defaults
+		if self.word_size is None:
+			if self.megablast:
+				self.word_size = 28
+			else:
+				self.word_size = 11
+
+		if self.blastn is None:
+			os_platform = utils.getOS()
+			#print("Found OS platform:", os_platform)
+			if os_platform == "linux" or os_platform == "unknown":
+				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
+				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
+			elif os_platform == "darwin": #mac os
+				print("Automatically detected MACOS platform: Using MACOS BLASTN executable.")
+				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
+
+		if self.makedb is None:
+			os_platform = utils.getOS()
+			#print("Found OS platform:", os_platform)
+			if os_platform.lower() in ("linux", "ubuntu", "unknown", None):
+				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
+				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
+			elif os_platform.lower() in ("darwin", "mac", "macos", "unix", "apple"): #mac os
+				print("Automatically detected MACOS platform: Using MACOS MAKEBLASTDB executable.")
+				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
+
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
 			self.overlap = self.blen // 2
-
-		#Call help menu if prompted
-		if call_help is 1:
-			display_help("Exiting because help menu was called.")
-			sys.exit(0)
