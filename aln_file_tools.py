@@ -6,7 +6,22 @@ import Bio
 from Bio import AlignIO
 
 """Functions for parsing and manipulating sequence alignment files
-Functions by Zach Zbinden"""
+Most functions by Zach Zbinden"""
+
+#Write FASTA from pandas df where col1 is index, col2 is sequence
+#seqs must be a pandas df
+def writeFasta(seqs, fas):
+	file_object = open(fas, "w")
+	#Write seqs to FASTA first
+	#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
+	for a in seqs.itertuples():
+		name = ">id_" + str(a[1]) + "\n"
+		seq = a[2] + "\n"
+		file_object.write(name)
+		file_object.write(seq)
+	file_object.close()
+
+
 
 #This is a GENERATOR function to read through a .loci file
 #.loci is the RAD alignment output from the promgram pyRAD

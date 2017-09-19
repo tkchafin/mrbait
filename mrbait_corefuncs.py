@@ -17,6 +17,7 @@ import seq_graph as graph
 import aln_file_tools
 import pandas as pd
 import numpy as np
+import blast as b
 import vsearch
 import subprocess
 
@@ -141,12 +142,29 @@ def filterTargetRegions(conn, params):
 			minid = option.o2
 			mincov= option.o3
 			print("Align option not fully impleneted yet")
-		elif option.o1 == "blast_x":
-			pass
-		elif option.o1 == "blast_i":
-			pass
-		elif option.o1 == "blast_a":
-			pass
+		elif option.o1 in ("blast_x", "blast_i", "blast_a"):
+			#if blast database given as fasta, make a blastdb:
+			db_path = None
+			if (params.blastdb):
+				db_path = params.blastdb
+			elif (params.fastadb):
+				db_path = params.workdir + "/blastdb/" + params.out
+				b.makeblastdb(params.makedb, params.fastadb, db_path)
+				params.blastdb = db_path
+			elif(not params.blastdb and not params.fastadb):
+				print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
+				break
+			print("BLASTDB PATH IS: ", db_path)
+			#Get targets, print to fasta
+			seqs = m.getPassedTRs(conn)
+			fas = params.workdir + "/.temp.fasta"
+			aln_file_tools.writeFasta(seqs, fas)
+			outfile = params.workdir + "/" + params.out + ".blast"
+			if option.o1 == "blast_x":
+				remove = b.blastExcludeMatch(params, db_path, fas, outfile)
+			#os.remove(fas)
+			sys.exit()
+			#remove = blast.blastFindMatches(params,)
 		else:
 			assert False, "Unhandled option %r"%option
 
@@ -246,15 +264,7 @@ def checkTargetRegions(conn):
 def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
 	fas = params.workdir + "/.temp.fasta"
-	file_object = open(fas, "w")
-	#Write seqs to FASTA first
-	#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
-	for a in seqs.itertuples():
-		name = ">id_" + str(a[1]) + "\n"
-		seq = a[2] + "\n"
-		file_object.write(name)
-		file_object.write(seq)
-	file_object.close()
+	aln_file_tools.writeFasta(seqs, fas)
 
 	#First sort FASTA by size
 	sor = params.workdir + "/.temp.sort"
@@ -275,7 +285,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	os.remove(fas)
 
 	#Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
-	pw = params.workdir + "/.temp.pw"
+	pw = params.workdir + "/" + params.out + ".pw"
 	try:
 		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw)
 	except KeyboardInterrupt:

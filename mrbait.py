@@ -31,7 +31,8 @@ import mrbait_corefuncs as core
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
 #TODO: Option to print LOCI, TARGETS to fasta files?
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
-#TODO: Incorporate blast options in mrbait_menu 
+#TODO: Incorporate blast options in mrbait_menu
+#TODO: Filter targets and baits by low-complexity (Dusting)
 
 #Parse Command line arguments
 params = parseArgs()

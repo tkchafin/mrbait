@@ -185,7 +185,7 @@ class parseArgs():
 			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
-			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb="
+			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb=",
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
 			"vthreads=","hacker=", "e_value=", "gapopen=", "gapextend=",
@@ -242,7 +242,7 @@ class parseArgs():
 		self.gapopen = 5
 		self.gapextend=2
 		self.word_size = None
-		self.megablast = 0
+		self.blast_method = "blastn"
 		self.blastn = None
 		self.makedb = None
 
@@ -442,7 +442,7 @@ class parseArgs():
 			elif opt in ("--word_size", "--word", "--wordsize"):
 				self.word_size = int(arg)
 			elif opt in ("--megablast", "--mega"):
-				self.megablast = 1
+				self.blast_method = "megablast"
 			elif opt == "--blastn":
 				self.blastn = arg
 			elif opt == "--makedb":
@@ -559,7 +559,7 @@ class parseArgs():
 
 		#BLAST defaults
 		if self.word_size is None:
-			if self.megablast:
+			if self.blast_method == "megablast":
 				self.word_size = 28
 			else:
 				self.word_size = 11
@@ -572,7 +572,7 @@ class parseArgs():
 				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
 			elif os_platform == "darwin": #mac os
 				print("Automatically detected MACOS platform: Using MACOS BLASTN executable.")
-				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
+				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-macos"
 
 		if self.makedb is None:
 			os_platform = utils.getOS()
@@ -582,7 +582,7 @@ class parseArgs():
 				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
 			elif os_platform.lower() in ("darwin", "mac", "macos", "unix", "apple"): #mac os
 				print("Automatically detected MACOS platform: Using MACOS MAKEBLASTDB executable.")
-				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
+				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-macos"
 
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
