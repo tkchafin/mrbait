@@ -39,7 +39,7 @@ Input options:
 	-M,--maf	: Input multiple alignment MAF file
 	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
 	-A,--assembly	: Input whole genome assembly as FASTA [NOT WORKING YET]""")
-print("""
+	print("""
 Assembly input options (for use only with -A <genome.fasta>):
 
 	-V,--vcf	: VCF file containing variant information [NOT WORKING YET]
