@@ -27,8 +27,9 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
+			chrom TEXT,
 			UNIQUE(id))
-	''')
+	''') #chrom only relevant if --assembly
 
 	#Table holding records for each locus
 	cursor.execute('''
@@ -136,10 +137,12 @@ def getVariants(conn):
 	return(pd.read_sql_query("""SELECT * FROM variants """, conn))
 
 #Code to add record to 'loci' table
-def add_locus_record(conn, depth, consensus, passed=1):
-	stuff = [depth, int(len(consensus)), str(consensus), int(passed)]
-	sql = ''' INSERT INTO loci(depth, length, consensus, pass)
-				VALUES(?,?,?,?) '''
+def add_locus_record(conn, depth, consensus, passed, name):
+	if name == None:
+		name = "NA"
+	stuff = [depth, int(len(consensus)), str(consensus), int(passed), str(name)]
+	sql = ''' INSERT INTO loci(depth, length, consensus, pass, chrom)
+				VALUES(?,?,?,?,?) '''
 	cur = conn.cursor()
 	cur.execute(sql, stuff)
 	conn.commit()
@@ -1273,7 +1276,7 @@ def getRegionWeightsByList_BAD(conn, fetch):
 	#adjust weights to be: max(weight)-weight:
 	max_weight = new_df["weight"].max()
 	new_df["weight"] = max_weight - new_df["weight"]
-	
+
 	return(new_df)
 
 #Function to return a pandas DF of regions, vars, and 'bad bases' of ONLY regids in a given list

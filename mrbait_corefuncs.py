@@ -27,6 +27,7 @@ import subprocess
 def loadMAF(conn, params):
 	#Parse MAF file and create database
 	for aln in AlignIO.parse(params.alignment, "maf"):
+		name = aln[0].name #Only gets name of top seq in alignment
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
@@ -34,7 +35,7 @@ def loadMAF(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, name)
 
 		print("Loading Locus #:",locid)
 
@@ -53,7 +54,7 @@ def loadLOCI(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 1)
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NA")
 
 		print("Loading Locus #:",locid)
 
