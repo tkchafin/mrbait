@@ -37,10 +37,13 @@ def display_help(message=None):
 Input options:
 
 	-M,--maf	: Input multiple alignment MAF file
-	-e,--gff	: GFF file containing annotation information [NOT WORKING YET]
 	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
 	-A,--assembly	: Input whole genome assembly as FASTA [NOT WORKING YET]""")
+print("""
+Assembly input options (for use only with -A <genome.fasta>):
 
+	-V,--vcf	: VCF file containing variant information [NOT WORKING YET]
+	-G,--gff	: GFF file containing annotation information [NOT WORKING YET]""")
 	print("""
 Locus filtering/ consensus options:
 
@@ -181,8 +184,8 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:e:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
-			["maf=","gff=","loci=","assembly=",'help',"cov=","len=","thresh=",
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:E:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
+			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
 			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb=",
@@ -201,6 +204,7 @@ class parseArgs():
 		#Input params
 		self.alignment=None
 		self.gff=None
+		self.vcf=None
 		self.loci=None
 		self.assembly=None
 
@@ -292,8 +296,10 @@ class parseArgs():
 			elif opt in ('-h', '--help'):
 				pass
 			#Input params
-			elif opt in ('-e', '--gff'):
+			elif opt in ('-E', '--gff'):
 				self.gff = arg
+			elif opt in ('-V', '--vcf'):
+				self.vcf = arg
 			elif opt in ('-L', '--loci'):
 				self.loci = arg
 			elif opt in ('-A', '--assembly'):
