@@ -14,25 +14,22 @@ import mrbait_corefuncs as core
 #ADD GFF FUNCTIONALITY LATER
 #Add multithreading support later... Each thread will need its own db conn
 #If TR too short, can add option to include variable flanking regions?
-#TODO: Option for first and second pass over database (e.g. first conservative, second of only failed TRs??)
 #TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
 #TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
 #TODO: Add BRANCHING option for Flow Control. e.g. Branch RUN1 from Regions level to try new method of bait design, etc
 #TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
 #TODO: Could also set minimum coverage thresholds for whole genome?
 #TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
-#TODO: Way to filter targets by masking in flanking region???
 #TODO: Filter targets by distance to GFF element
 #TODO: Option to constrain targets to ONLY in GFF elements
 #TODO: Parallelize loadLOCI and loadMAF, implement ZDZ's chunking functions
 #TODO: Parallelize TR discovery somehow??
-#TODO: FIlter by flanking masked, and flanking GFF elements
-#TODO: Could also have Target filtering by BLAST to a local database (provide as FASTA)???
+#TODO: Filter by flanking masked, and flanking GFF elements
 #TODO: Functions to read and write params as JSON? Or maybe just stick in database?
 #TODO: Option to print LOCI, TARGETS to fasta files?
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
-#TODO: Incorporate blast options in mrbait_menu
 #TODO: Filter targets and baits by low-complexity (Dusting)
+#TODO: Python implementation of SDUST algorithm
 
 #Parse Command line arguments
 params = parseArgs()
