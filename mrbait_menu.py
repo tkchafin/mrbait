@@ -143,6 +143,7 @@ BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 	--gapopen	: Gap opening penalty for blastn [5]
 	--gapextend	: Gap extension penatly for blastn [2]
 	--word_size	: Word size for blastn
+	--nodust	: Turn off low-complexity filter for blastn
 	--megablast	: Use megablast rather than blastn
 			--Default word size will be set to 28 if not provided
 	--blastn	: Path to blastn binary if different than default
@@ -191,9 +192,9 @@ class parseArgs():
 			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb=",
 			"select_b=","filter_b=","quiet","expand","out=",
 			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
-			"vthreads=","hacker=", "e_value=", "gapopen=", "gapextend=",
+			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
-			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "--wordsize="])
+			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -249,6 +250,7 @@ class parseArgs():
 		self.blast_method = "blastn"
 		self.blastn = None
 		self.makedb = None
+		self.nodust = None
 
 		#Bait selection options
 		self.overlap=None
@@ -453,6 +455,8 @@ class parseArgs():
 				self.blastn = arg
 			elif opt == "--makedb":
 				self.makedb = arg
+			elif opt == "--nodust":
+				self.nodust = "TRUE"
 
 			#output options
 			elif opt in ('-X', '--expand'):

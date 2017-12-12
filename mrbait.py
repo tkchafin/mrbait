@@ -69,7 +69,7 @@ core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
-print("Starting: Target Region Selection...")
+print("Starting Target Region selection...")
 
 #First pass filtering of target regions
 rand = core.filterTargetRegions(conn, params)
@@ -82,8 +82,11 @@ core.selectTargetRegions(conn, params)
 
 #If RANDOM filter for TRs was applied, apply if AFTER TR conflict resolution
 if rand:
-	print("randomly filtering all TRs")
+	print("Randomly filtering all TRs")
 	m.regionFilterRandom(conn, rand)
+
+numTR = m.getNumPassedTRs(conn)
+print("Finished Target Region selection... %r targets passed filtering."%numTR)
 
 #Bait discovery
 print("Starting probe design...")
@@ -96,6 +99,8 @@ passedTargets = m.getPassedTRs(conn)
 if passedTargets.shape[0] <= 0:
 	sys.exit("Program killed: No targets passed filtering.")
 core.baitDiscovery(conn, params, passedTargets)
+
+#print
 
 print("\n\nProgram ending...Here are some results\n\n")
 

@@ -162,10 +162,10 @@ def filterTargetRegions(conn, params):
 			aln_file_tools.writeFasta(seqs, fas)
 			outfile = params.workdir + "/" + params.out + ".blast"
 			if option.o1 == "blast_x":
-				remove = b.blastExcludeMatch(params, db_path, fas, outfile)
-			#os.remove(fas)
-			sys.exit()
-			#remove = blast.blastFindMatches(params,)
+				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+				m.removeRegionsByList(conn, blacklist)
+			os.remove(fas)
+			#sys.exit()
 		else:
 			assert False, "Unhandled option %r"%option
 

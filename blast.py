@@ -5,14 +5,18 @@ from subprocess import Popen, PIPE, CalledProcessError
 import os
 import sys
 import Bio
+import pandas as pd
 
-"""Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
+"""Includes utilities for calling NCBI BLAST and parsing outputs"""
 
 #Function to parse params object to call blastn, and parse output to remove all matching queries
 #Parses a MrBait parseArg object
-def blastExcludeMatch(opts, db, fas, out):
+def blastExcludeMatch(opts, db, fas, pid, qcov, out):
+	dust = "yes"
+	if opts.nodust:
+		dust = "no"
 	try:
-		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, 1, out)
+		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, 1, dust, out)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -31,15 +35,28 @@ def blastExcludeMatch(opts, db, fas, out):
 		print("BLASTN encountered an unknown runtime problem: ", end="")
 		sys.exit(sys.exc_info()[0])
 
-	#Next, read in an parse outfile
+	#Parse output and return blacklisted IDs
+	results = getBlastResults(out)
+	pid_adj = pid*100
+	blacklist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
+	blacklist = [s.replace('id_', '') for s in blacklist]
+	return(blacklist)
 
-	#Then, return list of blacklisted IDs
+#Function reads a blast oufmt-6 table and returns pandas dataframe
+def getBlastResults(out):
+	r = pd.read_csv(out, sep="\t",names = ["qseqid", "sseqid", "pident", "qlen", "length", "evalue", "bitscore"])
+	r["qcov"] = r["length"] / r["qlen"]
+	return(r)
 
 
 #Function to build blastn command and make subprocess call
-def blastn(binary, fasta, blastdb, method, gapopen, gapextend, e_value, threads, hits, outfile):
-	print("starting")
+def blastn(binary, fasta, blastdb, method, gapopen, gapextend, e_value, threads, hits, dust, outfile):
+	#print("starting")
 	#NOTE: I changed the columns included in outfmt 6.
+	mask = "true"
+	if dust == "no":
+		mask = "false"
+
 	blastn_cli = [binary,
 		"-task", str(method),
 		"-query", str(fasta),
@@ -49,10 +66,12 @@ def blastn(binary, fasta, blastdb, method, gapopen, gapextend, e_value, threads,
 		"-num_threads", str(threads),
 		"-max_target_seqs", str(hits),
 		"-max_hsps", str(1),
+		"-dust", str(dust),
+		"-soft_masking", str(mask),
 		"-out", str(outfile)]
 
 	command = " ".join(blastn_cli)
-	print("Command is:",command )
+	print("BLASTN command is:",command )
 
 	#Vsearch subprocess
 	print("Running blast...")
