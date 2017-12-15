@@ -2,6 +2,7 @@
 
 import getopt
 import sys
+import os
 import re
 import ntpath
 import misc_utils as utils
@@ -362,7 +363,7 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('snp','mask','gc','len', "pw", "blast_n", "blast_x", "blast_a"): #TODO: Add blast options
+				if subopts[0] in ('snp','mask','gc','len', "pw", "blast_i", "blast_x", "blast_a"): #TODO: Add blast options
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] in ('gc', 'mask'):
 						assert 0.0 <= float(subopts[1]) < float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]

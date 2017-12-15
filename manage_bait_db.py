@@ -1017,6 +1017,29 @@ def regionFilterGC(conn, minprop, maxprop):
 	cur.execute(sql)
 	conn.commit()
 
+#Function to remove targets NOT included in list
+def removeRegionsByWhitelist(conn, whitelist):
+
+	cur = conn.cursor()
+	#If nothing in list, no need to do any work:
+	if len(whitelist) <= 0:
+		return(0)
+	df = pd.DataFrame({"regid" : whitelist})
+	df.to_sql('tt', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			regions
+		SET
+			pass = 0
+		WHERE
+			NOT EXISTS(SELECT * FROM tt WHERE tt.regid = regions.regid)
+	'''
+	cur.execute(sql_update)
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS tt")
+	conn.commit()
 
 #Function to remove Target Regions given a list of blacklisted regids
 def removeRegionsByList(conn, blacklist):
@@ -1026,8 +1049,6 @@ def removeRegionsByList(conn, blacklist):
 	if len(blacklist) <= 0:
 		return(0)
 	df = pd.DataFrame({"regid" : blacklist})
-	#print(df)
-
 	df.to_sql('tt', conn, if_exists='replace')
 
 	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
@@ -1040,7 +1061,6 @@ def removeRegionsByList(conn, blacklist):
 			EXISTS(SELECT * FROM tt WHERE tt.regid = regions.regid)
 	'''
 	cur.execute(sql_update)
-
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS tt")
 	conn.commit()

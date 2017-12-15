@@ -164,6 +164,9 @@ def filterTargetRegions(conn, params):
 			if option.o1 == "blast_x":
 				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
 				m.removeRegionsByList(conn, blacklist)
+			elif option.o1 == "blast_i":
+				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+				m.removeRegionsByWhitelist(conn, whitelist)
 			os.remove(fas)
 			#sys.exit()
 		else:

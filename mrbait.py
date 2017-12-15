@@ -30,6 +30,7 @@ import mrbait_corefuncs as core
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
 #TODO: Filter targets and baits by low-complexity (Dusting)
 #TODO: Python implementation of SDUST algorithm
+#TODO: Option to output baits as sense, antisense, or both strands 
 
 #Parse Command line arguments
 params = parseArgs()
