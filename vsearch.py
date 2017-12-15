@@ -7,12 +7,12 @@ import seq_graph as sg
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
 
-def allpairsGlobal(binary, threads, seqpath, qid, qcov, outpath):
+def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw):
 	vsearch = [binary,
 			"--allpairs_global", seqpath,
 			"--threads", str(threads),
 			"--id", str(qid),
-			"--blast6out", ".temp.pw",
+			"--blast6out", pw,
 			"--rowlen", "0", "--self",
 			"--target_cov", str(qcov),
 			"--quiet"]

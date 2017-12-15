@@ -305,7 +305,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 		sys.exit(err.args)
 	except:
 		sys.exit(sys.exc_info()[0])
-	#os.remove(sor)
+	os.remove(sor)
 
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Returns a list of edges
