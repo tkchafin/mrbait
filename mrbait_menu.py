@@ -102,7 +102,6 @@ Target Region options:
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
-			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
 			gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
 			Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases
 			NOTE: Values for gc, mask, pw, and blast* methods are given as proportions (e.g. 90% = 0.9)""")
@@ -124,7 +123,6 @@ Bait Design / Selection options:
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
-			blast_a=[i,q]: Remove targets having ambiguous mapping (more than one hit) to a provided db
 			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
