@@ -142,7 +142,6 @@ def filterTargetRegions(conn, params):
 			aln = 1
 			minid = option.o2
 			mincov= option.o3
-			print("Align option not fully impleneted yet")
 		elif option.o1 in ("blast_x", "blast_i", "blast_a"):
 			#if blast database given as fasta, make a blastdb:
 			db_path = None
@@ -167,6 +166,10 @@ def filterTargetRegions(conn, params):
 			elif option.o1 == "blast_i":
 				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
 				m.removeRegionsByWhitelist(conn, whitelist)
+			elif option.o1 == "blast_a":
+				sys.exit("blast_a option is not yet implemented.")
+				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+				#m.removeRegionsByList(conn, blacklist)
 			os.remove(fas)
 			#sys.exit()
 		else:
@@ -482,7 +485,7 @@ def filterBaits(conn, params):
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
 			m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "aln":
+		elif option.o1 == "pw":
 			aln = 1
 		else:
 			assert False, "Unhandled option %r"%option
