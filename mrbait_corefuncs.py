@@ -55,12 +55,17 @@ def loadLOCI(conn, params):
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NA")
-
-		print("Loading Locus #:",locid)
+		#print("Loading Locus #:",locid)
 
 		#Extract variable positions for database
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
+
+#Function to load FASTA into database
+def loadFASTA(conn, params):
+	for contig in aln_file_tools.read_fasta(params.assembly):
+		#print("Reading contig:",contig[0])
+		#print("Sequence is:",contig[1])
 
 
 #Function to discover target regions using a sliding windows through passedLoci

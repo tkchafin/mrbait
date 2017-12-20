@@ -46,7 +46,7 @@ Assembly input options (for use only with -A <genome.fasta>):
 	-V,--vcf	: VCF file containing variant information [NOT WORKING YET]
 	-G,--gff	: GFF file containing annotation information [NOT WORKING YET]""")
 	print("""
-Locus filtering/ consensus options:
+Alignment filtering/ consensus options (use with -M or -L inputs):
 
 	-c,--cov	: Minimum number of sequences per alignment, for MAF or LOCI input [1]
 	-l,--len	: Minimum alignment length to attempt bait design [80]
@@ -305,7 +305,6 @@ class parseArgs():
 				self.loci = arg
 			elif opt in ('-A', '--assembly'):
 				self.assembly = arg
-
 			#Locus filtering params
 			elif opt in ('-c', '--cov'):
 				self.cov = int(arg)

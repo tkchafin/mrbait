@@ -30,7 +30,7 @@ import mrbait_corefuncs as core
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
 #TODO: Filter targets and baits by low-complexity (Dusting)
 #TODO: Python implementation of SDUST algorithm
-#TODO: Option to output baits as sense, antisense, or both strands 
+#TODO: Option to output baits as sense, antisense, or both strands
 
 #Parse Command line arguments
 params = parseArgs()
@@ -50,9 +50,17 @@ if params.alignment:
 elif params.loci:
 	print("Loading LOCI file:",params.loci)
 	core.loadLOCI(conn, params)
+elif params.assembly:
+	#Load assembly file
+	print("Loading FASTA file:",params.assembly)
+	core.loadFASTA(conn, params)
+	#if params.gff:
+		#Load GFF
+	#if params.vcf:
+		#load vcf
 else:
 	#Option to load .loci alignment goes here!
-	print("No alignment input found. .fasta, .gff, and .phylip support not added yet!")
+	print("No alignment input found. .fasta, .gff, and support not added yet!")
 
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE

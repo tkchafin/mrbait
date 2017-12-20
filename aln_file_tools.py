@@ -6,7 +6,7 @@ import Bio
 from Bio import AlignIO
 
 """Functions for parsing and manipulating sequence alignment files
-Most functions by Zach Zbinden"""
+Functions by Zach Zbinden and Tyler Chafin"""
 
 #Write FASTA from pandas df where col1 is index, col2 is sequence
 #seqs must be a pandas df
@@ -21,6 +21,37 @@ def writeFasta(seqs, fas):
 		file_object.write(seq)
 	file_object.close()
 
+#Read genome as FASTA. FASTA header will be used
+#This is a generator function
+def read_fasta(fas):
+	try:
+		fh = open(fas)
+	except IOError as err:
+		print("I/O error({0}): {1}".format(err.errno, err.strerror))
+	except:
+		print("Unexpected error:", sys.exec_info()[0])
+
+	with fh as file_object:
+		contig = ""
+		seq = ""
+		for line in file_object:
+			line = line.strip()
+			if not line:
+				continue
+			line = line.replace(" ","")
+			#print(line)
+			if line[0] == ">": #Found a header line
+				#If we already loaded a contig, yield that contig and
+				#start loading a new one
+				if contig:
+					yield([contig,seq]) #yield
+					contig = "" #reset contig and seq
+					seq = ""
+				contig = (line.replace(">",""))
+			else:
+				seq += line
+
+	sys.exit()
 
 
 #This is a GENERATOR function to read through a .loci file
@@ -39,6 +70,9 @@ def read_loci(infile):
 
 	with f as file_object:
 		for line in file_object:
+			line = line.strip()
+			if not line:
+				continue
 			if line[0] == ">":
 				identifier = line.split()[0]
 				sequence = line.split()[1]
@@ -46,6 +80,7 @@ def read_loci(infile):
 			else:
 				yield(loci)
 				loci = Bio.Align.MultipleSeqAlignment([])
+	f.close()
 
 #Function by ZVZ to "chunk" a given MAF alignment file into n number of chunks
 def maf_chunker(infile, chunks):
