@@ -45,6 +45,7 @@ def loadMAF(conn, params):
 
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
+	locnum = 1
 	#Parse LOCI file and create database
 	for aln in aln_file_tools.read_loci(params.loci):
 		#NOTE: Add error handling, return error code
@@ -54,7 +55,8 @@ def loadLOCI(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NA")
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, locnum)
+		locnum += 1
 		#print("Loading Locus #:",locid)
 
 		#Extract variable positions for database
@@ -66,6 +68,7 @@ def loadFASTA(conn, params):
 	for contig in aln_file_tools.read_fasta(params.assembly):
 		#print("Reading contig:",contig[0])
 		#print("Sequence is:",contig[1])
+		locid = m.add_locus_record(conn, 1, contig[1], 1, contig[0])
 
 
 #Function to discover target regions using a sliding windows through passedLoci
