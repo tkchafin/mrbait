@@ -51,9 +51,6 @@ def read_fasta(fas):
 			else:
 				seq += line
 
-	sys.exit()
-
-
 #This is a GENERATOR function to read through a .loci file
 #.loci is the RAD alignment output from the promgram pyRAD
 #YIELDS: BioPython MultipleSeqAlignment object
