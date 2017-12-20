@@ -56,8 +56,10 @@ elif params.assembly:
 	core.loadFASTA(conn, params)
 	#if params.gff:
 		#Load GFF
-	#if params.vcf:
+		#core.loadGFF(conn, params)
+	if params.vcf:
 		#load vcf
+		core.loadVCF(conn, params)
 else:
 	#Option to load .loci alignment goes here!
 	print("No alignment input found. .fasta, .gff, and support not added yet!")

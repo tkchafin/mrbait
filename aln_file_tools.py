@@ -3,6 +3,7 @@
 import os
 import sys
 import Bio
+import vcf
 from Bio import AlignIO
 
 """Functions for parsing and manipulating sequence alignment files
@@ -20,6 +21,18 @@ def writeFasta(seqs, fas):
 		file_object.write(name)
 		file_object.write(seq)
 	file_object.close()
+
+#Read VCF variant calls
+#Generator function, yields each locus
+def read_vcf(v):
+	try:
+		vfh = vcf.Reader(filename=v)
+	except IOError as err:
+		print("I/O error({0}): {1}".format(err.errno, err.strerror))
+	except:
+		print("Unexpected error:", sys.exec_info()[0])
+
+
 
 #Read genome as FASTA. FASTA header will be used
 #This is a generator function

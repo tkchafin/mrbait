@@ -70,6 +70,10 @@ def loadFASTA(conn, params):
 		#print("Sequence is:",contig[1])
 		locid = m.add_locus_record(conn, 1, contig[1], 1, contig[0])
 
+#Function to load VCF variants file
+def loadVCF(conn, params):
+	aln_file_tools.read_vcf(params.vcf)
+
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):
