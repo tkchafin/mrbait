@@ -22,7 +22,7 @@ def read_vcf(v):
 					recs.append(rec)
 					continue
 				else:
-					print("YIELDING")
+					#print("YIELDING")
 					yield recs
 					chrom = rec.CHROM
 					recs = [rec]
@@ -30,8 +30,6 @@ def read_vcf(v):
 				chrom = rec.CHROM
 				recs.append(rec)
 				continue
-		else:
-			print("Failed:",rec.CHROM)
 
 #Function to return new consensus sequence given REF and VCF records
 def make_consensus_from_vcf(ref, records, thresh):
