@@ -24,6 +24,7 @@ def writeFasta(seqs, fas):
 
 #Read genome as FASTA. FASTA header will be used
 #This is a generator function
+#Doesn't matter if sequences are interleaved or not.
 def read_fasta(fas):
 	try:
 		fh = open(fas)
@@ -51,6 +52,10 @@ def read_fasta(fas):
 				contig = (line.replace(">",""))
 			else:
 				seq += line
+	fh.close()
+	#Iyield last sequence, if it has both a header and sequence
+	if contig and seq:
+		yield([contig,seq])
 
 #This is a GENERATOR function to read through a .loci file
 #.loci is the RAD alignment output from the promgram pyRAD
