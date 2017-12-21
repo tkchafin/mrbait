@@ -14,6 +14,10 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(o, int)
     return ((n*l)-((n-1)*o))
 
+#Function to return sorted unique string from list of chars
+def listToSortUniqueString(l):
+	l.sort()
+	return(str(''.join(l)))
 
 #Function to count number of lower case in a string
 def n_lower_chars(string):
