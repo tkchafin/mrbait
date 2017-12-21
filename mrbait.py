@@ -59,6 +59,7 @@ elif params.assembly:
 		#core.loadGFF(conn, params)
 	if params.vcf:
 		#load vcf
+		print("Loading VCF file:",params.vcf)
 		core.loadVCF(conn, params)
 else:
 	#Option to load .loci alignment goes here!

@@ -5,4 +5,7 @@
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMP001	SAMP002
 chr1.scaffold1	48	rs11449	A	G	.	PASS	.	GT	0/0	0/1
 chr1.scaffold1	1 rs84825 A	T	.	PASS	.	GT:GP	0/1:.	0/1:0.03,0.97,0
+chr1.scaffold1	2 rs84825 A	G,C	.	PASS	.	GT	1/1	1/2
 chr2.scaffold2	80 rs84823 G	T	.	PASS	.	GT:PL	./.:.	1/1:10,5,0
+chr2.scaffold2	81 rs84823 A	T	.	q20	.	GT:PL	./.:.	1/1:10,5,0
+chr2.scaffold1	4 indel1 G	-	.	PASS	.	GT	0/0	1/1
