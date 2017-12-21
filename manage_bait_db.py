@@ -82,7 +82,7 @@ def filterLoci(conn, minlen, mincov):
 
 #Function returns pandas dataframe of passedLoci
 def getPassedLoci(conn):
-	return(pd.read_sql_query("""SELECT id, consensus FROM loci WHERE pass=1""", conn))
+	return(pd.read_sql_query("""SELECT id, consensus, chrom FROM loci WHERE pass=1""", conn))
 
 #Function returns pandas dataframe of passed targets
 def getPassedTRs(conn):
