@@ -116,10 +116,7 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 			else:
 				nucs.append(str(key))
 		if add == 0:
-			nucs.sort()
-			#print (nucs)
-			temp = str(''.join(nucs))
-			#print(temp)
+			temp = utils.listToSortUniqueString(nucs)
 			consensus+=reverse_iupac_case(temp)
 	return(consensus)
 
