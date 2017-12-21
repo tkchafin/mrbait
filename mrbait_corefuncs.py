@@ -20,6 +20,8 @@ import numpy as np
 import blast as b
 import vsearch
 import subprocess
+import vcf_tools
+import vcf
 
 ############################# FUNCTIONS ################################
 
@@ -72,8 +74,36 @@ def loadFASTA(conn, params):
 
 #Function to load VCF variants file
 def loadVCF(conn, params):
-	aln_file_tools.read_vcf(params.vcf)
 
+	loci = m.getPassedLoci(conn) #get DF of passed loci
+	chrom_lookup = set(loci["chrom"].tolist()) #lookup table of locus IDs
+	loci = loci.set_index(['chrom']) #index loci DF by chrom column
+	print(loci)
+	passed=1 #To track number of VCF records for which no locus exists
+	failed=1
+
+	for reclist in vcf_tools.read_vcf(params.vcf):
+		#print(reclist[0].CHROM)
+		rec_chrom = reclist[0].CHROM
+		if rec_chrom in chrom_lookup:
+			passed+=1
+			#for rec in reclist:
+			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
+			#Grab DF record for the matching CHROM
+			sub = loci.loc[rec_chrom]
+			#Get new consensus sequence given VCF records
+			try:
+				new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
+			except ValueError as e:
+				print("ValueError: " + str(e) + " <%s>"%rec_chrom)
+		else:
+			failed+=1
+
+	#10			Build new consensus
+	#11			Perform UPDATE on locus record in table
+	#12			Submit to
+
+	sys.exit()
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):

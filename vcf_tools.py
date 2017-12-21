@@ -1,6 +1,7 @@
 import os
 import sys
 import vcf
+import alignment_tools as aln
 
 #Read VCF variant calls
 #Generator function, yields each locus
@@ -12,22 +13,30 @@ def read_vcf(v):
 	except:
 		print("Unexpected error:", sys.exec_info()[0])
 
-	num = 1
+	chrom = ""
+	recs = []
 	for rec in vfh:
-		# print("Record",num)
-		# print("Type:",rec.var_type)
-		# print("Subtype:",rec.var_subtype)
-		# samples = rec.samples
-		# print("Samples in record:")
-		# for samp in samples:
-		# 	print(samp.called, samp.gt_alleles)
-		# num+=1
-		# print()
 		if not rec.FILTER:
-			print(rec.CHROM, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
+			print(rec)
+			if chrom:
+				if chrom == rec.CHROM:
+					recs.append(rec)
+					continue
+				else:
+					yield recs
+				chrom = ""
+				recs = []
+			else:
+				chrom = rec.CHROM
+				recs.append(rec)
+				continue
 
-	# Pandas DF to return:
-	#	IF FILTER=PASS:
-	#		CHROM REF ALT Nsamples CALL_RATE AAF (Allele Freq)
-
-	sys.exit()
+#Function to return new consensus sequence given REF and VCF records
+def make_consensus_from_vcf(ref, records, thresh):
+	for rec in records:
+		if rec.REF == ref[rec.POS-1]:
+			nucs = aln.get_iupac(ref[rec.POS-1])
+			#nucs +=
+			pass
+		else:
+			raise ValueError("Nucleotide (%s) at position %s in reference sequence does not match REF allele from VCF file (%s). This is most commonly caused by incorrect indexing in your VCF file."%(ref[rec.POS-1],rec.POS,rec.REF))
