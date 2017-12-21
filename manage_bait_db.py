@@ -28,7 +28,7 @@ def init_new_db(connection):
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
 			chrom TEXT,
-			UNIQUE(id))
+			UNIQUE(chrom) ON CONFLICT ROLLBACK)
 	''') #chrom only relevant if --assembly
 
 	#Table holding records for each locus
@@ -141,11 +141,14 @@ def add_locus_record(conn, depth, consensus, passed, name):
 	if name == None:
 		name = "NA"
 	stuff = [depth, int(len(consensus)), str(consensus), int(passed), str(name)]
-	sql = ''' INSERT INTO loci(depth, length, consensus, pass, chrom)
-				VALUES(?,?,?,?,?) '''
-	cur = conn.cursor()
-	cur.execute(sql, stuff)
-	conn.commit()
+	try:
+		sql = ''' INSERT INTO loci(depth, length, consensus, pass, chrom)
+					VALUES(?,?,?,?,?) '''
+		cur = conn.cursor()
+		cur.execute(sql, stuff)
+		conn.commit()
+	except sqlite3.IntegrityError as err:
+		print("Constraint failed: Skipping locus \"%s\" because it already exists, this is usually caused by duplicate headers when parsing a FASTA file."%name)
 	return cur.lastrowid
 
 #Code to add record to 'bait' table
