@@ -325,6 +325,18 @@ def randomChooseRegionMINLEN(conn, min_len):
 	'''%min_len
 	cur.execute(sql_minlen)
 
+#Function to delete from variable table on locid
+def purgeVars(conn, key):
+	cur = conn.cursor()
+
+	sql = '''
+	DELETE FROM variants
+	WHERE locid = '%s'
+	'''%int(key)
+
+	cur.execute(sql)
+	conn.commit()
+
 #Function to update consensus sequence of a locus
 def updateConsensus(conn, key, seq):
 	cur = conn.cursor()
