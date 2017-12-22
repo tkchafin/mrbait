@@ -28,8 +28,8 @@ import vcf
 #Function to load a MAF file into database
 def loadMAF(conn, params):
 	#Parse MAF file and create database
+	num = 1
 	for aln in AlignIO.parse(params.alignment, "maf"):
-		name = aln[0].name #Only gets name of top seq in alignment
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
@@ -37,7 +37,8 @@ def loadMAF(conn, params):
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, name)
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
+		num+=1
 
 		print("Loading Locus #:",locid)
 
@@ -72,8 +73,9 @@ def loadFASTA(conn, params):
 		#print("Sequence is:",contig[1])
 		locid = m.add_locus_record(conn, 1, contig[1], 1, contig[0])
 
-		#TODO:
 		#Parse consensus for vars, submit those vars to db
+		for var in a.get_vars(contig[1]):
+			m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load VCF variants file
 def loadVCF(conn, params):
@@ -101,6 +103,9 @@ def loadVCF(conn, params):
 				new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
 				#Update new consensus seq in db
 				#Submit vars to db
+				#Parse consensus for vars, submit those vars to db
+				#for var in a.get_compare_vars(ref, new_cons):
+					#m.add_variant_record(conn, locid, var.position, var.value)
 			except ValueError as e:
 				print("ValueError: " + str(e) + " <%s>"%rec_chrom)
 		else:
@@ -109,11 +114,7 @@ def loadVCF(conn, params):
 	if failed > 0:
 		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
 
-	#10			Build new consensus
-	#11			Perform UPDATE on locus record in table
-	#12			Submit to
 
-	sys.exit()
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):
@@ -178,13 +179,12 @@ def filterTargetRegions(conn, params):
 		elif option.o1 == "snp":
 			m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
 		elif option.o1 == "mask":
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
+			max_mask_prop = option.o2
 			m.regionFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
-			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			m.regionFilterGC(conn, maxprop=max_mask_prop)
 		elif option.o1 == "len":
 			minlen = option.o2
 			maxlen= option.o3
@@ -531,8 +531,7 @@ def filterBaits(conn, params):
 			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
 		elif option.o1 == "mask":
 			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.baitFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			m.baitFilterMask(conn, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3

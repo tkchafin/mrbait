@@ -43,7 +43,7 @@ def init_new_db(connection):
 	#Table holding variant information
 	cursor.execute('''
 		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
-			column INTGER NOT NULL, value TEXT NOT NULL,
+			column INTEGER NOT NULL, value TEXT NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id),
 			PRIMARY KEY(varid),
 			UNIQUE(varid))
@@ -1006,7 +1006,7 @@ def regionFilterMask(conn, minprop, maxprop):
 	cur.execute(sql)
 	conn.commit()
 
-def regionFilterGC(conn, minprop, maxprop):
+def regionFilterGC(conn, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1014,8 +1014,8 @@ def regionFilterGC(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s) OR (gc < %s)
-	'''%(maxprop, minprop)
+		(gc > %s)
+	'''%(maxprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
@@ -1110,7 +1110,7 @@ def baitFilterMask(conn, minprop, maxprop):
 	cur.execute(sql)
 	conn.commit()
 
-def baitFilterGC(conn, minprop, maxprop):
+def baitFilterGC(conn, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1118,8 +1118,8 @@ def baitFilterGC(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s) OR (gc < %s)
-	'''%(maxprop, minprop)
+		(gc > %s)
+	'''%(maxprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()

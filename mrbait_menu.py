@@ -58,67 +58,68 @@ General Bait Design options:
 
 	-b, --bait	: Bait length [default=80]
 	-w, --win_shift	: Sliding window shift distance [1]
-		  	--Increasing will speed up program but could lower accuracy
-		  	--Cannot be longer than bait length <-b,--bait>
+		  --Increasing will speed up program but could lower accuracy
+		  --Cannot be longer than bait length <-b,--bait>
 	-R,--mult_reg	: Allow multiple target regions per locus [false]
-			--See \"Target Region options\" below
+		--See \"Target Region options\" below
 	-m,--min_mult	: Minimum alignment length to allow multiple regions
-			--By default is set to the value of <-l>. Only applies when <-R>
-			--When -R and -T are off, only one bait is selected per locus
+		--By default is set to the value of <-l>. Only applies when <-R>
+		--When -R and -T are off, only one bait is selected per locus
 	-v,--var_max	: Maximum number of SNP columns to be included in a bait [0]
-			--These will be coded as the appropriate IUPAC ambiguity code
-			--Can be expanded in final output using the <--expand> flag
+		--These will be coded as the appropriate IUPAC ambiguity code
+		--Can be expanded in final output using the <--expand> flag
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
-			--These will be inserted as \"N\" unless <-N> is used
+		--These will be inserted as \"N\" unless <-N> is used
 	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]
 	-E,--gff_type	: Constrain bait design to within element type of GFF
-			--COMING SOON, NOT WORKING YET""")
+		--COMING SOON, NOT WORKING YET""")
 
 	print("""
 Target Region options:
 
 	-D,--dist_r	: Minimum distance between target regions [100]
-			--Conflicts will be resolved according to --select_r
+		--Conflicts will be resolved according to --select_r
 	-d,--flank_dist	: Distance in flanking regions selection and filtering targets
-			--See relevant options in <--select_r> and <--filter_r>
-			--By default will be set to [500]
+		--See relevant options in <--select_r> and <--filter_r>
+		--By default will be set to [500]
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
-			--Options
+		--Options
 			snp          : Most SNPs w/in \"d\" bases
 			bad          : Least Ns and gaps w/n \"d\" bases
 			cons         : Most conserved w/in \"d\" bases
 			rand         : Randomly choose a bait region [default]
 			Ex: -S s=100 to choose region with most SNPs w/in 100 bases
 	-F,--filter_r	: Include any criteria used to filter ALL bait regions
-			--Options
+		--Options
 			len=[x,y]    : Target length between \"x\" (min) and \"y\" (max)
 			gap=[x]      : Maximum of \"x\" indels in target region
 			bad=[x]      : Maximum of \"x\" Ns in target region
-			min=[x]      : Minimum of \"x\" SNPs within \"d\" bases
-			max=[x]      : Maximum of \"x\" SNPs within \"d\" bases
-			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+			snp=[x,y]    : Min. of \"x\" and max \"y\" SNPs within --flank_dist
+			mask=[x]     : Maximum of \"x\" proportion of masked bases allowed
 			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 			rand=[x]     : Randomly retain \"x\" target regions w/ baits
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
 			gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
-			Ex: -F min=100,1 -F max=100,10 to sample when 1-10 SNPs w/in 100 bases
-			NOTE: Values for gc, mask, pw, and blast* methods are given as proportions (e.g. 90% = 0.9)""")
+		Ex1: -F snp=1,10 -d 100 to sample when 1-10 SNPs w/in 100 bases
+		Ex2: -F gc=0.2,0.8 -F rand=100 to randomly sample 100 targets with GC between 20-80%
+		Ex3: -F mask=0.0,0.1 to remove targets with >10% \masked bases
+		NOTE: Values for gc, mask, pw, and blast* methods are given as proportions (e.g. 90% = 0.9)""")
 
 	print("""
 Bait Design / Selection options:
 
 	-s,--select_b	: Which criterion to select a bait for target region
-			--NOTE: This option is ignored when <-W>
-			--Options
+		--NOTE: This option is ignored when <-W>
+		--Options
 		  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
 		  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
 			flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
 			Ex: -s tile=40 to tile baits with an overlap of 40 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
-			--Options
-			mask=[x,y]   : Proportion masked bases between \"x\" (min) and \"y\" (max)
+		--Options
+			mask=[x]     : Maximum of \"x\" proportion of masked bases allowed
 			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
@@ -129,9 +130,9 @@ Bait Design / Selection options:
 VSEARCH Parameters (use when --select_b or --select_r = \"aln\"):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
-			--MrBait will try to detect OS and appropriate exectable to use
+		--MrBait will try to detect OS and appropriate exectable to use
 	--vthreads	: Number of threads for VSEARCH
-			--Will set to the value of <--threads> if not defined=""")
+		--Will set to the value of <--threads> if not defined=""")
 
 	print("""
 BLAST Parameters (use when --select_b or --select_r = \"blast\"):
@@ -144,18 +145,18 @@ BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 	--word_size	: Word size for blastn
 	--nodust	: Turn off low-complexity filter for blastn
 	--megablast	: Use megablast rather than blastn
-			--Default word size will be set to 28 if not provided
+		--Default word size will be set to 28 if not provided
 	--blastn	: Path to blastn binary if different than default
 	--makedb	: Path to makeblastdb binary if different than default
-			--MrBait will try to detect OS and appropriate exectable to use""")
+		--MrBait will try to detect OS and appropriate exectable to use""")
 
 
 	print("""
 Output options:
 
 	-X,--expand	: In output bait table, expand all ambiguities
-			--Gaps are expanded as [ACGT] and absent
-			--\"N\"s are expanded as [ACGT]
+		--Gaps are expanded as [ACGT] and absent
+		--\"N\"s are expanded as [ACGT]
 	-o,--out	: Output directory and prefix [e.g. ./baits/run1]""")
 
 	#SPLIT option not figured out yet
@@ -163,10 +164,10 @@ Output options:
 General options:
 
 	-W,--tile_all	: Tile baits across all target regions
-			--Skips target filtering and selection, and just tiles all
+		--Skips target filtering and selection, and just tiles all
 	-K, --no_mask	: Ignore all masking information [boolean]
 	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
-			--Errors and assertions are not affected
+		--Errors and assertions are not affected
 	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
 	-h,--help	: Displays this help menu
 	""")
@@ -362,9 +363,12 @@ class parseArgs():
 				subopts = re.split('=|,',arg)
 				if subopts[0] in ('snp','mask','gc','len', "pw", "blast_i", "blast_x", "blast_a"): #TODO: Add blast options
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					if subopts[0] in ('gc', 'mask'):
+					if subopts[0] == 'gc':
 						assert 0.0 <= float(subopts[1]) < float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+					elif subopts[0] == 'mask':
+						assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_r> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
+						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1])))
 					elif subopts[0] == "len":
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
@@ -409,13 +413,16 @@ class parseArgs():
 				self.filter_b_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('min','max','mask','gc'):
+				if subopts[0] in ('min','max','gc'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
-					if subopts[0] in ('gc', 'mask'):
+					if subopts[0] in ('gc'):
 						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"mask\" and \"gc\": Min must be less than max"
-						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+						self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 					else:
-						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
+						self.filter_b_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
+				elif subopts[0] == 'mask':
+					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
+					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1])))
 				elif (subopts[0] is 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))

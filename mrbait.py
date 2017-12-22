@@ -117,6 +117,7 @@ core.baitDiscovery(conn, params, passedTargets)
 print("\n\nProgram ending...Here are some results\n\n")
 
 print(m.getLoci(conn))
+print(m.getVariants(conn))
 print(m.getRegions(conn))
 print(m.getBaits(conn))
 
