@@ -7,6 +7,5 @@ Python program for universal design of targeted-enrichment probes from multiple 
 2. sqlite3 and Python package
 3. Biopython
 4. pyvcf
-5. gffutils
 
 Currently in development. Contact me at tkchafin@uark.edu if you are interested in progress or contributing. 
