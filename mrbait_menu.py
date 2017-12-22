@@ -82,6 +82,7 @@ Target Region options:
 	-d,--flank_dist	: Distance in flanking regions selection and filtering targets
 		--See relevant options in <--select_r> and <--filter_r>
 		--By default will be set to [500]
+		--Appopriate value likely will correspond to your sequencing insert size
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 		--Options
 			snp          : Most SNPs w/in \"d\" bases
