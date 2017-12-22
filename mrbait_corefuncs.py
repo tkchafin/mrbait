@@ -21,7 +21,7 @@ import blast as b
 import vsearch
 import subprocess
 import vcf_tools
-import gff3_parser.py
+import gff3_parser
 
 ############################# FUNCTIONS ################################
 
