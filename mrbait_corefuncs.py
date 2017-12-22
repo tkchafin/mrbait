@@ -81,9 +81,10 @@ def loadFASTA(conn, params):
 def loadVCF(conn, params):
 
 	loci = m.getPassedLoci(conn) #get DF of passed loci
+	print(loci)
 	chrom_lookup = set(loci["chrom"].tolist()) #lookup table of locus IDs
 	loci = loci.set_index(['chrom']) #index loci DF by chrom column
-	print(loci)
+	#print(loci)
 	passed=0 #To track number of VCF records for which no locus exists
 	failed=0
 
@@ -91,6 +92,7 @@ def loadVCF(conn, params):
 		rec_chrom = reclist[0].CHROM
 		print("Starting locus",rec_chrom)
 		if rec_chrom in chrom_lookup:
+			locid = loci.loc[rec_chrom]["id"]
 			passed+=1
 			#for rec in reclist:
 			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
@@ -102,10 +104,14 @@ def loadVCF(conn, params):
 				#Fetch new consensus sequence
 				new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
 				#Update new consensus seq in db
-				#Submit vars to db
-				#Parse consensus for vars, submit those vars to db
-				#for var in a.get_compare_vars(ref, new_cons):
-					#m.add_variant_record(conn, locid, var.position, var.value)
+				if len(new_cons) != len(sub['consensus']): #Check length first
+					print("Warning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
+				else:
+					m.updateConsensus(conn, locid, new_cons)
+					#Submit vars to db
+					#Delete old vars for locus, and parse new consensus
+					#for var in a.get_compare_vars(ref, new_cons):
+						#m.add_variant_record(conn, locid, var.position, var.value)
 			except ValueError as e:
 				print("ValueError: " + str(e) + " <%s>"%rec_chrom)
 		else:
@@ -114,7 +120,7 @@ def loadVCF(conn, params):
 	if failed > 0:
 		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
 
-
+	sys.exit()
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):

@@ -325,6 +325,21 @@ def randomChooseRegionMINLEN(conn, min_len):
 	'''%min_len
 	cur.execute(sql_minlen)
 
+#Function to update consensus sequence of a locus
+def updateConsensus(conn, key, seq):
+	cur = conn.cursor()
+
+	sql = '''
+		UPDATE loci
+		SET
+			consensus = '%s'
+		WHERE
+			id = '%s'
+	'''%(str(seq),int(key))
+
+	cur.execute(sql)
+	conn.commit()
+
 #Internal function for checking if TRs overlap within distance buffer
 def checkOverlap(row1, row2, dist):
 	#This could be made much more concise
