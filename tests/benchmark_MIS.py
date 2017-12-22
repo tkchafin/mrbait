@@ -15,7 +15,8 @@ Unfortunately, this problem is NP-hard and can't be done efficiently... """
 
 #TODO: Test that nodes retained in NAIVE definitely dont have any edges!!!
 
-"""RESULTS: Mine is slighlty faster and finds more nodes at smaller network sizes. 
+"""RESULTS: Mine is slighlty faster and finds more nodes at smaller network sizes.
+But the approximate algorithm scales better.  
 
 Approximate, Nodes=10, 100 reps
 Average number of nodes:  5.07
