@@ -92,8 +92,8 @@ def loadVCF(conn, params):
 		rec_chrom = reclist[0].CHROM
 		print("Starting locus",rec_chrom)
 		if rec_chrom in chrom_lookup:
-			locid = loci.loc[rec_chrom]["id"]
-			print("locid is",locid)
+			locid = int(loci.loc[rec_chrom]["id"])
+			#print("locid is",locid)
 			passed+=1
 			#for rec in reclist:
 			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
@@ -108,8 +108,9 @@ def loadVCF(conn, params):
 				m.updateConsensus(conn, locid, new_cons)
 				#Delete old vars for locus, and parse new consensus
 				m.purgeVars(conn, locid)
-				#for var in a.get_compare_vars(ref, new_cons):
-					#m.add_variant_record(conn, locid, var.position, var.value)
+				#Get new vars and add records to table
+				for var in a.get_vars(new_cons):
+					m.add_variant_record(conn, locid, var.position, var.value)
 
 		else:
 			#print(rec_chrom, "not found.")
