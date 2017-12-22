@@ -118,9 +118,6 @@ def loadVCF(conn, params):
 	if failed > 0:
 		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
 
-	print(m.getVariants(conn))
-	sys.exit()
-
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):
 
