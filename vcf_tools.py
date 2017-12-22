@@ -16,22 +16,25 @@ def read_vcf(v):
 
 	chrom = ""
 	recs = []
+	added = 0
 	for rec in vfh:
 		if not rec.FILTER:
 			if chrom:
 				if chrom == rec.CHROM:
 					recs.append(rec)
-					continue
+					added = 1
 				else:
 					#print("YIELDING")
 					yield recs
 					chrom = rec.CHROM
 					recs = [rec]
+					added = 0
 			else:
 				chrom = rec.CHROM
 				recs.append(rec)
-				continue
-
+				added = 1
+	if added == 0 and recs:
+		yield recs
 #NOTES:
 #If reference base from FASTA is N or gap, we try to call new consensus from VCF
 #N or - in VCF still have to pass threshold to be incoporated.
@@ -84,6 +87,6 @@ def make_consensus_from_vcf(ref, records, thresh):
 				consensus = utils.stringSubstitute(current_ref, (rec.POS-1), cons.lower())
 			else:
 				consensus = utils.stringSubstitute(current_ref, (rec.POS-1), cons.upper())
-	print("Reference:",ref)
-	print("Consensus:",consensus)
+	#print("Reference:",ref)
+	#print("Consensus:",consensus)
 	return(consensus)
