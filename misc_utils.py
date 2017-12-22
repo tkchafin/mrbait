@@ -14,6 +14,11 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(o, int)
     return ((n*l)-((n-1)*o))
 
+#Function implementing fast way to replace single char in string
+#This way is a lot faster than doing it by making a list and subst in list
+def stringSubstitute(s, pos, c):
+	return(s[:pos] + c + s[pos+1:])
+
 #Function to return sorted unique string from list of chars
 def listToSortUniqueString(l):
 	l.sort()
