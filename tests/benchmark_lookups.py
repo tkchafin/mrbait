@@ -82,6 +82,17 @@ def make_random_dict(size):
 		counter +=1
 	return d
 
+#Function to make a random df
+def make_random_set(size):
+	ids = random.sample(range(size*10),size)
+	rands = random.sample(range(size*10),size)
+	s = set()
+	counter = 0
+	for i in ids:
+		set.append(rands[counter])
+		counter +=1
+	return d
+
 def randomword(length):
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(length))
