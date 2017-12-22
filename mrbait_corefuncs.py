@@ -72,6 +72,9 @@ def loadFASTA(conn, params):
 		#print("Sequence is:",contig[1])
 		locid = m.add_locus_record(conn, 1, contig[1], 1, contig[0])
 
+		#TODO:
+		#Parse consensus for vars, submit those vars to db
+
 #Function to load VCF variants file
 def loadVCF(conn, params):
 
@@ -79,12 +82,12 @@ def loadVCF(conn, params):
 	chrom_lookup = set(loci["chrom"].tolist()) #lookup table of locus IDs
 	loci = loci.set_index(['chrom']) #index loci DF by chrom column
 	print(loci)
-	passed=1 #To track number of VCF records for which no locus exists
-	failed=1
+	passed=0 #To track number of VCF records for which no locus exists
+	failed=0
 
 	for reclist in vcf_tools.read_vcf(params.vcf):
-		#print(reclist[0].CHROM)
 		rec_chrom = reclist[0].CHROM
+		print("Starting locus",rec_chrom)
 		if rec_chrom in chrom_lookup:
 			passed+=1
 			#for rec in reclist:
@@ -93,11 +96,18 @@ def loadVCF(conn, params):
 			sub = loci.loc[rec_chrom]
 			#Get new consensus sequence given VCF records
 			try:
+				#print("...getting new consensus for locus",rec_chrom)
+				#Fetch new consensus sequence
 				new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
+				#Update new consensus seq in db
+				#Submit vars to db
 			except ValueError as e:
 				print("ValueError: " + str(e) + " <%s>"%rec_chrom)
 		else:
+			#print(rec_chrom, "not found.")
 			failed+=1
+	if failed > 0:
+		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
 
 	#10			Build new consensus
 	#11			Perform UPDATE on locus record in table
