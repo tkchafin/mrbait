@@ -78,7 +78,7 @@ def make_consensus_from_vcf(ref, records, thresh):
 				cons = aln.reverse_iupac(temp)
 				chosen = 1
 		else:
-			raise ValueError("Nucleotide (%s) at position %s in reference sequence does not match REF allele from VCF file (%s). This is most commonly caused by incorrect indexing in your VCF file."%(current_ref[rec.POS-1],rec.POS,rec.REF))
+			print("WARNING: Nucleotide (%s) at position %s in reference sequence does not match REF allele from VCF file (%s). This is most commonly caused by incorrect indexing in your VCF file."%(current_ref[rec.POS-1],rec.POS,rec.REF))
 
 		#Incorporate new consensus base
 		if chosen == 1 and cons:

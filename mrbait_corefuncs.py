@@ -93,33 +93,31 @@ def loadVCF(conn, params):
 		print("Starting locus",rec_chrom)
 		if rec_chrom in chrom_lookup:
 			locid = loci.loc[rec_chrom]["id"]
+			print("locid is",locid)
 			passed+=1
 			#for rec in reclist:
 			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
 			#Grab DF record for the matching CHROM
 			sub = loci.loc[rec_chrom]
 			#Get new consensus sequence given VCF records
-			try:
-				#print("...getting new consensus for locus",rec_chrom)
-				#Fetch new consensus sequence
-				new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
-				#Update new consensus seq in db
-				if len(new_cons) != len(sub['consensus']): #Check length first
-					print("Warning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
-				else:
-					m.updateConsensus(conn, locid, new_cons)
-					#Submit vars to db
-					#Delete old vars for locus, and parse new consensus
-					#for var in a.get_compare_vars(ref, new_cons):
-						#m.add_variant_record(conn, locid, var.position, var.value)
-			except ValueError as e:
-				print("ValueError: " + str(e) + " <%s>"%rec_chrom)
+			new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
+			#Update new consensus seq in db
+			if len(new_cons) != len(sub['consensus']): #Check length first
+				print("Warning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
+			else:
+				m.updateConsensus(conn, locid, new_cons)
+				#Delete old vars for locus, and parse new consensus
+				m.purgeVars(conn, locid)
+				#for var in a.get_compare_vars(ref, new_cons):
+					#m.add_variant_record(conn, locid, var.position, var.value)
+
 		else:
 			#print(rec_chrom, "not found.")
 			failed+=1
 	if failed > 0:
 		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
 
+	print(m.getVariants(conn))
 	sys.exit()
 
 #Function to discover target regions using a sliding windows through passedLoci
