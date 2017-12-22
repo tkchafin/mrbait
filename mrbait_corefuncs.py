@@ -21,7 +21,7 @@ import blast as b
 import vsearch
 import subprocess
 import vcf_tools
-import vcf
+import gff3_parser.py
 
 ############################# FUNCTIONS ################################
 
@@ -76,6 +76,11 @@ def loadFASTA(conn, params):
 		#Parse consensus for vars, submit those vars to db
 		for var in a.get_vars(contig[1]):
 			m.add_variant_record(conn, locid, var.position, var.value)
+
+#Function to load GFF file into database
+def loadGFF(conn, params):
+	pass
+
 
 #Function to load VCF variants file
 def loadVCF(conn, params):

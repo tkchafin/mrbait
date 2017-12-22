@@ -1,8 +1,14 @@
 ##gff-version 3
-chr1.scaffold1	.	mRNA	25	80	.	+	.	ID=mrna0001;Name=sonichedgehog
-chr1.scaffold2	.	TF_binding_site	40	79	.	+	.	ID=tfbs00001;Parent=gene00001
-chr2.scaffold1	.	exon	1300	1500	.	+	.	ID=exon00001;Name=
-chr2.scaffold1	.	exon	1050	1500	.	+	.	ID=exon00002;
-chr2.scaffold1	.	exon	3000	3902	.	+	.	ID=exon00003;
-chr2.scaffold1	Ensembl	exon	5000	5500	.	+	.	ID=exon00004;
-chr2.scaffold1	.	exon	7000	9000	.	+	.	ID=exon00005;
+chr1.scaffold1	.	gene	10	180	.	+	.	ID=gene0001;Name=CoolGeneBro
+chr1.scaffold1	.	mRNA	20	180	.	+	.	ID=mrna0001;Parent=gene0001;Name=CoolGeneBro
+chr1.scaffold1	.	TF_binding_site	10	12	.	+	.	ID=tfbs00001;Parent=gene0001
+chr1.scaffold1	.	exon	20	50	.	+	.	ID=exon0001;Parent=gene0001;Name=CoolGeneBro;Alias=example
+chr1.scaffold1	.	exon	70	110	.	+	.	ID=exon0002;Parent=gene0001;Name=CoolGeneBro;Alias=example
+chr1.scaffold1	.	exon	160	1800	.	+	.	ID=exon0003;Parent=gene0001;Name=CoolGeneBro
+chr2.scaffold1	.	CDS	50	150	.	+	0	ID=cds44332;
+chr1.scaffold2	.	CDS	2	81	.	+	1	ID=cds49338;Alias=example
+chr2.scaffold1	.	exon	30	192	.	+	.	ID=exon13003;Alias=example
+chr2.scaffold1	.	CDS	32	192	.	+	1	ID=cds13003;Alias=example
+chr2.scaffold1	Ensembl	exon	5000	5500	.	+	.	ID=exon00004
+chr2.scaffold1	.	exon	7000	9000	.	+	.	ID=exon00005
+chr2.scaffold2	.	CDS	400	502	.	+	2	Alias=example
