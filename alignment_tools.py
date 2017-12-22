@@ -9,44 +9,10 @@ from Bio import AlignIO
 class consensAlign():
 	'Consensus alignment object'
 	#Default constructor
-	def __init__(self, alignment, threshold=0.1, mask=0.1):
+	def __init__(self, alignment, threshold, mask):
 		self.alnVars = []
 		self.conSequence = make_consensus(alignment, threshold, mask)
-		self.alnVars = self.get_vars(self.conSequence, alignment)
-
-	@staticmethod
-	def get_vars(con, aln):
-		#print("Parsing: ", con)
-		var_objects = [] #empty list for holding var objects
-		#For each position
-		for i in range(len(con)):
-			#print(i, " is ", con[i])
-			#If not monomorphic
-			if con[i] not in {"A", "G", "T", "C"}:
-				var_objects.append(variablePosition(i, con[i].upper()))
-				#continue
-			#else:
-			'''
-			#For each sequence
-			for c in range(len(aln[:,i])):
-				#print(aln[c,i], end='', flush=True)
-				ref = con[i].upper()
-				var = aln[c,i].upper()
-				#ref.upper()
-				#var.upper()
-				#print("Var is ",var, " and Ref is ", ref)
-				if var == ref:
-				#if var == "-" and ref == "-":
-					continue
-				#elif var == "N" and ref == "N":
-					continue
-				else:
-					#print(var, end='', flush=True)
-					#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
-					var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
-			'''
-		return var_objects
-
+		self.alnVars = get_vars(self.conSequence)
 
 class variablePosition():
 	'Object to hold information about a variable position'
@@ -71,6 +37,9 @@ class variablePosition():
 #From an AlignIO alignment object
 def make_consensus(alignment, threshold=0.1, mask=0.1):
 	aln_depth = len(alignment)
+	#If only one sequence in alignment, return that seq as consensus
+	if aln_depth == 1:
+		return alignment[:,0]
 	aln_len = alignment.get_alignment_length()
 	consensus="" #consensus string to build
 	#For each column
@@ -119,6 +88,39 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 			temp = utils.listToSortUniqueString(nucs)
 			consensus+=reverse_iupac_case(temp)
 	return(consensus)
+
+#Function to get a list of variablePositions
+def get_vars(con):
+	#print("Parsing: ", con)
+	var_objects = [] #empty list for holding var objects
+	#For each position
+	for i in range(len(con)):
+		#print(i, " is ", con[i])
+		#If not monomorphic
+		if con[i].upper() not in {"A", "G", "T", "C", "X"}:
+			var_objects.append(variablePosition(i, con[i].upper()))
+			#continue
+		#else:
+		'''
+		#For each sequence
+		for c in range(len(aln[:,i])):
+			#print(aln[c,i], end='', flush=True)
+			ref = con[i].upper()
+			var = aln[c,i].upper()
+			#ref.upper()
+			#var.upper()
+			#print("Var is ",var, " and Ref is ", ref)
+			if var == ref:
+			#if var == "-" and ref == "-":
+				continue
+			#elif var == "N" and ref == "N":
+				continue
+			else:
+				#print(var, end='', flush=True)
+				#print(aln[c].id, " has ", aln[c,i], " at pos ", i)
+				var_objects.append(variablePosition(aln[c].id, i, aln[c,i]))
+		'''
+	return var_objects
 
 #Function to split character to IUPAC codes, assuing diploidy
 def get_iupac(char):
