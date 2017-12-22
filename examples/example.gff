@@ -1,0 +1,8 @@
+##gff-version 3
+chr1.scaffold1	.	mRNA	25	80	.	+	.	ID=mrna0001;Name=sonichedgehog
+chr1.scaffold2	.	TF_binding_site	40	79	.	+	.	ID=tfbs00001;Parent=gene00001
+chr2.scaffold1	.	exon	1300	1500	.	+	.	ID=exon00001;Name=
+chr2.scaffold1	.	exon	1050	1500	.	+	.	ID=exon00002;
+chr2.scaffold1	.	exon	3000	3902	.	+	.	ID=exon00003;
+chr2.scaffold1	Ensembl	exon	5000	5500	.	+	.	ID=exon00004;
+chr2.scaffold1	.	exon	7000	9000	.	+	.	ID=exon00005;
