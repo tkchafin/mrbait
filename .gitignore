@@ -1,3 +1,8 @@
 __pycache__
 __pycache__/*
 mrbait.sqlite
+blastdb
+blastdb.*
+.temp*
+.DS_Store
+out.*
