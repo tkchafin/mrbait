@@ -180,11 +180,11 @@ def filterTargetRegions(conn, params):
 			m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
 		elif option.o1 == "mask":
 			max_mask_prop = option.o2
-			m.regionFilterMask(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			m.regionFilterMask(conn, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
-			m.regionFilterGC(conn, maxprop=max_mask_prop)
+			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "len":
 			minlen = option.o2
 			maxlen= option.o3

@@ -992,7 +992,7 @@ def varMaxFilterTR(conn, varmax):
 	cur.execute(sql)
 	conn.commit()
 
-def regionFilterMask(conn, minprop, maxprop):
+def regionFilterMask(conn, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1000,13 +1000,13 @@ def regionFilterMask(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(mask > %s) OR (mask < %s)
-	'''%(maxprop, minprop)
+		(mask > %s)
+	'''%(maxprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
 
-def regionFilterGC(conn, maxprop):
+def regionFilterGC(conn, minprop, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1014,8 +1014,8 @@ def regionFilterGC(conn, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s)
-	'''%(maxprop)
+		(gc > %s) OR (gc < %s)
+	'''%(maxprop, minprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
@@ -1096,7 +1096,7 @@ def removeBaitsByList(conn, blacklist):
 	cur.execute("DROP TABLE IF EXISTS b")
 	conn.commit()
 
-def baitFilterMask(conn, minprop, maxprop):
+def baitFilterMask(conn, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1104,13 +1104,13 @@ def baitFilterMask(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(mask > %s) OR (mask < %s)
-	'''%(maxprop, minprop)
+		(mask > %s)
+	'''%(maxprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
 
-def baitFilterGC(conn, maxprop):
+def baitFilterGC(conn, minprop, maxprop):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -1118,8 +1118,8 @@ def baitFilterGC(conn, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s)
-	'''%(maxprop)
+		(gc > %s) OR (gc < %s)
+	'''%(maxprop, minprop)
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql)
 	conn.commit()
