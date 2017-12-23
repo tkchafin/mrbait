@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import os
 import sys
+import gzip
 import misc_utils as utils
 import alignment_tools as aln
 

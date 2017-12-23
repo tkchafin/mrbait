@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import sys
 import sqlite3
 import pandas

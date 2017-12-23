@@ -7,6 +7,10 @@ import alignment_tools as aln
 #Read VCF variant calls
 #Generator function, yields each locus
 def read_vcf(v):
+
+	if not utils.fileCheck(v):
+		raise FileNotFoundError("Fatal exception, file %s not found."%v)
+
 	try:
 		vfh = vcf.Reader(filename=v)
 	except IOError as err:
