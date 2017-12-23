@@ -4,6 +4,7 @@ import os
 import sys
 import Bio
 import vcf
+import misc_utils as utils
 from Bio import AlignIO
 
 """Functions for parsing and manipulating sequence alignment files
@@ -26,41 +27,46 @@ def writeFasta(seqs, fas):
 #This is a generator function
 #Doesn't matter if sequences are interleaved or not.
 def read_fasta(fas):
-	try:
-		fh = open(fas)
-	except IOError as err:
-		print("I/O error({0}): {1}".format(err.errno, err.strerror))
-	except:
-		print("Unexpected error:", sys.exec_info()[0])
 
-	with fh as file_object:
-		contig = ""
-		seq = ""
-		for line in file_object:
-			line = line.strip()
-			if not line:
-				continue
-			line = line.replace(" ","")
-			#print(line)
-			if line[0] == ">": #Found a header line
-				#If we already loaded a contig, yield that contig and
-				#start loading a new one
-				if contig:
-					yield([contig,seq]) #yield
-					contig = "" #reset contig and seq
-					seq = ""
-				contig = (line.replace(">",""))
-			else:
-				seq += line
-	fh.close()
-	#Iyield last sequence, if it has both a header and sequence
-	if contig and seq:
-		yield([contig,seq])
+	if not utils.fileCheck(fas):
+		raise FileNotFoundError("Fatal exception, file %s not found."%fas)
+
+	fh = open(fas)
+	try:
+		with fh as file_object:
+			contig = ""
+			seq = ""
+			for line in file_object:
+				line = line.strip()
+				if not line:
+					continue
+				line = line.replace(" ","")
+				#print(line)
+				if line[0] == ">": #Found a header line
+					#If we already loaded a contig, yield that contig and
+					#start loading a new one
+					if contig:
+						yield([contig,seq]) #yield
+						contig = "" #reset contig and seq
+						seq = ""
+					contig = (line.replace(">",""))
+				else:
+					seq += line
+		#Iyield last sequence, if it has both a header and sequence
+		if contig and seq:
+			yield([contig,seq])
+	finally:
+		fh.close()
+
 
 #This is a GENERATOR function to read through a .loci file
 #.loci is the RAD alignment output from the promgram pyRAD
 #YIELDS: BioPython MultipleSeqAlignment object
 def read_loci(infile):
+
+	if not utils.fileCheck(infile):
+		raise FileNotFoundError("Fatal exception, file %s not found."%infile)
+
 	# make emptyp dictionary
 	loci = Bio.Align.MultipleSeqAlignment([])
 	# read file from command line
