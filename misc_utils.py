@@ -2,7 +2,13 @@
 
 import sys
 import os
+import os.path
 import pandas as pd
+
+#Function to check if a file path is valid
+def fileCheck(f):
+	return (os.path.isfile(f))
+
 
 #Function calculates union length of overlapping fixed length lines
 def calculateUnionLengthFixed(n, l, o):
