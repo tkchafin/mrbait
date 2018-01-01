@@ -30,7 +30,13 @@ import mrbait_corefuncs as core
 #TODO: Python implementation of SDUST algorithm
 #TODO: Option to output baits as sense, antisense, or both strands
 #TODO: NEED a function to sanitize inputs to SQL db before inserting them.
-	#To prevent potential of SQL injection fuckery 
+	#To prevent potential of SQL injection fuckery
+	#Change format of SQL executes from:
+		#cur.execute("SELECT * FROM platforms WHERE language = '%s';" % platform)
+	#to:
+		#cur.execute("SELECT * FROM platforms WHERE language = %s;", (platform,))
+	#in order to sanitize inputs and prevent SQL injection potential 
+
 
 #Parse Command line arguments
 params = parseArgs()
