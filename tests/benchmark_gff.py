@@ -213,11 +213,11 @@ def read_gff_PANDAS(g, num):
 #Function to read each GFF element into a native dict
 @time_me
 def read_gff_DICT(g, num):
-	GFFTuple = {}
 	g3 = open(g)
 	with g3 as file_object:
 		for i in range(num):
 			for line in file_object:
+				GFFTuple = {}
 				if line.startswith("#"): continue
 				line = line.strip()
 				things = line.split("\t")
