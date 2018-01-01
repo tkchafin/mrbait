@@ -2,13 +2,18 @@
 
 import os
 import sys
-import gzip
-from collections import namedtuple
 import misc_utils as utils
-import alignment_tools as aln
 
-#TODO: Decided I don't like any of the available GFF3 parsers so I'm going to
-#write my own.
+#Function to split GFF attributes
+def splitAttributes(a):
+	ret = {}
+	for thing in a.split(";"):
+		stuff = thing.split("=")
+		if len(stuff) != 2: continue #Eats error silently, YOLO
+		key = stuff[0]
+		value = stuff[1]
+		ret[key] = value
+	return ret
 
 #function to read a GFF file
 #Generator function, yields individual elements
