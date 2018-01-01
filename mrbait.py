@@ -15,11 +15,6 @@ import mrbait_corefuncs as core
 #TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
 #TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
 #TODO: Add BRANCHING option for Flow Control. e.g. Branch RUN1 from Regions level to try new method of bait design, etc
-#TODO: For whole genome option, need to read an mpileup or similar to capture variant information.
-#TODO: Could also set minimum coverage thresholds for whole genome?
-#TODO: Some form of duplicate screening. Screen targets for dupe or screen baits? Not sure.
-#TODO: Filter targets by distance to GFF element
-#TODO: Option to constrain targets to ONLY in GFF elements
 #TODO: Parallelize loadLOCI and loadMAF, implement ZDZ's chunking functions
 #TODO: Parallelize TR discovery somehow??
 #TODO: Filter by flanking masked, and flanking GFF elements
@@ -27,16 +22,17 @@ import mrbait_corefuncs as core
 #TODO: Option to print LOCI, TARGETS to fasta files?
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
 #TODO: Filter targets and baits by low-complexity (Dusting)
-#TODO: Python implementation of SDUST algorithm
-#TODO: Option to output baits as sense, antisense, or both strands
+#TODO: Python implementation of SDUST algorithm (gonna be a lot of work, hold off for now)
+#TODO: Option to output baits as +, -, or both strands
 #TODO: NEED a function to sanitize inputs to SQL db before inserting them.
 	#To prevent potential of SQL injection fuckery
 	#Change format of SQL executes from:
 		#cur.execute("SELECT * FROM platforms WHERE language = '%s';" % platform)
 	#to:
 		#cur.execute("SELECT * FROM platforms WHERE language = %s;", (platform,))
-	#in order to sanitize inputs and prevent SQL injection potential 
-
+	#in order to sanitize inputs and prevent SQL injection potential
+#TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
+#TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
 
 #Parse Command line arguments
 params = parseArgs()
