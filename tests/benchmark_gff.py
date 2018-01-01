@@ -14,31 +14,51 @@ Benchmarking two different structures for yielding GFF Records
 
 Results:
 
-Seems like at a small number, namedtuples are a lot faster. 
+-At small numbers, namedtuples and native lists are much faster.
+-namedtuple and pandas df do have some more up-front cost in defining them
+	But this is inconsequential if the definition won't be repeated
+-Adding in 1 access (of seqid) per iteration didn't change much.
+-At high number of replicates, they all seem to take about the same time
 
-Testing with namedtuples: 10 iterations
+Testing with namedtuples: 100 iterations
 1 ms
 Testing with namedtuples: 1000 iterations
 2 ms
 Testing with namedtuples: 10000 iterations
-20 ms
+21 ms
 Testing with namedtuples: 100000 iterations
-190 ms
+194 ms
 Testing with namedtuples: 1000000 iterations
-1883 ms
+1962 ms
 
 Testing with pandas df: 100 iterations
 12 ms
 Testing with pandas df: 1000 iterations
-12 ms
+13 ms
 Testing with pandas df: 10000 iterations
-30 ms
+31 ms
 Testing with pandas df: 100000 iterations
-202 ms
+207 ms
 Testing with pandas df: 1000000 iterations
-1871 ms
+1939 ms
 
+Testing with dict df: 100 iterations
+0 ms
+Testing with dict df: 1000 iterations
+2 ms
+Testing with dict df: 10000 iterations
+20 ms
+Testing with dict df: 100000 iterations
+196 ms
+Testing with dict df: 1000000 iterations
+1942 ms
 
+Conclusion:
+-probably will go with a native dict since namedtuple doesn't seem to speed
+	things up much. Pandas DF seems overboard for this simple container case
+-namedtuple and dict should also theoretically take same space in mem,
+	although in this case we should only have 1 record in mem per thread, so
+	this is negligible anyways 
 
 
 """
@@ -92,10 +112,10 @@ def read_gff_TUPLE(g, num):
 					"phase": None if things[7] == "." else things[7],
 					"attributes": None if things[8] == "." else splitAttributes(things[8])
 				}
-				#Alternatively, you can emit the dictionary here, if you need mutability:
-				#yield normalizedInfo
-				rec = GFFTuple(**normalizedInfo)
-				rec = ""
+				ret = GFFTuple(**normalizedInfo)
+				test = GFFTuple.seqid
+				test2=GFFTuple.phase
+				ret = ""
 	gf.close()
 
 
@@ -127,11 +147,42 @@ def read_gff_PANDAS(g, num):
 				GFFTuple["attributes"] = None if things[8] == "." else things[8]
 				things = splitAttributes(str(GFFTuple["attributes"]))
 
-				#Alternatively, you can emit the dictionary here, if you need mutability:
-				#yield normalizedInfo
-				rec = GFFTuple
-				rec = "" #This is where the yield would go
+				ret = GFFTuple
+				test = GFFTuple["seqid"]
+				test2 = GFFTuple["phase"]
+				ret = "" #This is where the yield would go
 	g2.close()
+
+#Function to read each GFF element into a native dict
+@time_me
+def read_gff_DICT(g, num):
+	GFFTuple = {}
+	g3 = open(g)
+	with g3 as file_object:
+		for i in range(num):
+			for line in file_object:
+				if line.startswith("#"): continue
+				line = line.strip()
+				things = line.split("\t")
+				if len(things) != 9:
+					sys.exit("Fatal error: GFF file is not standard-compatible")
+				#line = utils.removeURL(line) #Sanitize any URLs out
+
+				GFFTuple["seqid"] = None if things[0] == "." else things[0]
+				GFFTuple["source"] = None if things[1] == "." else things[1]
+				GFFTuple["type"] =  None if things[2] == "." else things[2]
+				GFFTuple["start"] = None if things[3] == "." else int(things[3])
+				GFFTuple["end"] = None if things[4] == "." else int(things[4])
+				GFFTuple["score"] = None if things[5] == "." else float(things[5])
+				GFFTuple["strand"] = None if things[6] == "." else things[6]
+				GFFTuple["phase"] = None if things[7] == "." else things[7]
+				GFFTuple["attributes"] = None if things[8] == "." else splitAttributes(things[8])
+
+				ret = GFFTuple
+				test = GFFTuple["seqid"]
+				test2 = GFFTuple["phase"]
+				ret = "" #This is where the yield would go
+	g3.close()
 
 #MAIN
 gff = "../examples/example.gff"
@@ -159,3 +210,16 @@ print("Testing with pandas df: 100000 iterations")
 read_gff_PANDAS(gff, 100000)
 print("Testing with pandas df: 1000000 iterations")
 read_gff_PANDAS(gff, 1000000)
+
+print()
+
+print("Testing with dict df: 100 iterations")
+read_gff_DICT(gff, 100)
+print("Testing with dict df: 1000 iterations")
+read_gff_DICT(gff, 1000)
+print("Testing with dict df: 10000 iterations")
+read_gff_DICT(gff, 10000)
+print("Testing with dict df: 100000 iterations")
+read_gff_DICT(gff, 100000)
+print("Testing with dict df: 1000000 iterations")
+read_gff_DICT(gff, 1000000)
