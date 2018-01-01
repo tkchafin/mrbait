@@ -29,6 +29,8 @@ import mrbait_corefuncs as core
 #TODO: Filter targets and baits by low-complexity (Dusting)
 #TODO: Python implementation of SDUST algorithm
 #TODO: Option to output baits as sense, antisense, or both strands
+#TODO: NEED a function to sanitize inputs to SQL db before inserting them.
+	#To prevent potential of SQL injection fuckery 
 
 #Parse Command line arguments
 params = parseArgs()
