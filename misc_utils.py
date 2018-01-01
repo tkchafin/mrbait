@@ -4,11 +4,11 @@ import sys
 import os
 import os.path
 import pandas as pd
+import re
 
 #Function to check if a file path is valid
 def fileCheck(f):
 	return (os.path.isfile(f))
-
 
 #Function calculates union length of overlapping fixed length lines
 def calculateUnionLengthFixed(n, l, o):
@@ -19,6 +19,10 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(l, int)
     assert isinstance(o, int)
     return ((n*l)-((n-1)*o))
+
+#Function to sanitize strings of any URLs, and replace them with "<REMOVED URL>"
+def removeURL(st):
+	return(re.sub(r'^https?:\/\/.*[\r\n]*', '', st, flags=re.MULTILINE))
 
 #Function implementing fast way to replace single char in string
 #This way is a lot faster than doing it by making a list and subst in list
