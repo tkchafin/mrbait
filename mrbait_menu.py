@@ -186,7 +186,7 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:E:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:GE:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
@@ -299,7 +299,7 @@ class parseArgs():
 			elif opt in ('-h', '--help'):
 				pass
 			#Input params
-			elif opt in ('-E', '--gff'):
+			elif opt in ('-G', '--gff'):
 				self.gff = arg
 			elif opt in ('-V', '--vcf'):
 				self.vcf = arg
@@ -330,12 +330,8 @@ class parseArgs():
 				self.var_max = int(arg)
 			elif opt in ('-n', '--numN'):
 				self.numN = int(arg)
-			elif opt in ('-N', '--callN'):
-				self.callN = 1
 			elif opt in ('-g', '--numG'):
 				self.numG = int(arg)
-			elif opt in ('-G', '--callG'):
-				self.callG = 1
 			elif opt in ('-E', '--gff_type'):
 				self.anchor = arg
 
