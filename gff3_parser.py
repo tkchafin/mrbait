@@ -10,7 +10,7 @@ def splitAttributes(a):
 	for thing in a.split(";"):
 		stuff = thing.split("=")
 		if len(stuff) != 2: continue #Eats error silently, YOLO
-		key = stuff[0]
+		key = stuff[0].lower()
 		value = stuff[1]
 		ret[key] = value
 	return ret

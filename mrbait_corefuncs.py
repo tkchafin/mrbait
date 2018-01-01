@@ -79,8 +79,11 @@ def loadFASTA(conn, params):
 def loadGFF(conn, params):
 	print("Trying to load GFF")
 	for record in gff.read_gff(params.gff):
+		#if record["attributes"]["alias"]:
+		#	t = record['attributes']['alias']
+		#	print(record["seqid"], record["start"], record["end"], t)
+		#else:
 		print(record["seqid"], record["start"], record["end"], record["attributes"])
-
 	sys.exit()
 
 
