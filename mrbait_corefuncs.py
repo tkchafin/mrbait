@@ -19,7 +19,7 @@ import blast as b
 import vsearch
 import subprocess
 import vcf_tools
-import gff3_parser
+import gff3_parser as gff
 
 ############################# FUNCTIONS ################################
 
@@ -77,7 +77,11 @@ def loadFASTA(conn, params):
 
 #Function to load GFF file into database
 def loadGFF(conn, params):
-	pass
+	print("Trying to load GFF")
+	for record in gff.read_gff(params.gff):
+		print(record["seqid"], record["start"], record["end"], record["attributes"])
+
+	sys.exit()
 
 
 #Function to load VCF variants file

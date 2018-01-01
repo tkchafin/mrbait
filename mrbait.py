@@ -58,12 +58,11 @@ elif params.assembly:
 	core.loadFASTA(conn, params)
 	#If VCF file
 	if params.vcf:
-		#load vcf
 		print("Loading VCF file:",params.vcf)
 		core.loadVCF(conn, params)
+		
 	#if GFF file
 	if params.gff:
-		#load vcf
 		print("Loading GFF file:",params.gff)
 		core.loadGFF(conn, params)
 else:
