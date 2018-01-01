@@ -22,6 +22,7 @@ def init_new_db(connection):
 	cursor.execute('''DROP TABLE IF EXISTS variants''')
 	cursor.execute('''DROP TABLE IF EXISTS regions''')
 	cursor.execute('''DROP TABLE IF EXISTS baits''')
+	cursor.execute('''DROP TABLE IF EXISTS gff''')
 
 	#Table holding records for each locus
 	cursor.execute('''
@@ -49,6 +50,14 @@ def init_new_db(connection):
 			UNIQUE(varid))
 	''')
 
+	#Table holding GFF element information
+	cursor.execute('''
+		CREATE TABLE gff(gffid INTEGER NOT NULL, seqid INTEGER NOT NULL,
+			type TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
+			alias TEXT,
+			FOREIGN KEY (seqid) REFERENCES loci(id),
+			PRIMARY KEY(gffid),
+	''')
 	cursor.execute('''
 		CREATE TABLE baits(baitid INTEGER NOT NULL, regid INTEGER NOT NULL,
 			sequence TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
