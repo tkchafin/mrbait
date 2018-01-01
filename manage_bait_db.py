@@ -52,12 +52,12 @@ def init_new_db(connection):
 
 	#Table holding GFF element information
 	cursor.execute('''
-		CREATE TABLE gff(gffid INTEGER NOT NULL, seqid INTEGER NOT NULL,
-			type TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
-			alias TEXT,
-			FOREIGN KEY (seqid) REFERENCES loci(id),
-			PRIMARY KEY(gffid),
+		CREATE TABLE gff(gffid PRIMARY KEY, seqid INTEGER NOT NULL,
+			type TEXT NOT NULL, start INTEGER NOT NULL,
+			stop INTEGER NOT NULL, alias TEXT,
+			FOREIGN KEY (seqid) REFERENCES loci(id))
 	''')
+
 	cursor.execute('''
 		CREATE TABLE baits(baitid INTEGER NOT NULL, regid INTEGER NOT NULL,
 			sequence TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
