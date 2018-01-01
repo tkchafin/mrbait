@@ -2,7 +2,7 @@
 
 import os
 import sys
-import misc_utils as utils
+import urllib.parse
 
 #Function to split GFF attributes
 def splitAttributes(a):
@@ -36,16 +36,16 @@ def read_gff(g):
 						sys.exit("Fatal error: GFF file does not appear to be standard-compatible. See https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md")
 				#line = utils.removeURL(line) #Sanitize any URLs out
 				GFFTuple = {} #Empty dict
-				#Load up dict, and sanitize inputs 
-				GFFTuple["seqid"] = None if things[0] == "." else things[0]
-				GFFTuple["source"] = None if things[1] == "." else things[1]
-				GFFTuple["type"] =  None if things[2] == "." else things[2]
+				#Load up dict, and sanitize inputs
+				GFFTuple["seqid"] = None if things[0] == "." else urllib.parse.unquote(things[0])
+				GFFTuple["source"] = None if things[1] == "." else urllib.parse.unquote(things[1])
+				GFFTuple["type"] =  None if things[2] == "." else urllib.parse.unquote(things[2])
 				GFFTuple["start"] = None if things[3] == "." else int(things[3])
 				GFFTuple["end"] = None if things[4] == "." else int(things[4])
 				GFFTuple["score"] = None if things[5] == "." else float(things[5])
-				GFFTuple["strand"] = None if things[6] == "." else things[6]
-				GFFTuple["phase"] = None if things[7] == "." else things[7]
-				GFFTuple["attributes"] = None if things[8] == "." else splitAttributes(things[8])
+				GFFTuple["strand"] = None if things[6] == "." else urllib.parse.unquote(things[6])
+				GFFTuple["phase"] = None if things[7] == "." else urllib.parse.unquote(things[7])
+				GFFTuple["attributes"] = None if things[8] == "." else splitAttributes(urllib.parse.unquote(things[8]))
 
 				yield(GFFTuple)
 	finally:
