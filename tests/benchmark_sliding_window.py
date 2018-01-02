@@ -1,8 +1,22 @@
 #!/usr/bin/python
 
-import time 
+import time
 from itertools import islice
 import re
+
+"""
+Conclusions:
+- No real difference across methods. countSlidingWindowSubstring2 seems a bit
+  faster but probably just because of not having the function calls. I like
+  countSlidingWindowSubstring the best because I understand the code of the
+  generator function for that one better, plus its one less package dependency
+  Islice is maybe a little bit faster than the substring picking method but
+  I get more flexibility with my substring method
+- Converting to a simplified consensus seems to be the fastest overall
+- The additional overhead of the regex substitution in the 'Simplest'
+  version doesn't affect it much and this ends up being by far the fastest
+  option (less than half the average runtime)
+"""
 
 def time_me(method):
     def wrapper(*args, **kw):
@@ -34,7 +48,7 @@ def seqCounterLoop(seq):
 		"D"	: 0,
 		"H"	: 0,
 		"V"	: 0
-	}	
+	}
 	for c in seq:
 		if c in d:
 			d[c] += 1
@@ -48,7 +62,7 @@ def seqCounterLoopSimplified(seq):
 		'N':0,
 		'-':0,
 		'*':0
-	}	
+	}
 	for c in seq:
 		if c in d:
 			d[c] += 1
@@ -62,12 +76,12 @@ def windowSlice(seq, n=2):
     it = iter(seq)
     result = tuple(islice(it, n))
     if len(result) == n:
-        yield result    
+        yield result
     for elem in it:
         result = result[1:] + (elem,)
         yield result
 
-@time_me	
+@time_me
 def countSlidingWindow(seq, num):
 	"""This option calls seqCounterLoop per sliding window on unaltered sequence"""
 	print("Using islice:")
@@ -86,9 +100,9 @@ def windowSub(seq, shift, width=2):
 		else:
 			j = i + width
 		yield seq[i:j]
-		if j==seqlen: break	
+		if j==seqlen: break
 
-@time_me	
+@time_me
 def countSlidingWindowSubstring(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
 	print("Using substrings:")
@@ -99,7 +113,7 @@ def countSlidingWindowSubstring(seq, num, shift, width):
 			window_seq = "".join(i)
 			seqCounterLoop(window_seq)
 
-@time_me	
+@time_me
 def countSlidingWindowSubstring2(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
 	print("Using substrings, no generator function:")
@@ -113,9 +127,9 @@ def countSlidingWindowSubstring2(seq, num, shift, width):
 				j = i + width
 			window_seq = "".join(seq_norm[i:j])
 			seqCounterLoop(window_seq)
-			if j==seqlen: break	
+			if j==seqlen: break
 
-@time_me	
+@time_me
 def countSlidingWindowSubstringSimple(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
 	print("Using substrings, simplified consensus:")
@@ -126,7 +140,7 @@ def countSlidingWindowSubstringSimple(seq, num, shift, width):
 			window_seq = "".join(i)
 			seqCounterLoopSimplified(window_seq)
 
-@time_me	
+@time_me
 def countSlidingWindowSubstringSimplest(seq, num, shift, width):
 	"""This option does a sliding window manually by caalculating start/stop of substrings"""
 	print("Using substrings, more simplified consensus:")
@@ -138,17 +152,7 @@ def countSlidingWindowSubstringSimplest(seq, num, shift, width):
 			window_seq = "".join(i)
 			seqCounterLoopSimplified(window_seq)
 
-#Conclusions: 
-# - No real difference across methods. countSlidingWindowSubstring2 seems a bit 
-#   faster but probably just because of not having the function calls. I like 
-#   countSlidingWindowSubstring the best because I understand the code of the 
-#   generator function for that one better, plus its one less package dependency
-#   Islice is maybe a little bit faster than the substring picking method but 
-#   I get more flexibility with my substring method
-# - Converting to a simplified consensus seems to be the fastest overall
-# - The additional overhead of the regex substitution in the 'Simplest' 
-#   version doesn't affect it much and this ends up being by far the fastest
-#   option (less than half the average runtime)
+
 
 
 seq = "ATGTGTAA-NRATTYRR-NNNAtattgygygwrttsgstttyn--agagg--gwtrrcacacccncacncgcc-ay-accdhaaca-vhVaaccannNNN"
@@ -157,16 +161,6 @@ reps = 10000
 countSlidingWindow(seq, reps)
 countSlidingWindowSubstring(seq, reps, 1, 10)
 countSlidingWindowSubstring2(seq, reps, 1, 10)
-#Now trying by converting all chars to simplified version: 
+#Now trying by converting all chars to simplified version:
 countSlidingWindowSubstringSimple(seq, reps, 1, 10)
 countSlidingWindowSubstringSimplest(seq, reps, 1, 10)
-
-
-
-
-
-
-
-
-
-
