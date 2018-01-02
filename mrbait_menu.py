@@ -65,14 +65,12 @@ General Bait Design options:
 	-m,--min_mult	: Minimum alignment length to allow multiple regions
 		--By default is set to the value of <-l>. Only applies when <-R>
 		--When -R and -T are off, only one bait is selected per locus
-	-v,--var_max	: Maximum number of SNP columns to be included in a bait [0]
+	-v,--var_max	: Maximum number of SNP columns to be allowed in a bait [0]
 		--These will be coded as the appropriate IUPAC ambiguity code
 		--Can be expanded in final output using the <--expand> flag
 	-n,--numN	: Number of consensus Ns allowed in a bait [0]
 		--These will be inserted as \"N\" unless <-N> is used
-	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]
-	-E,--gff_type	: Constrain bait design to within element type of GFF
-		--COMING SOON, NOT WORKING YET""")
+	-g,--numG	: Number of consensus indels (\"-\") allowed in bait [0]""")
 
 	print("""
 Target Region options:
@@ -102,7 +100,11 @@ Target Region options:
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
-			gff=         : ADD LATER!!! Only keep targets within X distance of GFF element
+			gff=[type]   : Only retain targets within \"d\" distance of \"type\" GFF elements
+			               Use \"all\" to target all types, or see GFF3 specifications for SO feature types:
+			               https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md
+			gff_a=[alias]: Only retain targets within \"d\" distance of GFF records with attributes of \"Alias\"
+			               Note that \"gff\" and \"gffa\" options are case-insensitive
 		Ex1: -F snp=1,10 -d 100 to sample when 1-10 SNPs w/in 100 bases
 		Ex2: -F gc=0.2,0.8 -F rand=100 to randomly sample 100 targets with GC between 20-80%
 		Ex3: -F mask=0.0,0.1 to remove targets with >10% \masked bases
