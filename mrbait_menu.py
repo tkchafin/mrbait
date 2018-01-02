@@ -108,6 +108,7 @@ Target Region options:
 		Ex1: -F snp=1,10 -d 100 to sample when 1-10 SNPs w/in 100 bases
 		Ex2: -F gc=0.2,0.8 -F rand=100 to randomly sample 100 targets with GC between 20-80%
 		Ex3: -F mask=0.0,0.1 to remove targets with >10% \masked bases
+		Ex4: -F gff=exon -d 1000 to constrain targets to within 1000 bases of exons 
 		NOTE: Values for gc, mask, pw, and blast* methods are given as proportions (e.g. 90% = 0.9)""")
 
 	print("""
