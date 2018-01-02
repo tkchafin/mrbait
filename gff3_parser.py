@@ -15,6 +15,21 @@ def splitAttributes(a):
 		ret[key] = value
 	return ret
 
+#Function to return a GFF record as a dict
+def GFFRecordAsDict(things):
+	rec = {}
+	#Load up dict, and sanitize inputs
+	rec["seqid"] = None if things[0] == "." else urllib.parse.unquote(things[0])
+	rec["source"] = None if things[1] == "." else urllib.parse.unquote(things[1])
+	rec["type"] =  None if things[2] == "." else urllib.parse.unquote(things[2])
+	rec["start"] = None if things[3] == "." else int(things[3])
+	rec["end"] = None if things[4] == "." else int(things[4])
+	rec["score"] = None if things[5] == "." else float(things[5])
+	rec["strand"] = None if things[6] == "." else urllib.parse.unquote(things[6])
+	rec["phase"] = None if things[7] == "." else urllib.parse.unquote(things[7])
+	rec["attributes"] = None if things[8] == "." else splitAttributes(urllib.parse.unquote(things[8]))
+	return rec
+
 #function to read a GFF file
 #Generator function, yields individual elements
 def read_gff(g):
@@ -35,17 +50,7 @@ def read_gff(g):
 					elif bad == 1:
 						sys.exit("Fatal error: GFF file does not appear to be standard-compatible. See https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md")
 				#line = utils.removeURL(line) #Sanitize any URLs out
-				GFFRecord = {} #Empty dict
-				#Load up dict, and sanitize inputs
-				GFFRecord["seqid"] = None if things[0] == "." else urllib.parse.unquote(things[0])
-				GFFRecord["source"] = None if things[1] == "." else urllib.parse.unquote(things[1])
-				GFFRecord["type"] =  None if things[2] == "." else urllib.parse.unquote(things[2])
-				GFFRecord["start"] = None if things[3] == "." else int(things[3])
-				GFFRecord["end"] = None if things[4] == "." else int(things[4])
-				GFFRecord["score"] = None if things[5] == "." else float(things[5])
-				GFFRecord["strand"] = None if things[6] == "." else urllib.parse.unquote(things[6])
-				GFFRecord["phase"] = None if things[7] == "." else urllib.parse.unquote(things[7])
-				GFFRecord["attributes"] = None if things[8] == "." else splitAttributes(urllib.parse.unquote(things[8]))
+				GFFRecord = GFFRecordAsDict(things)
 
 				yield(GFFRecord)
 	finally:
