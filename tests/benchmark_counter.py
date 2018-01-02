@@ -2,8 +2,16 @@
 
 from collections import Counter
 from collections import defaultdict
-import time 
+import time
 import unicodedata
+
+"""
+Conclusions:
+- Just converting to upper() or lower() is faster than using unicode normalization function
+- For loop and dictionaries are faster than using the collections.Counter class
+- defaultdict does not substantially improve performance over the seqCounterLoop function
+"""
+
 
 def normalize_caseless(text):
     return unicodedata.normalize("NFKD", text.casefold())
@@ -40,7 +48,7 @@ def seqCounter2(seq, num):
 		+ c['k'] + c['m'] + c['b'] + c['d'] + c['h'] + c['v']
 	print(c)
 
-@time_me	
+@time_me
 def seqCounterLoop(seq, num):
 	d = {}
 	seq_norm = seq.upper()
@@ -63,7 +71,7 @@ def seqCounterLoop(seq, num):
 			"D"	: 0,
 			"H"	: 0,
 			"V"	: 0
-		}	
+		}
 		for c in seq_norm:
 			if c in d:
 				d[c] += 1
@@ -71,7 +79,7 @@ def seqCounterLoop(seq, num):
 		+ d['K'] + d['M'] + d['B'] + d['D'] + d['H'] + d['V']
 	print(d)
 
-@time_me 
+@time_me
 def seqCounterDict(seq, num):
 	print("dict style")
 	seq_norm = seq.upper()
@@ -79,11 +87,6 @@ def seqCounterDict(seq, num):
 		mydict = defaultdict(int)
 		for c in seq_norm:
 			mydict[c] += 1
-		
-#Conclusions: 
-# - Just converting to upper() or lower() is faster than using unicode normalization function
-# - For loop and dictionaries are faster than using the collections.Counter class 
-# - defaultdict does not substantially improve performance over the seqCounterLoop function	
 
 seq = "ATGTGTAA-NRATTYRR-NNNAtattgygygwrttsgstttyn--agagg--gwtrrcacacccncacncgcc-ay-accdhaaca-vhVaaccannNNN"
 
