@@ -246,7 +246,8 @@ def validateGFFRecords(conn):
 				(gff.start > loci.length) AND (gff.stop > loci.length)
 			);
 	'''
-
+	cur.execute(sql)
+	conn.commit()
 
 #Function to filter regions relation by minimum flanking SNPs
 def regionFilterMinVar(conn, val, flank):

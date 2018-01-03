@@ -82,16 +82,21 @@ def loadGFF(conn, params):
 		#Skip any records that are missing the sequence ID, or coordinates
 		if record.seqid == "NULL" or record.start == "NULL" or record.end == "NULL":
 			continue
+		if record.start > record.end:
+			temp = record.start
+			record.start = record.end
+			record.end = temp
 		#Get the alias, if it exists
 		alias = ""
 		if record.getAlias(): #returns false if no alias
 			alias = record.getAlias()
 		else:
 			alias = "NULL"
+		#NOTE: This function ONLY inserts GFFRecords where record.seqid matches an existing locus in the loci table
 		m.add_gff_record(conn, record.seqid, record.type.lower(), record.start, record.end, alias)
 
 	#Check if all GFF records fall within bounds of
-	m.verifyGFFRecords(conn)
+	m.validateGFFRecords(conn)
 
 
 #Function to load VCF variants file
