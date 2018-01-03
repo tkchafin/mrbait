@@ -8,7 +8,8 @@ chr1.scaffold1	.	exon	160	1800	.	+	.	ID=exon0003;Parent=gene0001;Name=CoolGeneBr
 chr2.scaffold1	.	CDS	50	150	.	+	0	ID=test23433;
 chr1.scaffold2	.	CDS	2	81	.	+	1	ID=cds49338;Alias=example
 chr2.scaffold1	.	exon	30	192	.	+	.	ID=exon13003;Alias=example
-chr2.scaffold1	.	CDS	32	192	.	+	1	ID=cds13003;Alias=example
+chr2.scaffold1	.	CDS	32	192	.	+	1	ID=cds13003;Alias=2
 chr2.scaffold1	Ensembl	exon	5000	5500	.	+	.	ID=exon00004;Alias=aliasTwo
 chr2.scaffold1	.	exon	7000	9000	.	+	.	ID=exon00005
 chr2.scaffold2	.	CDS	400	502	.	+	2	Alias=example
+chr4.scaffold17	.	CDS	400	502	.	+	2	Alias=example
