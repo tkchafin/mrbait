@@ -33,6 +33,7 @@ import mrbait_corefuncs as core
 	#in order to sanitize inputs and prevent SQL injection potential
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
+#TODO: Remove --no_mask and add --max_mask, or maximum MASK proportion allowed for locus to pass
 
 #Parse Command line arguments
 params = parseArgs()
@@ -67,10 +68,9 @@ elif params.assembly:
 		print("Loading GFF file:",params.gff)
 		core.loadGFF(conn, params)
 		print(m.getGFF(conn))
-		sys.exit()
 else:
 	#Option to load .loci alignment goes here!
-	print("No alignment input found. .fasta, .gff, and support not added yet!")
+	sys.exit("No input files provided.")
 
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE

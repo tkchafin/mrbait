@@ -177,7 +177,7 @@ def add_bait_record(conn, reg, seq, start, stop, mask, gc):
 	conn.commit()
 	return cur.lastrowid
 
-#Code to add record to 'bait' table
+#Code to add record to GFF table
 def add_gff_record(conn,seqid, gff_type, start, stop, alias):
 	cur = conn.cursor()
 
@@ -270,7 +270,7 @@ def regionFilterMinVar(conn, val, flank):
 			GROUP BY regid)
 			WHERE counts < ?);
 
-	'''%(flank, flank, val)
+	'''
 	stuff = [flank, flank, val]
 	cur.execute(sql, stuff)
 	conn.commit()
@@ -292,12 +292,13 @@ def regionFilterMaxVar(conn, val, flank):
 			WHERE
 				value != "N" AND value != "-"
 			AND
-				((column < (stop+%s)) AND (column > start-%s))
+				((column < (stop+?)) AND (column > start-?))
 			GROUP BY regid)
-			WHERE counts > %s);
+			WHERE counts > ?);
 
-	'''%(flank, flank, val)
-	cur.execute(sql)
+	'''
+	stuff = [flank, flank, val]
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Function for debug printing of variant counts flanking TRs
@@ -346,10 +347,11 @@ def regionFilterRandom(conn, num):
 					regions
 				WHERE
 					pass=1
-				ORDER BY RANDOM() LIMIT(%s - %s - %s)
+				ORDER BY RANDOM() LIMIT(? - ? - ?)
 				)
-		'''%(rows,fails,num)
-		cur.execute(sql)
+		'''
+		stuff = [rows, fails, num]
+		cur.execute(sql, stuff)
 		conn.commit()
 
 def randomChooseRegionMINLEN(conn, min_len):
@@ -368,15 +370,15 @@ def randomChooseRegionMINLEN(conn, min_len):
 					FROM
 						conflicts INNER JOIN loci ON conflicts.locid = loci.id
 					WHERE
-						length <= %r
+						length <= ?
 					ORDER BY
 						RANDOM()
 					)
 				GROUP BY
 					locid
 				)
-	'''%min_len
-	cur.execute(sql_minlen)
+	'''
+	cur.execute(sql_minlen, (minlen,))
 
 #Function to delete from variable table on locid
 def purgeVars(conn, key):
@@ -384,10 +386,10 @@ def purgeVars(conn, key):
 
 	sql = '''
 	DELETE FROM variants
-	WHERE locid = '%s'
-	'''%int(key)
+	WHERE locid = ?
+	'''
 
-	cur.execute(sql)
+	cur.execute(sql,(key,))
 	conn.commit()
 
 #Function to update consensus sequence of a locus
@@ -397,12 +399,12 @@ def updateConsensus(conn, key, seq):
 	sql = '''
 		UPDATE loci
 		SET
-			consensus = '%s'
+			consensus = ?
 		WHERE
-			id = '%s'
-	'''%(str(seq),int(key))
-
-	cur.execute(sql)
+			id = ?
+	'''
+	stuff = [str(seq), int(key)]
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Internal function for checking if TRs overlap within distance buffer
