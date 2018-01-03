@@ -15,6 +15,28 @@ def splitAttributes(a):
 		ret[key] = value
 	return ret
 
+#Class for holding GFF Record data, no __slots__
+class GFFRecord():
+	def __init__(self, things):
+		self.seqid = None if things[0] == "." else urllib.parse.unquote(things[0])
+		self.source = None if things[1] == "." else urllib.parse.unquote(things[1])
+		self.type = None if things[2] == "." else urllib.parse.unquote(things[2])
+		self.start = None if things[3] == "." else int(things[3])
+		self.end = None if things[4] == "." else int(things[4])
+		self.score = None if things[5] == "." else float(things[5])
+		self.strand = None if things[6] == "." else urllib.parse.unquote(things[6])
+		self.phase = None if things[7] == "." else urllib.parse.unquote(things[7])
+		self.attributes = {}
+		if things[8] != "." and things[8] != "":
+			self.attributes = splitAttributes(urllib.parse.unquote(things[8]))
+
+	def getAlias(self):
+		"""Returns value of alias if exists, and False if it doesn't exist"""
+		if 'alias' in self.attributes:
+			return self.attributes['alias']
+		else:
+			return False
+
 #Function to return a GFF record as a dict
 def GFFRecordAsDict(things):
 	rec = {}
@@ -47,11 +69,12 @@ def read_gff(g):
 					if bad == 0:
 						print("Warning: GFF file does not appear to be standard-compatible. See https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md")
 						bad = 1
+						continue
 					elif bad == 1:
 						sys.exit("Fatal error: GFF file does not appear to be standard-compatible. See https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md")
 				#line = utils.removeURL(line) #Sanitize any URLs out
-				GFFRecord = GFFRecordAsDict(things)
+				rec = GFFRecord(things)
 
-				yield(GFFRecord)
+				yield(rec)
 	finally:
 		gf.close()
