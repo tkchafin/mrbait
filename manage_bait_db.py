@@ -84,9 +84,10 @@ def filterLoci(conn, minlen, mincov):
 	SET
 		pass=0
 	WHERE
-		length < %s OR depth < %s
-	'''%(minlen, mincov)
-	cur.execute(sql)
+		length < ? OR depth < ?
+	'''
+	stuff = [minlen, mincov]
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Function returns pandas dataframe of passedLoci
@@ -1052,10 +1053,11 @@ def lengthFilterTR(conn, maxlen, minlen):
 	SET
 		pass=0
 	WHERE
-		length > %s OR length < %s
-	'''%(maxlen, minlen)
+		length > ? OR length < ?
+	'''
+	stuff = [int(maxlen), int(minlen)]
 	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Functon to filter targets by --vmax_r
@@ -1068,10 +1070,10 @@ def varMaxFilterTR(conn, varmax):
 	SET
 		pass=0
 	WHERE
-		vars > %s
-	'''%(varmax)
+		vars > ?
+	'''
 	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+	cur.execute(sql, (varmax,))
 	conn.commit()
 
 def regionFilterMask(conn, maxprop):
@@ -1082,10 +1084,10 @@ def regionFilterMask(conn, maxprop):
 	SET
 		pass=0
 	WHERE
-		(mask > %s)
-	'''%(maxprop)
+		(mask > ?)
+	'''
 	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+	cur.execute(sql, (maxprop,))
 	conn.commit()
 
 def regionFilterGC(conn, minprop, maxprop):
@@ -1096,10 +1098,11 @@ def regionFilterGC(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s) OR (gc < %s)
-	'''%(maxprop, minprop)
+		(gc > ?) OR (gc < ?)
+	'''
+	stuff = [maxprop, minprop]
 	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Function to remove targets NOT included in list
@@ -1186,10 +1189,10 @@ def baitFilterMask(conn, maxprop):
 	SET
 		pass=0
 	WHERE
-		(mask > %s)
-	'''%(maxprop)
+		(mask > ?)
+	'''
 	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+	cur.execute(sql, (maxprop,))
 	conn.commit()
 
 def baitFilterGC(conn, minprop, maxprop):
@@ -1200,10 +1203,11 @@ def baitFilterGC(conn, minprop, maxprop):
 	SET
 		pass=0
 	WHERE
-		(gc > %s) OR (gc < %s)
-	'''%(maxprop, minprop)
-	#print(pd.read_sql_query(sql, conn))
-	cur.execute(sql)
+		(gc > ?) OR (gc < ?)
+	'''
+	stuff = [maxprop, minprop]
+
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Function for random selection of baits
@@ -1232,10 +1236,11 @@ def baitFilterRandom(conn, num):
 					baits
 				WHERE
 					pass=1
-				ORDER BY RANDOM() LIMIT(%s - %s - %s)
+				ORDER BY RANDOM() LIMIT(? - ? - ?)
 				)
-		'''%(rows,fails,num)
-		cur.execute(sql)
+		'''
+		stuff = [rows, fails, num]
+		cur.execute(sql, stuff)
 		conn.commit()
 
 #Function to parse variants table to update regions VARS for flanking information
@@ -1251,7 +1256,7 @@ def parseFlankVars(conn, dist):
 			WHERE
 				v.value !="N" AND v.value != "-"
 			AND
-				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
 			GROUP BY
 				r.regid)
 		UPDATE
@@ -1260,8 +1265,9 @@ def parseFlankVars(conn, dist):
 			vars = vars + (SELECT counts FROM other WHERE regions.regid = other.regid)
 		WHERE
 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''%(dist, dist)
-	cur.execute(sql)
+	'''
+	stuff = [dist, dist]
+	cur.execute(sql, stuff)
 	conn.commit()
 
 def parseFlankBad(conn, dist):
@@ -1276,7 +1282,7 @@ def parseFlankBad(conn, dist):
 			WHERE
 				v.value ="N"
 			AND
-				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
 			GROUP BY
 				r.regid)
 		UPDATE
@@ -1285,8 +1291,9 @@ def parseFlankBad(conn, dist):
 			bad = bad + (SELECT counts FROM other WHERE regions.regid = other.regid)
 		WHERE
 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''%(dist, dist)
-	cur.execute(sql2)
+	'''
+	stuff = [dist, dist]
+	cur.execute(sql2, stuff)
 	conn.commit()
 
 def parseFlankGap(conn, dist):
@@ -1301,7 +1308,7 @@ def parseFlankGap(conn, dist):
 			WHERE
 				v.value = "-"
 			AND
-				v.column <= (r.stop + CAST(%s as integer)) AND v.column >= (r.start-CAST(%s as integer))
+				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
 			GROUP BY
 				r.regid)
 		UPDATE
@@ -1310,8 +1317,9 @@ def parseFlankGap(conn, dist):
 			gap = gap + (SELECT counts FROM other WHERE regions.regid = other.regid)
 		WHERE
 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''%(dist, dist)
-	cur.execute(sql3)
+	'''
+	stuff = [dist, dist]
+	cur.execute(sql3, stuff)
 	conn.commit()
 
 #Function to parse variants table to population flanking character columns for regions table
@@ -1417,11 +1425,11 @@ def simpleFilterTargets_gap(conn, thresh):
 #Function to update REGIONS table based on existing Bad attribute
 def simpleFilterTargets_bad(conn, thresh):
 	cur = conn.cursor()
-	cur.execute("UPDATE regions SET pass=0 WHERE bad > %s"%thresh)
+	cur.execute("UPDATE regions SET pass=0 WHERE bad > ?", (thresh,))
 	conn.commit()
 
 #Function to update REGIONS table based on existing vars attribute
 def simpleFilterTargets_SNP(conn, minS, maxS):
 	cur = conn.cursor()
-	cur.execute("UPDATE regions SET pass=0 WHERE vars < %s OR vars > %s"%(minS,maxS))
+	cur.execute("UPDATE regions SET pass=0 WHERE vars < ? OR vars > ?",(minS,maxS))
 	conn.commit()
