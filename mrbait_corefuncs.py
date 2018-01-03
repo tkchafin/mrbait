@@ -78,12 +78,19 @@ def loadFASTA(conn, params):
 #Function to load GFF file into database
 def loadGFF(conn, params):
 	print("Trying to load GFF")
+	gffid = 1
 	for record in gff.read_gff(params.gff):
-		#if record["attributes"]["alias"]:
-		#	t = record['attributes']['alias']
-		#	print(record["seqid"], record["start"], record["end"], t)
-		#else:
-		print(record["seqid"], record["start"], record["end"], record["attributes"])
+		#Get the alias, if it exists
+		alias = ""
+		if record.getAlias(): #returns false if no alias
+			alias = record.getAlias()
+			print("Alias is",alias)
+		else:
+			alias = "NULL"
+			print("There is no alias!")
+		gff_type = record.type
+
+		gffid += 1
 	sys.exit()
 
 
