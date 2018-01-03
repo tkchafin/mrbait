@@ -77,8 +77,7 @@ def loadFASTA(conn, params):
 
 #Function to load GFF file into database
 def loadGFF(conn, params):
-	print("Trying to load GFF")
-	gffid = 1
+	#For each GFF record in params.gff
 	for record in gff.read_gff(params.gff):
 		#Skip any records that are missing the sequence ID, or coordinates
 		if record.seqid == "NULL" or record.start == "NULL" or record.end == "NULL":
@@ -87,14 +86,12 @@ def loadGFF(conn, params):
 		alias = ""
 		if record.getAlias(): #returns false if no alias
 			alias = record.getAlias()
-			print("Alias is",alias)
 		else:
 			alias = "NULL"
-			print("There is no alias!")
-		m.add_gff_record(conn, record.seqid, record.type, record.start, record.end, alias)
+		m.add_gff_record(conn, record.seqid, record.type.lower(), record.start, record.end, alias)
 
-		gffid += 1
-	sys.exit()
+	#Check if all GFF records fall within bounds of
+	m.verifyGFFRecords(conn)
 
 
 #Function to load VCF variants file

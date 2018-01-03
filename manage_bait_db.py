@@ -52,10 +52,10 @@ def init_new_db(connection):
 
 	#Table holding GFF element information
 	cursor.execute('''
-		CREATE TABLE gff(gffid PRIMARY KEY, seqid INTEGER NOT NULL,
+		CREATE TABLE gff(gffid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
 			type TEXT NOT NULL, start INTEGER NOT NULL,
-			stop INTEGER NOT NULL, alias TEXT,
-			FOREIGN KEY (seqid) REFERENCES loci(id))
+			stop INTEGER NOT NULL, alias TEXT, pass INTEGER NOT NULL,
+			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
 
 	cursor.execute('''
@@ -137,6 +137,10 @@ def getRegions(conn):
 def getBaits(conn):
 	return(pd.read_sql_query("""SELECT * FROM baits """, conn))
 
+#Function to return GFF table as pandas DataFrame
+def getGFF(conn):
+	return(pd.read_sql_query("""SELECT * FROM gff """, conn))
+
 #Function to return baits table
 def getPassedBaits(conn):
 	return(pd.read_sql_query("""SELECT * FROM baits WHERE pass=1""", conn))
@@ -159,6 +163,7 @@ def add_locus_record(conn, depth, consensus, passed, name):
 	except sqlite3.IntegrityError as err:
 		print("Constraint failed: Skipping locus \"%s\" because it already exists, this is usually caused by duplicate headers when parsing a FASTA file."%name)
 	return cur.lastrowid
+
 
 #Code to add record to 'bait' table
 def add_bait_record(conn, reg, seq, start, stop, mask, gc):
@@ -184,12 +189,11 @@ def add_gff_record(conn,seqid, gff_type, start, stop, alias):
 		locid = res[0]
 		print("Locid for",seqid,"is:",locid)
 		#BUILT INSERT SQL
-		sql = ''' INSERT INTO gff(seqid, type, start, stop, alias)
-					VALUES(?,?,?,?,?);'''
+		sql = ''' INSERT INTO gff(locid, type, start, stop, alias, pass)
+					VALUES(?,?,?,?,?,1);'''
 		stuff = [int(locid), str(gff_type), int(start), int(stop), str(alias)]
 		cur.execute(sql, stuff)
 		conn.commit()
-
 
 #Code to add to 'variants' table
 def add_variant_record(conn, loc, pos, val):
@@ -224,6 +228,25 @@ def add_region_record(conn, locid, start, stop, seq, counts, mask, gc):
 	#insert
 	cur.execute(sql, stuff)
 	conn.commit()
+
+
+#Function to FAIL any GFF elements that do not overlap with our sequence for the given locus/region
+def validateGFFRecords(conn):
+	cur = conn.cursor()
+
+	sql = '''
+		UPDATE
+			gff
+		SET
+			pass = 0
+		WHERE gffid IN
+			(SELECT gffid FROM
+				gff INNER JOIN loci ON gff.locid = loci.id
+			WHERE
+				(gff.start > loci.length) AND (gff.stop > loci.length)
+			);
+	'''
+
 
 #Function to filter regions relation by minimum flanking SNPs
 def regionFilterMinVar(conn, val, flank):

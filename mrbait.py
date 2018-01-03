@@ -56,7 +56,7 @@ elif params.assembly:
 	#Load assembly file
 	print("Loading FASTA file:",params.assembly)
 	core.loadFASTA(conn, params)
-	
+
 	#If VCF file
 	if params.vcf:
 		print("Loading VCF file:",params.vcf)
@@ -66,6 +66,8 @@ elif params.assembly:
 	if params.gff:
 		print("Loading GFF file:",params.gff)
 		core.loadGFF(conn, params)
+		print(m.getGFF(conn))
+		sys.exit()
 else:
 	#Option to load .loci alignment goes here!
 	print("No alignment input found. .fasta, .gff, and support not added yet!")
@@ -78,11 +80,13 @@ passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
 if passedLoci.shape[0] <= 0:
 	sys.exit("Program killed: No loci passed filtering.")
 
+#TODO: Could add an option here to extract GFF elements, and ONLY design baits for those?
+
 #Target region discovery according to params set
 core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 #Assert that there are TRs chosen, and that not all have been filtered out
-#core.checkTargetRegions(conn)
+core.checkTargetRegions(conn)
 
 #Filter target regions
 #If multiple regions NOT allowed, need to choose which to keep
