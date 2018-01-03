@@ -29,7 +29,7 @@ import mrbait_corefuncs as core
 	#Change format of SQL executes from:
 		#cur.execute("SELECT * FROM platforms WHERE language = '%s';" % platform)
 	#to:
-		#cur.execute("SELECT * FROM platforms WHERE language = %s;", (platform,))
+		#cur.execute("SELECT * FROM platforms WHERE language = ?;", (platform,))
 	#in order to sanitize inputs and prevent SQL injection potential
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
@@ -56,11 +56,12 @@ elif params.assembly:
 	#Load assembly file
 	print("Loading FASTA file:",params.assembly)
 	core.loadFASTA(conn, params)
+	
 	#If VCF file
 	if params.vcf:
 		print("Loading VCF file:",params.vcf)
 		core.loadVCF(conn, params)
-		
+
 	#if GFF file
 	if params.gff:
 		print("Loading GFF file:",params.gff)
