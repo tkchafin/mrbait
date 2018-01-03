@@ -20,6 +20,34 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(o, int)
     return ((n*l)-((n-1)*o))
 
+#Function for checking if two things with start and end coordinates overlap on single axis
+#Line segment overlap
+def checkOverlap(row1, row2, dist):
+	#This could be made much more concise
+	x2 = row2["start"]
+	y2 = row2["stop"]
+	x1 = (row1["start"]-dist)
+	y1 = (row1["stop"]+dist)
+
+	if x1 < 0:
+		x1 = 0
+
+	# print("x1=",x1)
+	# print("y1=",y1)
+	# print("x2=",x2)
+	# print("y2=",y2)
+	#Left edge of row1 overlaps right edge of row2
+	if (x2 < x1) and (y2 >= x1):
+		return 1
+	#Right edge of row1 overlaps left edge of row2
+	elif (x2 <= y1) and (y2 > y1):
+		return 1
+	#Row 2 completely overlapped by row1
+	elif (x2 >= x1 and y2 > x1) and (x2 < y1 and y2 <= y1):
+		return 1
+	else:
+		return 0
+
 #Function to sanitize strings of any URLs, and replace them with "<REMOVED URL>"
 def removeURL(st):
 	return(re.sub(r'^https?:\/\/.*[\r\n]*', '', st, flags=re.MULTILINE))
