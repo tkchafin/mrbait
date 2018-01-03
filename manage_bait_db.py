@@ -172,6 +172,25 @@ def add_bait_record(conn, reg, seq, start, stop, mask, gc):
 	conn.commit()
 	return cur.lastrowid
 
+#Code to add record to 'bait' table
+def add_gff_record(conn,seqid, gff_type, start, stop, alias):
+	cur = conn.cursor()
+
+	#Query seqid for given chrom
+	cur.execute("SELECT id FROM loci WHERE chrom = ?;",(seqid,))
+	res = cur.fetchone()
+	if res is not None:
+		#If any match exists, fetch locid
+		locid = res[0]
+		print("Locid for",seqid,"is:",locid)
+		#BUILT INSERT SQL
+		sql = ''' INSERT INTO gff(seqid, type, start, stop, alias)
+					VALUES(?,?,?,?,?);'''
+		stuff = [int(locid), str(gff_type), int(start), int(stop), str(alias)]
+		cur.execute(sql, stuff)
+		conn.commit()
+
+
 #Code to add to 'variants' table
 def add_variant_record(conn, loc, pos, val):
 	#Establish cursor
@@ -223,12 +242,13 @@ def regionFilterMinVar(conn, val, flank):
 			WHERE
 				value != "N" AND value != "-"
 			AND
-				((column < (stop+%s)) AND (column > start-%s))
+				((column < (stop+?)) AND (column > start-?))
 			GROUP BY regid)
-			WHERE counts < %s);
+			WHERE counts < ?);
 
 	'''%(flank, flank, val)
-	cur.execute(sql)
+	stuff = [flank, flank, val]
+	cur.execute(sql, stuff)
 	conn.commit()
 
 #Function to filter regions relation by maximum flanking SNPs
