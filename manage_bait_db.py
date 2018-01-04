@@ -122,11 +122,7 @@ def getNumTRs(conn):
 		 	regions
 	'''
 	cur.execute(check)
-	res = cur.fetchone()
-	if res is None:
-		return(0)
-	else:
-		return(res[0])
+	return(parseFetchNum(cur.fetchone()))
 
 #Function returns pandas dataframe of passedLoci
 def getNumPassedTRs(conn):
@@ -140,11 +136,7 @@ def getNumPassedTRs(conn):
 			pass=1
 	'''
 	cur.execute(check)
-	res = cur.fetchone()
-	if res is None:
-		return(0)
-	else:
-		return(res[0])
+	return(parseFetchNum(cur.fetchone()))
 
 #Function to return loci table
 def getLoci(conn):
