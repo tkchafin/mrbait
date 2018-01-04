@@ -235,7 +235,7 @@ def filterTargetRegions(conn, params):
 			seqs = m.getPassedTRs(conn)
 			fas = params.workdir + "/.temp.fasta"
 			aln_file_tools.writeFasta(seqs, fas)
-			outfile = params.workdir + "/" + params.out + ".blast"
+			outfile = params.workdir + "/.temp.blast"
 			if option.o1 == "blast_x":
 				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
 				m.removeRegionsByList(conn, blacklist)
@@ -247,6 +247,7 @@ def filterTargetRegions(conn, params):
 				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
 				#m.removeRegionsByList(conn, blacklist)
 			os.remove(fas)
+			os.remove(outfile)
 			#sys.exit()
 		elif option.o1 in ("gff", "gff_a"):
 			if params.gff and params.assembly:
@@ -352,7 +353,7 @@ def checkTargetRegions(conn):
 #Function for deduplication of targets by pairwise alignment
 def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
-	fas = params.workdir + "/.temp.fasta"
+	fas = params.workdir + "/.temp_ref.fasta"
 	aln_file_tools.writeFasta(seqs, fas)
 
 	#First sort FASTA by size
@@ -392,7 +393,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Returns a list of edges
 	ret = vsearch.parsePairwiseAlign(pw)
-	#os.remove(pw)
+	os.remove(pw)
 	return(ret)
 
 

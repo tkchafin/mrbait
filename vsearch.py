@@ -58,7 +58,7 @@ def sortByLength(binary, seqpath, outpath):
 def parsePairwiseAlign(filename):
 	#Function assumes id's are the first 2 positions, and prepended with "id_"
 	#Also assumes file is tab delimited
-	print("parsing pw file")
+	#print("parsing pw file")
 	bad_ids = []
 	filehandle = open(filename, "r")
 	for line in filehandle:

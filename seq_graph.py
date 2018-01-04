@@ -52,7 +52,7 @@ def naiveIndependentSet(G):
 def weightedNaiveIndependentSet(G, weights):
 	#Make a copy of graph
 	C = G.copy()
-	print(weights)
+	#print(weights)
 	#Loop through ALL edges
 	for n in G.edges_iter():
 		#If either node has been trimmed from Copy, skip.
@@ -103,7 +103,7 @@ def edgeResolveApproximate(edges):
 	for i in blacklist:
 		if i not in kept:
 			remove.append(i)
-			print(i)
+			#print(i)
 	#print("Removing:",remove)
 	return(remove) #return list of nodes that were removed.
 
@@ -119,7 +119,7 @@ def edgeResolveWeighted(edges, weights):
 	for i in blacklist:
 		if i not in kept:
 			remove.append(i)
-			print(i)
+			#print(i)
 	#print("Removing:",remove)
 	return(remove) #return list of nodes that were removed.
 
