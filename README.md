@@ -4,7 +4,12 @@
 
 Python program for universal design of targeted-enrichment probes from multiple input datatypes. Can be used to generate probe sets for ultraconserved elements, anchored enrichment, RAD-capture, etc. 
 
-### Dependencies: ###
+## Installation
+I currently only support installation on Linux and Mac OS. Sorry, Windows users, you're on your own! :) 
+
+<Fill in later>
+
+### Dependencies: 
 1. Python 3
 2. sqlite3 and Python package
 3. Biopython
