@@ -361,14 +361,11 @@ class parseArgs():
 				self.filter_r_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('snp','mask','gc','len', "pw", "blast_i", "blast_x", "blast_a"): #TODO: Add blast options
+				if subopts[0] in ('snp','gc','len', "pw", "blast_i", "blast_x", "blast_a"):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
 					if subopts[0] == 'gc':
 						assert 0.0 <= float(subopts[1]) < float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
-					elif subopts[0] == 'mask':
-						assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_r> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
-						self.filter_r_objects.append(subArg(subopts[0],float(subopts[1])))
 					elif subopts[0] == "len":
 						assert subopts[1] < subopts[2], "In <--filter_r> suboption \"%s\": Min must be less than max"%subopts[0]
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
@@ -383,9 +380,13 @@ class parseArgs():
 						assert isinstance(minS, int), "--filter_r suboption snp: Minimum must be an integer"
 						assert isinstance(maxS, int), "--filter_r suboption snp: Maximum must be an integer"
 						self.filter_r_objects.append(subArg(subopts[0],minS,maxS))
-				elif subopts[0] in ('rand','gap','bad'):
+
+				elif subopts[0] in ('rand','gap','bad', 'mask', 'gff', 'gff_a'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_r>" %subopts[0]
-					self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
+					if subopts[0] in ("gff", "gff_a"):
+						self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
+					else:
+						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
 				else:
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 

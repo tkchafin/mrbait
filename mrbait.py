@@ -22,7 +22,7 @@ import mrbait_corefuncs as core
 #TODO: Option to print LOCI, TARGETS to fasta files?
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
 #TODO: Filter targets and baits by low-complexity (Dusting)
-#TODO: Option to apply SDUST to all loci, and pass/fail loci/alignments on complexity 
+#TODO: Option to apply SDUST to all loci, and pass/fail loci/alignments on complexity
 #TODO: Python implementation of SDUST algorithm (gonna be a lot of work, hold off for now)
 #TODO: Option to output baits as +, -, or both strands
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
@@ -120,9 +120,9 @@ core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 print("\n\nProgram ending...Here are some results\n\n")
 
 print(m.getLoci(conn))
-print(m.getVariants(conn))
+#print(m.getVariants(conn))
 print(m.getRegions(conn))
-print(m.getBaits(conn))
+#print(m.getBaits(conn))
 
 conn.commit()
 conn.close()

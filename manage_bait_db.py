@@ -106,10 +106,22 @@ def parseFetchNum(fet):
 	else:
 		return fet[0]
 
-#Function returns pandas dataframe of passed targets
+#returns number of variants
 def getNumVars(conn):
 	cur = conn.cursor()
 	cur.execute("""SELECT count(varid) FROM variants""")
+	return(parseFetchNum(cur.fetchone()))
+
+#returns number of GFF elements
+def getNumGFF(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(gffid) FROM gff""")
+	return(parseFetchNum(cur.fetchone()))
+
+#returns number of GFF elements
+def getNumPassedGFF(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(gffid) FROM gff WHERE pass = 1""")
 	return(parseFetchNum(cur.fetchone()))
 
 #Function returns pandas dataframe of passed targets
@@ -1264,6 +1276,30 @@ def baitFilterRandom(conn, num):
 		cur.execute(sql, stuff)
 		conn.commit()
 
+#Function to filter targets by proximity or overlap with GFF records
+def regionFilterGFF(conn, gff_type, dist):
+	cur = conn.cursor()
+
+	if getNumGFF(conn) > 0:
+		if getNumPassedGFF(conn) > 0:
+			if gff_type == "all":
+				pass
+			else:
+				"""
+				FUCKED IT UP
+				TRY AGAIN 
+				"""
+				stuff = [dist, dist, gff_type]
+				cur.execute(sql, stuff)
+		else:
+			cur.execute("UPDATE gff SET pass = 0")
+			print("WARNING: All GFF records failed. Because you chose to filter target regions on proximity to GFF records, no targets will be retained.")
+	else:
+		print("WARNING: No GFF records present in database. Skipping target region filtering on proximity to GFF records.")
+
+	conn.commit()
+
+
 #Function to parse variants table to update regions VARS for flanking information
 def parseFlankVars(conn, dist):
 	cur = conn.cursor()
@@ -1342,6 +1378,7 @@ def parseFlankGap(conn, dist):
 	stuff = [dist, dist]
 	cur.execute(sql3, stuff)
 	conn.commit()
+
 
 #Function to parse variants table to population flanking character columns for regions table
 def flankDistParser(conn, dist):
