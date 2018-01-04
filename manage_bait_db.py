@@ -94,9 +94,9 @@ def filterLoci(conn, minlen, mincov):
 def getPassedLoci(conn):
 	return(pd.read_sql_query("""SELECT id, consensus, chrom FROM loci WHERE pass=1""", conn))
 
-#Function to get the number of variables in database
-def getNumVars(conn):
-	return(pd.read_sql_query("""SELECT id, consensus, chrom FROM loci WHERE pass=1""", conn))
+#Function returns a Pandas DataFrame of passing target regions
+def getPassedTRs(conn):
+	return(pd.read_sql_query("""SELECT regid, sequence FROM regions WHERE pass=1""", conn))
 
 #Function to parse fetchone() results (internal)
 def parseFetchNum(fet):
@@ -105,12 +105,21 @@ def parseFetchNum(fet):
 	else:
 		return fet[0]
 
-
 #Function returns pandas dataframe of passed targets
-def getPassedTRs(conn):
+def getNumVars(conn):
 	cur = conn.cursor()
 	cur.execute("""SELECT count(varid) FROM variants""")
 	return(parseFetchNum(cur.fetchone()))
+
+#Function returns pandas dataframe of passed targets
+def getNumConflicts(conn):
+	cur = conn.cursor()
+	try:
+		cur.execute("""SELECT count(*) FROM conflicts""")
+		return(parseFetchNum(cur.fetchone()))
+	except OperationalError:
+		return(False)
+
 
 #Function returns pandas dataframe of passedLoci
 def getNumTRs(conn):
