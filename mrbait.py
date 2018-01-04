@@ -34,6 +34,7 @@ import mrbait_corefuncs as core
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
 #TODO: Remove --no_mask and add --max_mask, or maximum MASK proportion allowed for locus to pass
+#TODO: Add better logging. 
 
 #Parse Command line arguments
 params = parseArgs()

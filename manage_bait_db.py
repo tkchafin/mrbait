@@ -2,6 +2,7 @@
 
 import sys
 import sqlite3
+from sqlite3 import OperationalError
 import pandas as pd
 
 #Function to create database connection
