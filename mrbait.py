@@ -116,10 +116,9 @@ print("Starting probe design...")
 core.checkTargetRegions(conn)
 
 #Sliding window bait discovery
-passedTargets = m.getPassedTRs(conn)
-if passedTargets.shape[0] <= 0:
+if m.getNumPassedTRs(conn) <= 0:
 	sys.exit("Program killed: No targets passed filtering.")
-core.baitDiscovery(conn, params, passedTargets)
+core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 
 #print
 

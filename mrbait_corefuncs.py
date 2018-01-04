@@ -248,6 +248,11 @@ def filterTargetRegions(conn, params):
 				#m.removeRegionsByList(conn, blacklist)
 			os.remove(fas)
 			#sys.exit()
+		elif option.o1 in ("gff", "gff_a"):
+			if params.gff and params.assembly:
+				pass
+			else:
+				sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
 		else:
 			assert False, "Unhandled option %r"%option
 
@@ -290,48 +295,49 @@ def selectTargetRegions(conn, params):
 
 	#NEXT: Need to select TRs within conflict_blocks
 	#TODO: First fetch how many conflicts, if there are none, then EXIT FUNCTION
+	if m.getNumConflicts(conn) > 0:
 
-	#Apply select_r filters for all conflicting TRs
-	if params.select_r == "rand":
-		print("--select_r is RANDOM")
-		#Do it later
-		pass
-	elif params.select_r == "snp":
-		#Select based on SNPs flanking in "d" dist
+		#Apply select_r filters for all conflicting TRs
+		if params.select_r == "rand":
+			print("--select_r is RANDOM")
+			#Do it later
+			pass
+		elif params.select_r == "snp":
+			#Select based on SNPs flanking in "d" dist
+			try:
+				#TODO: Change to parse flank first and populate in table
+				m.regionSelect_SNP(conn)
+			except ValueError as err:
+				sys.exit(err.args)
+		#	except:
+			#	sys.exit(sys.exc_info()[0])
+		elif params.select_r == "bad":
+			#Select based on least Ns and gaps in "d" flanking bases
+			try:
+				m.regionSelect_MINBAD(conn)
+			except ValueError as err:
+				sys.exit(err.args)
+		elif params.select_r == "cons":
+			#Select based on minimizing SNPs in flanking region
+			#TODO: Implement flankDistParser first!!!
+			try:
+				m.regionSelect_MINSNP(conn)
+			except ValueError as err:
+				sys.exit(err.args)
+		else:
+			assert False, "Unhandled option %r"%params.select_r
+
+		#randomly resolve any remaining conflicts
 		try:
-			#TODO: Change to parse flank first and populate in table
-			m.regionSelect_SNP(conn)
+			m.regionSelectRandom(conn)
 		except ValueError as err:
 			sys.exit(err.args)
-	#	except:
-		#	sys.exit(sys.exc_info()[0])
-	elif params.select_r == "bad":
-		#Select based on least Ns and gaps in "d" flanking bases
-		try:
-			m.regionSelect_MINBAD(conn)
-		except ValueError as err:
-			sys.exit(err.args)
-	elif params.select_r == "cons":
-		#Select based on minimizing SNPs in flanking region
-		#TODO: Implement flankDistParser first!!!
-		try:
-			m.regionSelect_MINSNP(conn)
-		except ValueError as err:
-			sys.exit(err.args)
-	else:
-		assert False, "Unhandled option %r"%params.select_r
+		except:
+				sys.exit(sys.exc_info()[0])
+		#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
-	#randomly resolve any remaining conflicts
-	try:
-		m.regionSelectRandom(conn)
-	except ValueError as err:
-		sys.exit(err.args)
-	except:
-			sys.exit(sys.exc_info()[0])
-	print(pd.read_sql_query("SELECT * FROM conflicts", conn))
-
-	#NEXT: Push conflicts to change "pass" attribute in regions table
-	m.pushResolvedConflicts(conn)
+		#NEXT: Push conflicts to change "pass" attribute in regions table
+		m.pushResolvedConflicts(conn)
 
 #Function to check that target regions table is valid to continue
 def checkTargetRegions(conn):

@@ -115,11 +115,10 @@ def getNumVars(conn):
 def getNumConflicts(conn):
 	cur = conn.cursor()
 	try:
-		cur.execute("""SELECT count(*) FROM conflicts""")
+		cur.execute("""SELECT count(*) FROM what""")
 		return(parseFetchNum(cur.fetchone()))
 	except OperationalError:
 		return(False)
-
 
 #Function returns pandas dataframe of passedLoci
 def getNumTRs(conn):
