@@ -22,19 +22,13 @@ import mrbait_corefuncs as core
 #TODO: Option to print LOCI, TARGETS to fasta files?
 #TODO: Keep vsearch and blast outfiles, remain to desired paths.
 #TODO: Filter targets and baits by low-complexity (Dusting)
+#TODO: Option to apply SDUST to all loci, and pass/fail loci/alignments on complexity 
 #TODO: Python implementation of SDUST algorithm (gonna be a lot of work, hold off for now)
 #TODO: Option to output baits as +, -, or both strands
-#TODO: NEED a function to sanitize inputs to SQL db before inserting them.
-	#To prevent potential of SQL injection fuckery
-	#Change format of SQL executes from:
-		#cur.execute("SELECT * FROM platforms WHERE language = '%s';" % platform)
-	#to:
-		#cur.execute("SELECT * FROM platforms WHERE language = ?;", (platform,))
-	#in order to sanitize inputs and prevent SQL injection potential
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
 #TODO: Remove --no_mask and add --max_mask, or maximum MASK proportion allowed for locus to pass
-#TODO: Add better logging. 
+#TODO: Add better logging.
 
 #Parse Command line arguments
 params = parseArgs()
