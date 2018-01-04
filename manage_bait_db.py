@@ -94,9 +94,23 @@ def filterLoci(conn, minlen, mincov):
 def getPassedLoci(conn):
 	return(pd.read_sql_query("""SELECT id, consensus, chrom FROM loci WHERE pass=1""", conn))
 
+#Function to get the number of variables in database
+def getNumVars(conn):
+	return(pd.read_sql_query("""SELECT id, consensus, chrom FROM loci WHERE pass=1""", conn))
+
+#Function to parse fetchone() results (internal)
+def parseFetchNum(fet):
+	if fet is None:
+		return 0
+	else:
+		return fet[0]
+
+
 #Function returns pandas dataframe of passed targets
 def getPassedTRs(conn):
-	return(pd.read_sql_query("""SELECT regid, sequence FROM regions WHERE pass=1""", conn))
+	cur = conn.cursor()
+	cur.execute("""SELECT count(varid) FROM variants""")
+	return(parseFetchNum(cur.fetchone()))
 
 #Function returns pandas dataframe of passedLoci
 def getNumTRs(conn):
@@ -108,8 +122,11 @@ def getNumTRs(conn):
 		 	regions
 	'''
 	cur.execute(check)
-
-	return((cur.fetchone()[0]))
+	res = cur.fetchone()
+	if res is None:
+		return(0)
+	else:
+		return(res[0])
 
 #Function returns pandas dataframe of passedLoci
 def getNumPassedTRs(conn):
@@ -123,8 +140,11 @@ def getNumPassedTRs(conn):
 			pass=1
 	'''
 	cur.execute(check)
-
-	return((cur.fetchone()[0]))
+	res = cur.fetchone()
+	if res is None:
+		return(0)
+	else:
+		return(res[0])
 
 #Function to return loci table
 def getLoci(conn):
