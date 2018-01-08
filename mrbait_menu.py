@@ -165,7 +165,7 @@ Output options:
 		--\"N\"s are expanded as [ACGT]
 	--strand	: Output strand. Options: "+", "-", "both"
 		--"-" means to reverse complement bait sequences
-	-o,--out	: Output directory and prefix [e.g. ./baits/run1]""")
+	-o,--out	: Prefix for output files""")
 
 	#SPLIT option not figured out yet
 	print("""
@@ -273,8 +273,8 @@ class parseArgs():
 		#Output options
 		self.expand = 0
 		self.strand = "+"
-		self.out = None
-		self.workdir = None
+		self.out = ""
+		self.workdir = ""
 		self.threads = 1
 
 		self.ploidy=2
@@ -548,18 +548,12 @@ class parseArgs():
 			self.mask = 1.0
 
 		#Get working dir path and output prefix
-		if self.out is None:
+		if self.out == "":
 			self.out = "baits"
-			self.workdir = utils.getWorkingDir()
-		else:
-			self.workdir, self.out = ntpath.split(self.out)
-			if self.out == "":
-				self.out = "baits"
-			if self.workdir == "":
-				self.workdir = os.getcwd()
+		self.workdir = utils.getWorkingDir()
 		if self.db == "":
 			self.db = self.workdir + "/" + self.out + ".sqlite"
-		print("Working directory: ", self.workdir)
+		print("Database is:", self.db)
 		print("Prefix is: ", self.out)
 
 

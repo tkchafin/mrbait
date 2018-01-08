@@ -10,12 +10,8 @@ import sequence_tools as s
 #Function to create database connection
 #Add code later to enable re-running from existing database
 def create_connection(db):
-	try:
-		conn = sqlite3.connect(db)
-		return conn
-	except Error as e:
-		print(e)
-	return None
+	conn = sqlite3.connect(db)
+	return conn
 
 
 #Initialize empty databases
