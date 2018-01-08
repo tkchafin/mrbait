@@ -1,6 +1,6 @@
 __pycache__
 __pycache__/*
-mrbait.sqlite
+*.sqlite
 blastdb
 blastdb.*
 .temp*
