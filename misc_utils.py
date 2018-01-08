@@ -6,6 +6,13 @@ import os.path
 import pandas as pd
 import re
 
+#Function to calculate overlap of two 1D line segments
+#Found on StackOverflow
+#https://stackoverflow.com/questions/16691524/calculating-the-overlap-distance-of-two-1d-line-segments
+def calcOverlap(min1, max1, min2, max2):
+	return max(0, min(max1, max2) - max(min1, min2))
+
+
 #Function to check if a file path is valid
 def fileCheck(f):
 	return (os.path.isfile(f))
