@@ -50,9 +50,25 @@ def seqCounterSimple(seq):
 	return d
 
 #Function to get GC content of a provided sequence
-def gc_content(string):
+def gc_counts(string):
 	new = re.sub('[GCgc]','#',string)
 	return sum(1 for c in new if c == '#')
+
+#Function to get counts of masked bases
+def mask_counts(string):
+	return sum(1 for c in string if c.islower())
+
+
+#Function to get GC content as proportion
+def gc_content(string):
+	new = re.sub('[GCgc]','#',string)
+	count = sum(1 for c in new if c == '#')
+	return(count/(len(string)))
+
+#Function to count number of lower case in a string
+def mask_content(string):
+	count = sum(1 for c in string if c.islower())
+	return(count/(len(string)))
 
 #generator to create sliding windows by slicing out substrings
 def seqSlidingWindowString(seq, shift, width=2):
