@@ -51,7 +51,8 @@ Alignment filtering/ consensus options (use with -M or -L inputs):
 	-c,--cov	: Minimum number of sequences per alignment, for MAF or LOCI input [1]
 	-l,--len	: Minimum alignment length to attempt bait design [80]
 	-t,--thresh	: Minimum proportion for gap/N to include in consensus [0.1]
-	-k,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]""")
+	-k,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]
+	-K, --max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.1]""")
 
 	print("""
 General Bait Design options:
@@ -169,9 +170,6 @@ General options:
 
 	-W,--tile_all	: Tile baits across all target regions
 		--Skips target filtering and selection, and just tiles all
-	-K, --no_mask	: Ignore all masking information [boolean]
-	-Q,--quiet	: Shut up and run - don't output ANYTHING to stdout
-		--Errors and assertions are not affected
 	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
 	-h,--help	: Displays this help menu
 	""")
@@ -189,13 +187,13 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:QXo:Pk:Kd:T:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:QXo:Pk:K:d:T:', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=",
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
 			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb=",
 			"select_b=","filter_b=","quiet","expand","out=",
-			"plot_all","mask=","no_mask", "flank_dist=","vsearch=",
+			"plot_all","mask=","max_mask=","flank_dist=","vsearch=",
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust"])
@@ -218,6 +216,7 @@ class parseArgs():
 		self.minlen=None
 		self.thresh=0.1
 		self.mask=0.1
+		self.max_mask=0.1
 
 		#Bait params
 		self.blen=80
@@ -319,6 +318,8 @@ class parseArgs():
 				self.thresh = float(arg)
 			elif opt in ('-k', '--mask'):
 				self.mask = float(arg)
+			elif opt in ('-K', '--max_mask'):
+				self.max_mask = float(arg)
 
 			#Bait general params
 			elif opt in ('-b', '--bait'):
@@ -433,8 +434,6 @@ class parseArgs():
 			#Running options
 			elif opt in ('-Q', '--quiet'):
 				self.stfu = 1
-			elif opt in ('-K', '--no_mask'):
-				self.no_mask = 1
 
 			#vsearch options
 			elif opt == ("--vsearch"):
