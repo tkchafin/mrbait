@@ -1307,18 +1307,7 @@ def regionFilterGFF(conn, gff_type, dist):
 				"""
 				df = pd.read_sql_query(sql, conn, params=(gff_type,))
 
-			#Check for records which overlap with GFF item
-			for index, row in df.iterrows():
-				min1 = row["start"] - dist or 0
-				min2 = row["gff_start"]
-				max1 = row["stop"] + dist
-				max2 = row["gff_stop"]
-				#If no overlap (overlap distance <= 0), set 'pass' to 0/FAIL
-				if utils.calcOverlap(min1, max1, min2, max2) <= 0:
-					df.loc[index, "pass"] = 0
-
-			#Get list of passed targets, pass list to FAIL all non-whitelisted targets
-			whitelist = df[df["pass"]==1].regid.unique()
+			whitelist = parseJoinGFFTable(df, dist)
 			removeRegionsByWhitelist(conn, whitelist)
 
 			"""
@@ -1329,12 +1318,67 @@ def regionFilterGFF(conn, gff_type, dist):
 				This should also fail the case where NO GFF RECORDS TO JOIN or gff record was failed
 			"""
 		else:
-			cur.execute("UPDATE gff SET pass = 0")
+			cur.execute("UPDATE regions SET pass = 0")
 			print("WARNING: No GFF records passed quality control. Because you chose to filter target regions on proximity to GFF records, no targets will be retained.")
 	else:
 		print("WARNING: No GFF records present in database. Skipping target region filtering on proximity to GFF records.")
-
 	conn.commit()
+
+#Function to filter targets by proximity or overlap with GFF records
+def regionFilterGFF_Alias(conn, gff_type, dist):
+	cur = conn.cursor()
+
+	if getNumGFF(conn) > 0:
+		if getNumPassedGFF(conn) > 0:
+			df = pd.DataFrame() #empty pandas DF
+			#If get GFF by type:
+			if gff_type == "all":
+				sql = """
+					SELECT regid, regions.start, regions.stop, regions.pass,
+						gffid, gff.start AS gff_start, gff.stop AS gff_stop
+					FROM
+						regions INNER JOIN gff ON regions.locid = gff.locid
+					WHERE
+						regions.pass = 1 AND gff.pass = 1 AND gff.alias != "NULL"
+				"""
+				df = pd.read_sql_query(sql, conn)
+			else:
+				#Query database to get targets with passing GFFs
+				sql = """
+					SELECT regid, regions.start, regions.stop, regions.pass,
+						gffid, gff.start AS gff_start, gff.stop AS gff_stop
+					FROM
+						regions INNER JOIN gff ON regions.locid = gff.locid
+					WHERE
+						regions.pass = 1 AND gff.pass = 1 AND gff.alias = ?
+				"""
+				df = pd.read_sql_query(sql, conn, params=(gff_type,))
+
+			#Get list of passed targets, pass list to FAIL all non-whitelisted targets
+			whitelist = parseJoinGFFTable(df, dist)
+			removeRegionsByWhitelist(conn, whitelist)
+
+		else:
+			cur.execute("UPDATE regions SET pass = 0")
+			print("WARNING: No GFF records passed quality control. Because you chose to filter target regions on proximity to GFF records, no targets will be retained.")
+	else:
+		print("WARNING: No GFF records present in database. Skipping target region filtering on proximity to GFF records.")
+	conn.commit()
+
+#Function to parse an INNER JOIN regions/gff table for overlapping fragments, and return whitelist
+def parseJoinGFFTable(df, dist):
+	for index, row in df.iterrows():
+		min1 = row["start"] - dist or 0
+		min2 = row["gff_start"]
+		max1 = row["stop"] + dist
+		max2 = row["gff_stop"]
+		#If no overlap (overlap distance <= 0), set 'pass' to 0/FAIL
+		if utils.calcOverlap(min1, max1, min2, max2) <= 0:
+			df.loc[index, "pass"] = 0
+
+	#Get list of passed targets, pass list to FAIL all non-whitelisted targets
+	whitelist = df[df["pass"]==1].regid.unique()
+	return(whitelist)
 
 
 #Function to parse variants table to update regions VARS for flanking information

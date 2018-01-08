@@ -253,10 +253,8 @@ def filterTargetRegions(conn, params):
 			if params.gff and params.assembly:
 				if option.o1 == "gff":
 					m.regionFilterGFF(conn, option.o2, params.flank_dist)
-					pass
 				elif option.o1 == "gff_a":
-					#m.regionFilterGFF_Alias(conn, option.o2)
-					pass
+					m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
 			else:
 				sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
 		else:
