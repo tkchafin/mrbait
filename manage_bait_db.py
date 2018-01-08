@@ -5,6 +5,7 @@ import sqlite3
 from sqlite3 import OperationalError
 import pandas as pd
 import misc_utils as utils
+import sequence_tools as s
 
 #Function to create database connection
 #Add code later to enable re-running from existing database
@@ -30,7 +31,7 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
-			chrom TEXT,
+			chrom TEXT, ambig REAL, gap REAL, mask REAL, gc REAL,
 			UNIQUE(chrom) ON CONFLICT ROLLBACK)
 	''') #chrom only relevant if --assembly
 
@@ -78,7 +79,7 @@ def init_new_db(connection):
 	connection.commit()
 
 #Function to filter loci by coverage and length
-def filterLoci(conn, minlen, mincov):
+def filterLoci(conn, minlen, mincov, max_ambig, max_mask):
 	cur = conn.cursor()
 	sql = '''
 	UPDATE
@@ -86,9 +87,9 @@ def filterLoci(conn, minlen, mincov):
 	SET
 		pass=0
 	WHERE
-		length < ? OR depth < ?
+		length < ? OR depth < ? OR (ambig + gap) > ? OR mask > ?
 	'''
-	stuff = [minlen, mincov]
+	stuff = [minlen, mincov, max_ambig, max_mask]
 	cur.execute(sql, stuff)
 	conn.commit()
 
@@ -194,10 +195,16 @@ def getVariants(conn):
 def add_locus_record(conn, depth, consensus, passed, name):
 	if name == None:
 		name = "NA"
-	stuff = [depth, int(len(consensus)), str(consensus), int(passed), str(name)]
+	seq_norm = s.simplifySeq(consensus)
+	counts = s.seqCounterSimple(seq_norm)
+	ambig = counts["N"]/len(consensus)
+	gap = counts["-"]/len(consensus)
+	mask = s.mask_content(consensus)
+	gc = s.gc_content(consensus)
+	stuff = [depth, int(len(consensus)), str(consensus), int(passed), str(name), float(ambig), float(gap), float(mask), float(gc)]
 	try:
-		sql = ''' INSERT INTO loci(depth, length, consensus, pass, chrom)
-					VALUES(?,?,?,?,?) '''
+		sql = ''' INSERT INTO loci(depth, length, consensus, pass, chrom, ambig, gap, mask, gc)
+					VALUES(?,?,?,?,?,?,?,?,?) '''
 		cur = conn.cursor()
 		cur.execute(sql, stuff)
 		conn.commit()
