@@ -163,14 +163,14 @@ Output options:
 	-X,--expand	: In output bait table, expand all ambiguities
 		--Gaps are expanded as [ACGT] and absent
 		--\"N\"s are expanded as [ACGT]
+	--strand	: Output strand. Options: "+", "-", "both"
+		--"-" means to reverse complement bait sequences
 	-o,--out	: Output directory and prefix [e.g. ./baits/run1]""")
 
 	#SPLIT option not figured out yet
 	print("""
 General options:
 
-	-W,--tile_all	: Tile baits across all target regions
-		--Skips target filtering and selection, and just tiles all
 	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
 	-h,--help	: Displays this help menu
 	""")
@@ -272,12 +272,13 @@ class parseArgs():
 
 		#Output options
 		self.expand = 0
+		self.strand = "+"
 		self.out = None
 		self.workdir = None
 		self.threads = 1
 
 		self.ploidy=2
-		self.db="./mrbait.sqlite"
+		self.db=""
 
 		#HACKER ONLY OPTIONS
 		self._noGraph = 0
@@ -548,14 +549,16 @@ class parseArgs():
 
 		#Get working dir path and output prefix
 		if self.out is None:
-			self.out = "mrbait"
+			self.out = "baits"
 			self.workdir = utils.getWorkingDir()
 		else:
 			self.workdir, self.out = ntpath.split(self.out)
 			if self.out == "":
-				self.out = "mrbait"
+				self.out = "baits"
 			if self.workdir == "":
 				self.workdir = os.getcwd()
+		if self.db == "":
+			self.db = self.workdir + "/" + self.out + ".sqlite"
 		print("Working directory: ", self.workdir)
 		print("Prefix is: ", self.out)
 
