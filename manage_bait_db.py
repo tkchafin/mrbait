@@ -125,6 +125,12 @@ def getNumPassedGFF(conn):
 	cur.execute("""SELECT count(gffid) FROM gff WHERE pass = 1""")
 	return(parseFetchNum(cur.fetchone()))
 
+#returns number of GFF elements
+def getNumPassedBaits(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(baitid) FROM baits WHERE pass = 1""")
+	return(parseFetchNum(cur.fetchone()))
+
 #Function returns pandas dataframe of passed targets
 def getNumConflicts(conn):
 	cur = conn.cursor()
