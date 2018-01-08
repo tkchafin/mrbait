@@ -4,6 +4,7 @@ import sys
 import sqlite3
 from sqlite3 import OperationalError
 import pandas as pd
+import misc_utils as utils
 
 #Function to create database connection
 #Add code later to enable re-running from existing database
@@ -128,7 +129,7 @@ def getNumPassedGFF(conn):
 def getNumConflicts(conn):
 	cur = conn.cursor()
 	try:
-		cur.execute("""SELECT count(*) FROM what""")
+		cur.execute("""SELECT count(*) FROM conflicts""")
 		return(parseFetchNum(cur.fetchone()))
 	except OperationalError:
 		return(False)
@@ -1282,18 +1283,54 @@ def regionFilterGFF(conn, gff_type, dist):
 
 	if getNumGFF(conn) > 0:
 		if getNumPassedGFF(conn) > 0:
+			df = pd.DataFrame() #empty pandas DF
+			#If get GFF by type:
 			if gff_type == "all":
-				pass
+				sql = """
+					SELECT regid, regions.start, regions.stop, regions.pass,
+						gffid, gff.start AS gff_start, gff.stop AS gff_stop
+					FROM
+						regions INNER JOIN gff ON regions.locid = gff.locid
+					WHERE
+						regions.pass = 1 AND gff.pass = 1
+				"""
+				df = pd.read_sql_query(sql, conn)
 			else:
+				#Query database to get targets with passing GFFs
+				sql = """
+					SELECT regid, regions.start, regions.stop, regions.pass,
+						gffid, gff.start AS gff_start, gff.stop AS gff_stop
+					FROM
+						regions INNER JOIN gff ON regions.locid = gff.locid
+					WHERE
+						regions.pass = 1 AND gff.pass = 1 AND gff.type = ?
 				"""
-				FUCKED IT UP
-				TRY AGAIN 
-				"""
-				stuff = [dist, dist, gff_type]
-				cur.execute(sql, stuff)
+				df = pd.read_sql_query(sql, conn, params=(gff_type,))
+
+			#Check for records which overlap with GFF item
+			for index, row in df.iterrows():
+				min1 = row["start"] - dist or 0
+				min2 = row["gff_start"]
+				max1 = row["stop"] + dist
+				max2 = row["gff_stop"]
+				#If no overlap (overlap distance <= 0), set 'pass' to 0/FAIL
+				if utils.calcOverlap(min1, max1, min2, max2) <= 0:
+					df.loc[index, "pass"] = 0
+
+			#Get list of passed targets, pass list to FAIL all non-whitelisted targets
+			whitelist = df[df["pass"]==1].regid.unique()
+			removeRegionsByWhitelist(conn, whitelist)
+
+			"""
+			1. Fetch INNER JOINED db matching criterion
+			2. Parse overlaps in Python (see function above)
+			3. Return list of ones to keep.
+			4. For UPDATE- Set pass to 0 if: pass NOT 1 in returned list, OR if already failed
+				This should also fail the case where NO GFF RECORDS TO JOIN or gff record was failed
+			"""
 		else:
 			cur.execute("UPDATE gff SET pass = 0")
-			print("WARNING: All GFF records failed. Because you chose to filter target regions on proximity to GFF records, no targets will be retained.")
+			print("WARNING: No GFF records passed quality control. Because you chose to filter target regions on proximity to GFF records, no targets will be retained.")
 	else:
 		print("WARNING: No GFF records present in database. Skipping target region filtering on proximity to GFF records.")
 

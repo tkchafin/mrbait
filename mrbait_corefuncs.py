@@ -300,10 +300,8 @@ def selectTargetRegions(conn, params):
 		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 
 	#NEXT: Need to select TRs within conflict_blocks
-	#TODO: First fetch how many conflicts, if there are none, then EXIT FUNCTION
 	if m.getNumConflicts(conn) > 0:
-
-		#Apply select_r filters for all conflicting TRs
+	#Apply select_r filters for all conflicting TRs
 		if params.select_r == "rand":
 			print("--select_r is RANDOM")
 			#Do it later
@@ -339,7 +337,7 @@ def selectTargetRegions(conn, params):
 		except ValueError as err:
 			sys.exit(err.args)
 		except:
-				sys.exit(sys.exc_info()[0])
+			sys.exit(sys.exc_info()[0])
 		#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
 		#NEXT: Push conflicts to change "pass" attribute in regions table
