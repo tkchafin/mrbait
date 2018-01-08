@@ -50,9 +50,10 @@ Alignment filtering/ consensus options (use with -M or -L inputs):
 
 	-c,--cov	: Minimum number of sequences per alignment, for MAF or LOCI input [1]
 	-l,--len	: Minimum alignment length to attempt bait design [80]
-	-t,--thresh	: Minimum proportion for gap/N to include in consensus [0.1]
-	-k,--mask	: Minimum proportion for masking (lower case) to include in consensus [0.1]
-	-K, --max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.1]""")
+	-q,--thresh	: Threshold proportion for gap/N to include in consensus [0.1]
+	-Q,--max_ambig	: Maximum proportion of gap/N bases allowed in a consensus sequence [0.5]
+	-k,--mask	: Threshold proportion for masking (lower case) to include in consensus [0.1]
+	-K, --max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.5]""")
 
 	print("""
 General Bait Design options:
@@ -187,8 +188,8 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:t:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:QXo:Pk:K:d:T:', \
-			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=",
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:T:', \
+			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=", "max_ambig="
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
 			"select_r=","filter_r=", "threads=", "blastdb=", "fastadb=",
@@ -215,8 +216,9 @@ class parseArgs():
 		self.cov=1
 		self.minlen=None
 		self.thresh=0.1
+		self.max_ambig=0.5
 		self.mask=0.1
-		self.max_mask=0.1
+		self.max_mask=0.5
 
 		#Bait params
 		self.blen=80
@@ -314,8 +316,10 @@ class parseArgs():
 				self.cov = int(arg)
 			elif opt in ('-l', '--len'):
 				self.minlen = int(arg)
-			elif opt in ('-t', '--thresh'):
+			elif opt in ('-q', '--thresh'):
 				self.thresh = float(arg)
+			elif opt in ('-Q', '--max_ambig'):
+				self.max_ambig = float(arg)
 			elif opt in ('-k', '--mask'):
 				self.mask = float(arg)
 			elif opt in ('-K', '--max_mask'):
@@ -432,8 +436,6 @@ class parseArgs():
 					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
 			#Running options
-			elif opt in ('-Q', '--quiet'):
-				self.stfu = 1
 
 			#vsearch options
 			elif opt == ("--vsearch"):
@@ -501,9 +503,12 @@ class parseArgs():
 			else:
 				assert False, "Unhandled option %r"%opt
 
-		#DEBUG PRINTS
+
 		for subopt in self.filter_r_objects:
-			print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
+			if subopt.o1 in ("gff", "gff_a"):
+				if not self.gff:
+					sys.exit("ERROR: You have selected to filter targets on proximity to GFF elements, but have not provided a GFF file!")
+			#print("filter_r: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
 
 		#for subopt in self.filter_b_objects:
 			#print("filter_b: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
@@ -514,6 +519,10 @@ class parseArgs():
 			sys.exit(0)
 
 		assert self.blen > 0, "Bait length cannot be less than or equal to zero!"
+		assert 0.0 <= self.thresh <= 1.0, "Threshold for including ambiguous bases in consensus <-q, --thresh> must be between 0.0 and 1.0!"
+		assert 0.0 <= self.mask <= 1.0, "Threshold for masking bases in consensus <-k, --mask> must be between 0.0 and 1.0!"
+		assert 0.0 <= self.max_ambig <= 1.0, "Maximum proportion of ambiguous bases in a consensus <-Q, --max_ambig> must be between 0.0 and 1.0!"
+		assert 0.0 <= self.max_mask <= 1.0, "Maximum proportion of masked bases in a consensus <-K, --max_mask> must be between 0.0 and 1.0!"
 
 		#Set default win_width
 		if self.win_width is None:
@@ -602,3 +611,16 @@ class parseArgs():
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
 			self.overlap = self.blen // 2
+
+		#Validate input types
+		if self.assembly:
+			if self.loci or self.alignment:
+				sys.exit("ERROR: FASTA inputs cannot be provided with MAF or LOCI")
+			if self.mask or self.thresh:
+				print("WARNING: <-q,--thresh> and <-k,--mask> inputs have no affect when using a FASTA input file. Ignoring them.")
+			self.mincov = 0
+		if self.gff or self.vcf:
+			if not self.assembly:
+				sys.exit("ERROR: VCF and GFF inputs require a FASTA assembly file.")
+			if self.loci or self.alignment:
+				sys.exit("ERROR: VCF and GFF files cannot be used with MAF and LOCI inputs.")
