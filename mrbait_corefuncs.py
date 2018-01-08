@@ -573,16 +573,14 @@ def filterBaits(conn, params):
 		else:
 			assert False, "Unhandled option %r"%option
 
-
 	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	#Target region deduplication by pairwise alignment
 	if aln:
-		passedTargets = m.getPassedTRs(conn)
+		passedBaits = m.getPassedBaits(conn)
 		minid = option.o2
 		mincov= option.o3
 		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
 		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		pairwiseAlignDedup(params, passedTargets, minid, mincov)
+		pairwiseAlignDedup(params, passedBaits, minid, mincov)
 
 	#If 'random' select is turned on, then apply AFTER all other options
 	if rand and not rand_num:
