@@ -27,7 +27,6 @@ import mrbait_corefuncs as core
 #TODO: Option to output baits as +, -, or both strands
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
-#TODO: Remove --no_mask and add --max_mask, or maximum MASK proportion allowed for locus to pass
 #TODO: Add better logging.
 #NOTE: Not all database drivers support the "?" syntax I use for passing params to SQLite. Be careful.
 
@@ -71,7 +70,7 @@ else:
 #First-pass bait design on loci passing pre-filters
 #PASS=1 is PASS=FALSE
 #Pre-filters: Length, alignment depth
-m.filterLoci(conn, params.minlen, params.cov)
+m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
 passedLoci = m.getPassedLoci(conn) #returns pandas dataframe
 if passedLoci.shape[0] <= 0:
 	sys.exit("Program killed: No loci passed filtering.")
@@ -116,7 +115,11 @@ if m.getNumPassedTRs(conn) <= 0:
 	sys.exit("Program killed: No targets passed filtering.")
 core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 
-#print
+#Create final outputs
+if m.getNumPassedBaits(conn) > 0:
+	core.printBaits(conn, params)
+else:
+	pass
 
 print("\n\nProgram ending...Here are some results\n\n")
 
