@@ -166,7 +166,7 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 					target = (seq[2])[start:stop]
 					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 					n_mask = utils.n_lower_chars(target)
-					n_gc = s.gc_content(target)
+					n_gc = s.gc_counts(target)
 					#Check that there aren't too many SNPs
 					#if tr_counts["*"] <= params.vmax_r:
 					#print("	Target region: ", target)
@@ -449,7 +449,7 @@ def baitSlidingWindow(conn, source, sequence, overlap, length):
 	#print(window_seq)
 		if (len(window_seq[0]) == length):
 			n_mask = utils.n_lower_chars(window_seq[0])
-			n_gc = s.gc_content(window_seq[0])
+			n_gc = s.gc_counts(window_seq[0])
 			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2], n_mask, n_gc)
 
 #function for sliding window bait generation, with custom coordinates
@@ -462,7 +462,7 @@ def baitSlidingWindowCoord(conn, source, sequence, overlap, length, start):
 			start_coord = start + window_seq[1]
 			stop_coord = start_coord + length
 			n_mask = utils.n_lower_chars(window_seq[0])
-			n_gc = s.gc_content(window_seq[0])
+			n_gc = s.gc_counts(window_seq[0])
 			m.add_bait_record(conn, source, window_seq[0], start_coord, stop_coord, n_mask, n_gc)
 
 #Function to discover target regions
@@ -585,3 +585,8 @@ def filterBaits(conn, params):
 	#If 'random' select is turned on, then apply AFTER all other options
 	if rand and not rand_num:
 		m.baitFilterRandom(conn, rand_num)
+
+
+#Function to print baits in final output
+def printBaits(conn, params):
+	pass
