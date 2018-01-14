@@ -163,6 +163,18 @@ def getNumPassedTRs(conn):
 	cur.execute(check)
 	return(parseFetchNum(cur.fetchone()))
 
+#Function returns pandas dataframe of baits to print
+def getPrintBaits(conn):
+	sql = '''
+		SELECT
+			locid, baits.regid, baitid, baits.sequence
+		FROM
+		 	baits INNER JOIN regions ON baits.regid = regions.regid
+		WHERE
+			baits.pass=1
+	'''
+	return(pd.read_sql_query(sql, conn))
+
 #Function to return loci table
 def getLoci(conn):
 	return(pd.read_sql_query("""SELECT * FROM loci """, conn))
