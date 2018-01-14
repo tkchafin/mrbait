@@ -115,11 +115,16 @@ if m.getNumPassedTRs(conn) <= 0:
 	sys.exit("Program killed: No targets passed filtering.")
 core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 
+#Bait Filtering
+if m.getNumPassedBaits(conn) > 0:
+	print("Filtering probe sequences")
+	core.filterBaits(conn, params)
+
 #Create final outputs
 if m.getNumPassedBaits(conn) > 0:
 	core.printBaits(conn, params)
 else:
-	pass
+	sys.exit("Program killed: No baits passed filtering.")
 
 print("\n\nProgram ending...Here are some results\n\n")
 
