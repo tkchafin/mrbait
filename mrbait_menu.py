@@ -164,7 +164,7 @@ Output options:
 		--Gaps are expanded as [ACGT] and absent
 		--\"N\"s are expanded as [ACGT]
 	--strand	: Output strand. Options: "+", "-", "both"
-		--"-" means to reverse complement bait sequences
+		--"-" print antiparallel (reverse complement)
 	-o,--out	: Prefix for output files""")
 
 	#SPLIT option not figured out yet
@@ -197,7 +197,7 @@ class parseArgs():
 			"plot_all","mask=","max_mask=","flank_dist=","vsearch=",
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
-			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust"])
+			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -271,7 +271,7 @@ class parseArgs():
 		self.stfu = 0
 
 		#Output options
-		self.expand = 0
+		self.expand = None
 		self.strand = "+"
 		self.out = ""
 		self.workdir = ""
@@ -299,69 +299,70 @@ class parseArgs():
 		for opt, arg_raw in options:
 			arg = arg_raw.replace(" ","")
 			arg = arg.strip()
-			if opt in ('-M', '--maf'):
+			opt = opt.replace("-","")
+			if opt in ('M', 'maf'):
 				self.alignment = arg
-			elif opt in ('-h', '--help'):
+			elif opt in ('h', 'help'):
 				pass
 			#Input params
-			elif opt in ('-G', '--gff'):
+			elif opt in ('G', 'gff'):
 				self.gff = arg
-			elif opt in ('-V', '--vcf'):
+			elif opt in ('V', 'vcf'):
 				self.vcf = arg
-			elif opt in ('-L', '--loci'):
+			elif opt in ('L', 'loci'):
 				self.loci = arg
-			elif opt in ('-A', '--assembly'):
+			elif opt in ('A', 'assembly'):
 				self.assembly = arg
 			#Locus filtering params
-			elif opt in ('-c', '--cov'):
+			elif opt in ('c', 'cov'):
 				self.cov = int(arg)
-			elif opt in ('-l', '--len'):
+			elif opt in ('l', 'len'):
 				self.minlen = int(arg)
-			elif opt in ('-q', '--thresh'):
+			elif opt in ('q', 'thresh'):
 				self.thresh = float(arg)
-			elif opt in ('-Q', '--max_ambig'):
+			elif opt in ('Q', 'max_ambig'):
 				self.max_ambig = float(arg)
-			elif opt in ('-k', '--mask'):
+			elif opt in ('k', 'mask'):
 				self.mask = float(arg)
-			elif opt in ('-K', '--max_mask'):
+			elif opt in ('K', 'max_mask'):
 				self.max_mask = float(arg)
 
 			#Bait general params
-			elif opt in ('-b', '--bait'):
+			elif opt in ('b', 'bait'):
 				self.blen = int(arg)
-			elif opt in ('-w', '--win_shift'):
+			elif opt in ('w', 'win_shift'):
 				self.win_shift = int(arg)
-			elif opt in ('-R', '--mult_reg'):
+			elif opt in ('R', 'mult_reg'):
 				self.mult_reg = 1
-			elif opt in ('-m', '--min_mult'):
+			elif opt in ('m', 'min_mult'):
 				self.min_mult = int(arg)
-			elif opt in ('-v', '--var_max'):
+			elif opt in ('v', 'var_max'):
 				self.var_max = int(arg)
-			elif opt in ('-n', '--numN'):
+			elif opt in ('n', 'numN'):
 				self.numN = int(arg)
-			elif opt in ('-g', '--numG'):
+			elif opt in ('g', 'numG'):
 				self.numG = int(arg)
-			elif opt in ('-E', '--gff_type'):
+			elif opt in ('E', 'gff_type'):
 				self.anchor = arg
 
 			#target region opts
-			elif opt in ('-D', '--dist_r'):
+			elif opt in ('D', 'dist_r'):
 				self.dist_r = int(arg)
-			elif opt in ('-p', '--tile_min'):
+			elif opt in ('p', 'tile_min'):
 				self.tile_min = int(arg)
 				self.tiling = 1
-			elif opt in ('-d', '--flank_dist'):
+			elif opt in ('d', 'flank_dist'):
 				self.flank_dist = int(arg)
 				assert isinstance(self.flank_dist, int), "<--flank_dist> must be an integer"
 				assert self.flank_dist >= 0, "<--flank_dist> must be an integer greater than zero!"
-			elif opt in ('-S', '--select_r'):
+			elif opt in ('S', 'select_r'):
 				temp = arg.split('=')
 				assert len(temp) == 1, "Invalid specification for <--select_r>: %s"%arg
 				self.select_r = (temp[0]).lower()
 				chars = (['snp','bad','cons','rand'])
 				if self.select_r not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-			elif opt in ('-F', '--filter_r'):
+			elif opt in ('F', 'filter_r'):
 				self.filter_r = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
 				self.filter_r_whole = arg
@@ -397,7 +398,7 @@ class parseArgs():
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
 			#Bait selection options
-			elif opt in ('-s', '--select_b'):
+			elif opt in ('s', 'select_b'):
 				subopts = re.split('=|,',arg)
 				self.select_b = (subopts[0]).lower()
 				chars = (['tile', 'center', 'flank'])
@@ -414,7 +415,7 @@ class parseArgs():
 					self.overlap = int(subopts[1])
 				#print("select_b is %r" %self.select_b)
 				#print("select_b_dist is %r"%self.select_b_dist)
-			elif opt in ('-f', '--filter_b'):
+			elif opt in ('f', 'filter_b'):
 				self.filter_b = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
 				self.filter_b_whole = arg
@@ -439,41 +440,44 @@ class parseArgs():
 			#Running options
 
 			#vsearch options
-			elif opt == ("--vsearch"):
+			elif opt == ("vsearch"):
 				self.vsearch = str(arg)
-			elif opt == ("--vthreads"):
+			elif opt == ("vthreads"):
 				self.vthreads = int(arg)
 
 			#BLAST options
-			elif opt in ("--blastdb", "--blast_db"):
+			elif opt in ("blastdb", "blast_db"):
 				self.blastdb = arg
-			elif opt in ("--fastadb", "--fasta_db"):
+			elif opt in ("fastadb", "fasta_db"):
 				self.fastadb = arg
-			elif opt in ("--e_value", "--evalue"):
+			elif opt in ("e_value", "evalue"):
 				self.evalue = float(arg)
-			elif opt in ("--gapopen", "--gap_open"):
+			elif opt in ("gapopen", "gap_open"):
 				self.gapopen = int(arg)
-			elif opt in ("--gapextend", "--gap_extend"):
+			elif opt in ("gapextend", "gap_extend"):
 				self.gapextend = int(arg)
-			elif opt in ("--word_size", "--word", "--wordsize"):
+			elif opt in ("word_size", "word", "wordsize"):
 				self.word_size = int(arg)
-			elif opt in ("--megablast", "--mega"):
+			elif opt in ("megablast", "mega"):
 				self.blast_method = "megablast"
-			elif opt == "--blastn":
+			elif opt == "blastn":
 				self.blastn = arg
-			elif opt == "--makedb":
+			elif opt == "makedb":
 				self.makedb = arg
-			elif opt == "--nodust":
+			elif opt == "nodust":
 				self.nodust = "TRUE"
 
 			#output options
-			elif opt in ('-X', '--expand'):
+			elif opt in ('X', 'expand'):
 				self.expand = 1
-			elif opt in ('-o', '--out'):
+			elif opt == "strand":
+				assert arg in ("+", "-", "both"), "Invalid option" + arg + "for <--strand>"
+				self.strand = arg
+			elif opt in ('o', 'out'):
 				self.out = arg
 
 			#HACKER ONLY OPTIONS
-			elif opt in ('--hacker'):
+			elif opt in ('hacker'):
 				print(opt, arg)
 				subopts = re.split('=|, ',arg)
 				main = subopts[0]
