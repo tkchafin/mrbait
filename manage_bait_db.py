@@ -181,7 +181,7 @@ def getGFF(conn):
 
 #Function to return baits table
 def getPassedBaits(conn):
-	return(pd.read_sql_query("""SELECT * FROM baits WHERE pass=1""", conn))
+	return(pd.read_sql_query("""SELECT baitid, sequence FROM baits WHERE pass=1""", conn))
 
 #Function to return variants table
 def getVariants(conn):
@@ -1223,6 +1223,31 @@ def removeBaitsByList(conn, blacklist):
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS b")
 	conn.commit()
+
+#Function to remove baits NOT included in list
+def removeBaitsByWhitelist(conn, whitelist):
+
+	cur = conn.cursor()
+	#If nothing in list, no need to do any work:
+	if len(whitelist) <= 0:
+		return(0)
+	df = pd.DataFrame({"baitid" : whitelist})
+	df.to_sql('ttt', conn, if_exists='replace')
+
+	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
+	sql_update = '''
+		UPDATE
+			baits
+		SET
+			pass = 0
+		WHERE
+			NOT EXISTS(SELECT * FROM ttt WHERE tt.baitid = regions.baitid)
+	'''
+	cur.execute(sql_update)
+	#Clear up the temp table t
+	cur.execute("DROP TABLE IF EXISTS ttt")
+	conn.commit()
+
 
 def baitFilterMask(conn, maxprop):
 	cur = conn.cursor()
