@@ -53,7 +53,7 @@ Alignment filtering/ consensus options (use with -M or -L inputs):
 	-q,--thresh	: Threshold proportion for gap/N to include in consensus [0.1]
 	-Q,--max_ambig	: Maximum proportion of gap/N bases allowed in a consensus sequence [0.5]
 	-k,--mask	: Threshold proportion for masking (lower case) to include in consensus [0.1]
-	-K, --max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.5]""")
+	-K,--max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.5]""")
 
 	print("""
 General Bait Design options:
@@ -420,17 +420,17 @@ class parseArgs():
 				self.filter_b_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('min','max','gc'):
+				if subopts[0] in ('pw','gc'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
-					if subopts[0] in ('gc'):
+					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
+					assert 0.0 <= float(subopts[2]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
+					if subopts[0] == "gc":
 						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"mask\" and \"gc\": Min must be less than max"
-						self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
-					else:
-						self.filter_b_objects.append(subArg(subopts[0],int(subopts[1]),int(subopts[2])))
+					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 				elif subopts[0] == 'mask':
 					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1])))
-				elif (subopts[0] is 'rand'):
+				elif (subopts[0] == 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))
 				else:
