@@ -264,8 +264,6 @@ def filterTargetRegions(conn, params):
 	#Target region deduplication by pairwise alignment
 	if aln:
 		passedTargets = m.getPassedTRs(conn)
-		minid = option.o2
-		mincov= option.o3
 		assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
 		assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
 		blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
@@ -551,39 +549,51 @@ def baitDiscovery(conn, params, targets):
 
 #Function to filter target regions by --filter_R arguments
 def filterBaits(conn, params):
-	rand = 0 #false
-	rand_num = 0
-	aln = 0
+	rand_num = None
+	aln = False
+	minid = None
+	mincov = None
 
 	for option in params.filter_b_objects:
-		print("Select Region Option: ", option.o1)
+		print("Bait filtering option: ", option.o1)
 		if option.o1 == "rand":
 		#Set 'rand' to TRUE for random selection AFTER other filters
 			rand_num = int(option.o2)
 			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
 		elif option.o1 == "mask":
-			min_mask_prop = option.o2
+			max_mask_prop = option.o2
 			m.baitFilterMask(conn, maxprop=max_mask_prop)
 		elif option.o1 == "gc":
 			min_mask_prop = option.o2
 			max_mask_prop = option.o3
 			m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 		elif option.o1 == "pw":
-			aln = 1
+			print("Filtering baits by pairwise alignment")
+			aln = True
+			minid = option.o2
+			mincov = option.o3
+		elif option.o1 in ("blast_x", "blast_i"):
+			print("not yet implemented")
+			pass
 		else:
 			assert False, "Unhandled option %r"%option
 
 	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
 	if aln:
 		passedBaits = m.getPassedBaits(conn)
-		minid = option.o2
-		mincov= option.o3
 		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
 		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		pairwiseAlignDedup(params, passedBaits, minid, mincov)
+		blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
+		print("Blacklisted edges:",blacklist_edges)
+		if (len(blacklist_edges) > 0):
+			params._noWeightGraph = 1
+			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+			if len(revised_blacklist) > 0:
+				m.removeBaitsByList(conn, revised_blacklist)
 
 	#If 'random' select is turned on, then apply AFTER all other options
-	if rand and not rand_num:
+	if rand_num:
+		print("Randomly selecting",rand_num,"baits.")
 		m.baitFilterRandom(conn, rand_num)
 
 
