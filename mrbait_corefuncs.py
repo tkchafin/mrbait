@@ -573,8 +573,35 @@ def filterBaits(conn, params):
 			minid = option.o2
 			mincov = option.o3
 		elif option.o1 in ("blast_x", "blast_i"):
-			print("not yet implemented")
-			pass
+			#if blast database given as fasta, make a blastdb:
+			db_path = None
+			if (params.blastdb):
+				db_path = params.blastdb
+			elif (params.fastadb):
+				db_path = params.workdir + "/blastdb/" + params.out
+				b.makeblastdb(params.makedb, params.fastadb, db_path)
+				params.blastdb = db_path
+			elif(not params.blastdb and not params.fastadb):
+				print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
+				break
+			print("BLASTDB PATH IS: ", db_path)
+			#Get targets, print to fasta
+			seqs = m.getPassedTRs(conn)
+			fas = params.workdir + "/.temp.fasta"
+			aln_file_tools.writeFasta(seqs, fas)
+			outfile = params.workdir + "/.temp.blast"
+			if option.o1 == "blast_x":
+				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+				m.removeBaitsByList(conn, blacklist)
+			elif option.o1 == "blast_i":
+				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+				m.removeBaitsByWhitelist(conn, whitelist)
+			elif option.o1 == "blast_a":
+				sys.exit("blast_a option is not yet implemented.")
+				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+				#m.removeRegionsByList(conn, blacklist)
+			os.remove(fas)
+			os.remove(outfile)
 		else:
 			assert False, "Unhandled option %r"%option
 
