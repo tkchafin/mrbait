@@ -611,7 +611,7 @@ def filterBaits(conn, params):
 		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
 		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
 		blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
-		print("Blacklisted edges:",blacklist_edges)
+		#print("Blacklisted edges:",blacklist_edges)
 		if (len(blacklist_edges) > 0):
 			params._noWeightGraph = 1
 			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
@@ -626,4 +626,36 @@ def filterBaits(conn, params):
 
 #Function to print baits in final output
 def printBaits(conn, params):
-	pass
+	df = m.getPrintBaits(conn)
+	out = params.workdir + "/" + params.out + ".fasta"
+	file_object = open(out, "w")
+	for i, r in df.iterrows():
+		#If user wants expanded sequences:
+		if params.expand:
+			var = 1
+			#Get fully expanded sequence
+			for expanded in s.expandAmbiquousDNA(r.sequence):
+				expanded = expanded.replace("-","")
+				if params.strand in ("+", "both"):
+					header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "." + str(var) + "\n"
+					seq = expanded + "\n"
+					file_object.write(header)
+					file_object.write(seq)
+				if params.strand in ("-", "both"):
+					header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "." + str(var) + "_revcomp" + "\n"
+					seq = s.reverseComplement(expanded) + "\n"
+					file_object.write(header)
+					file_object.write(seq)
+				var += 1
+		#Otherwise just print it
+		else:
+			if params.strand in ("+", "both"):
+				header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "\n"
+				seq = r.sequence + "\n"
+				file_object.write(header)
+				file_object.write(seq)
+			if params.strand in ("-", "both"):
+				header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "_revcomp" + "\n"
+				seq = s.reverseComplement(r.sequence) + "\n"
+				file_object.write(header)
+				file_object.write(seq)
