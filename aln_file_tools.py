@@ -170,41 +170,67 @@ def maf_chunker(infile, chunks):
 
 	os.remove("0.maf_chunk")
 
+#Function to remove existing CHUNK files
+def removeChunks(dir_name):
+	test = os.listdir(dir_name)
+
+	for item in test:
+	    if item.endswith(".chunk"):
+	        os.remove(os.path.join(dir_name, item))
+
 #Function by ZDZ to split a given .loci file into n chunks
-def loci_chunker(infile, chunks):
-# read file from command line
+def loci_chunker(infile, chunks, wd):
+	# read file from command line
 	with open(infile) as file_object:
 
-#count number of loci
+		#count number of loci
 		loci_count = 1
-		chunks = int(sys.argv[2])
+		chunks = int(chunks)
 
 		for line in file_object:
-			if line[0] == ">":
-				pass
-			else:
+			if line[0] == "/":
 				loci_count = loci_count+1
-
+			else:
+				pass
 		chunk_size = loci_count // chunks
+	file_object.close()
 
-#write .loci file into chunk files
+	removeChunks(wd)
+
+	#write .loci file into chunk files
 	with open(infile) as file_object:
-		max_chunks = int(sys.argv[2])
+		max_chunks = chunks
 		chunks = 1
 		loci_number = 1
+
+		chunk_file = wd + "/." + str(chunks) + ".chunk"
+		out_object = open(chunk_file, "w")
 
 		for line in file_object:
 			if chunks < max_chunks:
 				if loci_number <= chunk_size:
 					if line[0] == ">":
-						print(line.strip(), file=open(str(chunks) + ".chunk", "a"))
+						out = line.strip() + "\n"
+						out_object.write(out)
 					else:
 						loci_number = loci_number + 1
-						print("", file=open(str(chunks) + ".chunk", "a"))
+						out = line.strip() + "\n"
+						out_object.write(out)
 				else:
 					loci_number = 1
 					chunks = chunks + 1
-					print(line.strip(), file=open(str(chunks) + ".chunk", "a"))
+					out_object.close()
+					chunk_file = wd + "/." + str(chunks) + ".chunk"
+					out_object = open(chunk_file, "w")
+					out = line.strip() + "\n"
+					out_object.write(out)
 			else:
-				chunks = max_chunks
-				print(line.strip(), file=open(str(chunks) + ".chunk", "a"))
+				#If last chunk, keep writing to final chunk file 
+				out = line.strip() + "\n"
+				out_object.write(out)
+		out_object.close()
+		file_object.close()
+			# else:
+			# 	chunks = max_chunks
+			# 	out_object.write(line.strip())
+	return(loci_count)
