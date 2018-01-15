@@ -23,6 +23,32 @@ import gff3_parser as gff
 
 ############################# FUNCTIONS ################################
 
+#Function to print header information
+def printHeader(params):
+	print("""
+
+	=======================================================================
+	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
+	=======================================================================
+
+	Version: 1.0.1
+	Author: Tyler K. Chafin
+	Contact: tkchafin@uark.edu
+	License: GNU Public License
+
+	Releases: https://github.com/tkchafin/mrbait/releases
+	Documentation: XXXX TODO: ADD LATER XXXX
+
+	Citation: MrBait is currently unpublished. For now, please cite the source
+	code found at: https://github.com/tkchafin/mrbait
+
+	Contributers: Tyler Chafin, Zach Zbinden
+
+	=======================================================================
+	""")
+
+
+
 #Function to load a MAF file into database
 def loadMAF(conn, params):
 	#Parse MAF file and create database
@@ -38,7 +64,7 @@ def loadMAF(conn, params):
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
 
-		print("Loading Locus #:",locid)
+	#	print("Loading Locus #:",locid)
 
 		#Extract variable positions for database
 		for var in locus.alnVars:
@@ -52,17 +78,23 @@ def loadLOCI(conn, params):
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
-
-		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
-		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, locnum)
 		locnum += 1
-		#print("Loading Locus #:",locid)
 
-		#Extract variable positions for database
-		for var in locus.alnVars:
-			m.add_variant_record(conn, locid, var.position, var.value)
+		#Skip if coverage or alignment length too short
+		if cov < params.cov or alen < params.minlen:
+			#print("Locus skipped")
+			continue
+		else:
+			#Add each locus to database
+			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+			#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, locnum)
+
+			#print("Loading Locus #:",locid)
+
+			#Extract variable positions for database
+			for var in locus.alnVars:
+				m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load FASTA into database
 def loadFASTA(conn, params):

@@ -33,7 +33,20 @@ def display_help(message=None):
 	print("\tNOTE: SQLite databases are currently remade from scratch with each\n",\
 	"\tinstance of the program. Support for opening and editing older database files\n",\
 	"\twill come soon.\n")
+	#SPLIT option not figured out yet
+	print("""
+General options:
 
+	-r,--resume	: Resumes from a database pre-loaded with alignments (integer)
+		--Options
+			-r 1 : Continues pipeline beginning after Step 1 (Loading alignments)
+			-r 2 : Continues after Step 2 (Target discovery)
+			-r 3 : Continues after Step 3 (Target filtering/ selection)
+			-r 4 : Continues after step 4 (Bait discovery)
+	--db	: .sqlite file containing pre-existing database. For use with --resume
+	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
+	-h,--help	: Displays this help menu
+	""")
 	print("""
 Input options:
 
@@ -167,13 +180,6 @@ Output options:
 		--"-" print antiparallel (reverse complement)
 	-o,--out	: Prefix for output files""")
 
-	#SPLIT option not figured out yet
-	print("""
-General options:
-
-	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
-	-h,--help	: Displays this help menu
-	""")
 	print()
 
 #Sub-object for holding filtering options
@@ -188,7 +194,7 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:T:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:r:T:', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=", "max_ambig="
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
@@ -197,7 +203,8 @@ class parseArgs():
 			"plot_all","mask=","max_mask=","flank_dist=","vsearch=",
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
-			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand="])
+			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
+			"resume=","db="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -243,7 +250,7 @@ class parseArgs():
 
 		#VSEARCH options - deduplication
 		self.vsearch = None
-		self.vthreads = 4
+		self.vthreads = None
 
 		#BLAST options - contaminant removal and filtering by specificity
 		self.blastdb=None
@@ -279,6 +286,7 @@ class parseArgs():
 
 		self.ploidy=2
 		self.db=""
+		self.resume=None
 
 		#HACKER ONLY OPTIONS
 		self._noGraph = 0
@@ -473,8 +481,15 @@ class parseArgs():
 			elif opt == "strand":
 				assert arg in ("+", "-", "both"), "Invalid option" + arg + "for <--strand>"
 				self.strand = arg
+			elif opt in ("r", "resume"):
+				assert int(arg) in (0, 1, 2, 3, 4), "Invalid option" + arg + "for <-r, --resume>. Please specify a step (1-4) to resume pipeline."
+				self.resume = int(arg)
 			elif opt in ('o', 'out'):
 				self.out = arg
+			elif opt == "db":
+				self.db = str(arg)
+			elif opt in ('T', 'threads'):
+				self.threads = arg
 
 			#HACKER ONLY OPTIONS
 			elif opt in ('hacker'):
@@ -557,8 +572,8 @@ class parseArgs():
 		self.workdir = utils.getWorkingDir()
 		if self.db == "":
 			self.db = self.workdir + "/" + self.out + ".sqlite"
-		print("Database is:", self.db)
-		print("Prefix is: ", self.out)
+		#print("Database is:", self.db)
+		#print("Prefix is: ", self.out)
 
 
 		#Assert that win_shift cannot be larger than blen
@@ -571,6 +586,10 @@ class parseArgs():
 		if self.min_mult is None:
 			self.min_mult = self.minlen
 
+		self._os = utils.getOS()
+		if self._os == "darwin":
+			self._os = "darwin (MacOS)"
+
 		#If vsearch path not given, try to figure it out
 		if self.vsearch is None:
 			os_platform = utils.getOS()
@@ -581,6 +600,10 @@ class parseArgs():
 			elif os_platform == "darwin": #mac os
 				print("Automatically detected MACOS platform: Using MACOS VSEARCH executable.")
 				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-macos"
+
+		if self.vthreads is None:
+			self.vthreads = self.threads
+
 
 		#BLAST defaults
 		if self.word_size is None:
