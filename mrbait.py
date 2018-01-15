@@ -1,6 +1,7 @@
 import sys
 import sqlite3
 import pandas
+import time
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import mrbait_corefuncs as core
@@ -26,13 +27,14 @@ import mrbait_corefuncs as core
 #TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
 #TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
 #TODO: Progress bar for loadXXXX() functions
-#TODO: Implement file chunkers and parallel loading 
+#TODO: Implement file chunkers and parallel loading
 #NOTE: Not all database drivers support the "?" syntax I use for passing params to SQLite. Be careful.
 
 
 def main():
+	global_start = time.clock()
 	#Parse Command line arguments
-	print("Parsing command line arguments...")
+	print("\nParsing command line arguments...")
 	params = parseArgs()
 
 	#Print header information
@@ -52,10 +54,13 @@ def main():
 	while step < 5:
 		if step == 0:
 			#Establishing new database
+			start = time.clock()
 			print ("\t\tInitializing empty tables.")
 			m.init_new_db(conn)
 			step = 1
+			printTime(start,2)
 		elif step == 1:
+			start = time.clock()
 			#Loading inputs
 			print ("\n\tStep 1: Loading Alignments")
 			#Clear database
@@ -73,6 +78,7 @@ def main():
 			else:
 				print("\t\t## %s loci passed filtering! ##"%passedLoci)
 			step = 2
+			printTime(start,2)
 		elif step == 2:
 			#Target discovery
 			print("\n\tStep 2: Target Discovery")
@@ -93,6 +99,10 @@ def main():
 			#DONE
 			step = 6
 
+	print("\n\t=======================================================================")
+	print("\tDone!")
+	printTime(global_start, 1)
+	print()
 	conn.close()
 	sys.exit()
 
@@ -113,7 +123,7 @@ def loadAlignments(conn, params):
 			core.loadMAF(conn, params)
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
-			core.loadLOCI(conn, params)
+			core.loadLOCI_parallel(conn, params)
 	elif params.assembly:
 		print("\t\tStep 1 params:")
 		print("\t\t\t--Minimum contig length (-l,--len):", params.minlen)
@@ -136,6 +146,17 @@ def loadAlignments(conn, params):
 	else:
 		#Option to load .loci alignment goes here!
 		sys.exit("No input files provided.")
+
+
+#Function to print runtime given a start time
+def printTime(start, tabs):
+	t = (time.clock() - start)
+	m, s = divmod(t, 60)
+	h, m = divmod(m, 60)
+	out = ""
+	out = "".join(["\t" for i in range(0,tabs)])
+	print("%sRuntime: %d:%02d:%02d (%2f seconds)" % (out,h, m, s, t))
+
 
 #Call main function
 if __name__ == '__main__':

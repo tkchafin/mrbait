@@ -3,6 +3,7 @@ import sqlite3
 import getopt
 import Bio
 import os
+import time
 from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
@@ -20,6 +21,9 @@ import vsearch
 import subprocess
 import vcf_tools
 import gff3_parser as gff
+
+from multiprocessing import Process
+from queue import Queue
 
 ############################# FUNCTIONS ################################
 
@@ -70,6 +74,32 @@ def loadMAF(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
 
+
+#Function to load .loci file into database.
+def loadLOCI_parallel(conn, params):
+
+	"""
+	Format:
+	multiprocessing pool.
+	Master:
+		splits file into n chunks
+		controls serialized INSERTS
+	Workers:
+		read file chunk
+		calculate consensus
+		send loc object to Master to INSERT
+
+	Alternatives:
+		-Each process writes to own database, then merge them
+		-Implement a Lock, which each process has to grab before write/commit
+
+	"""
+	locnum = 1
+
+	aln_file_tools.loci_chunker(params.loci, params.threads, params.workdir)
+
+
+
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
 	locnum = 1
@@ -89,12 +119,12 @@ def loadLOCI(conn, params):
 			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 			#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, locnum)
-
 			#print("Loading Locus #:",locid)
 
 			#Extract variable positions for database
 			for var in locus.alnVars:
 				m.add_variant_record(conn, locid, var.position, var.value)
+
 
 #Function to load FASTA into database
 def loadFASTA(conn, params):
