@@ -27,9 +27,9 @@ def init_new_db(connection):
 	cursor.execute('''
 		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
 			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
-			chrom TEXT, ambig REAL, gap REAL, mask REAL, gc REAL,
-			UNIQUE(chrom) ON CONFLICT ROLLBACK)
+			chrom TEXT, ambig REAL, gap REAL, mask REAL, gc REAL)
 	''') #chrom only relevant if --assembly
+	#UNIQUE(chrom) ON CONFLICT ROLLBACK
 
 	#Table holding records for each locus
 	cursor.execute('''
@@ -120,6 +120,13 @@ def getNumGFF(conn):
 def getNumPassedGFF(conn):
 	cur = conn.cursor()
 	cur.execute("""SELECT count(gffid) FROM gff WHERE pass = 1""")
+	return(parseFetchNum(cur.fetchone()))
+
+
+#Function returns count of passed loci
+def getNumPassedLoci(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(id) FROM loci WHERE pass=1""")
 	return(parseFetchNum(cur.fetchone()))
 
 #returns number of GFF elements
