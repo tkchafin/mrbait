@@ -178,6 +178,12 @@ def removeChunks(dir_name):
 	    if item.endswith(".chunk"):
 	        os.remove(os.path.join(dir_name, item))
 
+#function to count number of loci alignments in file
+def countLoci(loci):
+	file  = open(loci, 'r').read()
+	return(file.count("//"))
+
+
 #Function by ZDZ to split a given .loci file into n chunks
 def loci_chunker(infile, chunks, wd):
 	# read file from command line
@@ -194,9 +200,9 @@ def loci_chunker(infile, chunks, wd):
 				pass
 		chunk_size = loci_count // chunks
 	file_object.close()
-
 	removeChunks(wd)
 
+	files = list()
 	#write .loci file into chunk files
 	with open(infile) as file_object:
 		max_chunks = chunks
@@ -205,6 +211,7 @@ def loci_chunker(infile, chunks, wd):
 
 		chunk_file = wd + "/." + str(chunks) + ".chunk"
 		out_object = open(chunk_file, "w")
+		files.append(chunk_file)
 
 		for line in file_object:
 			if chunks < max_chunks:
@@ -222,10 +229,11 @@ def loci_chunker(infile, chunks, wd):
 					out_object.close()
 					chunk_file = wd + "/." + str(chunks) + ".chunk"
 					out_object = open(chunk_file, "w")
+					files.append(chunk_file)
 					out = line.strip() + "\n"
 					out_object.write(out)
 			else:
-				#If last chunk, keep writing to final chunk file 
+				#If last chunk, keep writing to final chunk file
 				out = line.strip() + "\n"
 				out_object.write(out)
 		out_object.close()
@@ -233,4 +241,4 @@ def loci_chunker(infile, chunks, wd):
 			# else:
 			# 	chunks = max_chunks
 			# 	out_object.write(line.strip())
-	return(loci_count)
+	return(files)
