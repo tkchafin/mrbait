@@ -2,6 +2,7 @@ import sys
 import sqlite3
 import pandas
 import time
+from timeit import default_timer as timer
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import mrbait_corefuncs as core
@@ -32,7 +33,7 @@ import mrbait_corefuncs as core
 
 
 def main():
-	global_start = time.clock()
+	global_start = timer()
 	#Parse Command line arguments
 	print("\nParsing command line arguments...")
 	params = parseArgs()
@@ -54,13 +55,13 @@ def main():
 	while step < 5:
 		if step == 0:
 			#Establishing new database
-			start = time.clock()
+			start = timer()
 			print ("\t\tInitializing empty tables.")
 			m.init_new_db(conn)
 			step = 1
 			printTime(start,2)
 		elif step == 1:
-			start = time.clock()
+			start = timer()
 			#Loading inputs
 			print ("\n\tStep 1: Loading Alignments")
 			#Clear database
@@ -123,7 +124,11 @@ def loadAlignments(conn, params):
 			core.loadMAF(conn, params)
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
-			core.loadLOCI_parallel(conn, params)
+			if int(params.threads) > 1:
+				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
+				core.loadLOCI_parallel(conn, params)
+			else:
+				core.loadLOCI(conn, params)
 	elif params.assembly:
 		print("\t\tStep 1 params:")
 		print("\t\t\t--Minimum contig length (-l,--len):", params.minlen)
@@ -150,7 +155,7 @@ def loadAlignments(conn, params):
 
 #Function to print runtime given a start time
 def printTime(start, tabs):
-	t = (time.clock() - start)
+	t = (timer() - start)
 	m, s = divmod(t, 60)
 	h, m = divmod(m, 60)
 	out = ""
@@ -160,7 +165,11 @@ def printTime(start, tabs):
 
 #Call main function
 if __name__ == '__main__':
-    main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		sys.exit(1)
+
 
 
 

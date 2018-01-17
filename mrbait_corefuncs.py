@@ -8,6 +8,7 @@ from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 from substring import SubString
+from functools import partial
 import manage_bait_db as m
 import alignment_tools as a
 import sequence_tools as s
@@ -18,12 +19,10 @@ import pandas as pd
 import numpy as np
 import blast as b
 import vsearch
-import subprocess
+import multiprocessing
 import vcf_tools
 import gff3_parser as gff
 
-from multiprocessing import Process
-from queue import Queue
 
 ############################# FUNCTIONS ################################
 
@@ -77,38 +76,88 @@ def loadMAF(conn, params):
 
 #Function to load .loci file into database.
 def loadLOCI_parallel(conn, params):
-
 	"""
 	Format:
 	multiprocessing pool.
 	Master:
 		splits file into n chunks
-		controls serialized INSERTS
+		creates multiprocessing pool
 	Workers:
 		read file chunk
 		calculate consensus
-		send loc object to Master to INSERT
-
-	Alternatives:
-		-Each process writes to own database, then merge them
-		-Implement a Lock, which each process has to grab before write/commit
-
+		grab lock
+		INSERT data to SQL database
+		release lock
 	"""
-	locnum = 1
 
-	aln_file_tools.loci_chunker(params.loci, params.threads, params.workdir)
+	t = int(params.threads)
+	numLoci = aln_file_tools.countLoci(params.loci)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
+
+	#Make chunks for n threads -1
+	file_list = aln_file_tools.loci_chunker(params.loci, t, params.workdir)
+	#print("Files are:",file_list)
+	#Initialize multiprocessing pool
+	#if 'lock' not in globals():
+	lock = multiprocessing.Lock()
+	pool = multiprocessing.Pool(t,initializer=init, initargs=(lock,))
+	func = partial(loadLOCI_worker,params.db, params.cov, params.minlen, params.thresh, params.mask)
+	results = pool.map(func, file_list)
+	pool.close()
+	pool.join()
 
 
+#Worker function for loadLOCI_parallel
+def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
+	connection = sqlite3.connect(db)
+	#Parse LOCI file and create database
+	for aln in aln_file_tools.read_loci(chunk):
+		#NOTE: Add error handling, return error code
+		cov = len(aln)
+		alen = aln.get_alignment_length()
+
+		#Skip if coverage or alignment length too short
+		if cov < params_cov or alen < params_minlen:
+			#print("Locus skipped")
+			continue
+		else:
+			#Add each locus to database
+			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+
+			#Acquire lock, submit to Database
+			lock.acquire()
+			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+			#print("Loading Locus #:",locid)
+
+			#Extract variable positions for database
+			for var in locus.alnVars:
+				m.add_variant_record(connection, locid, var.position, var.value)
+			lock.release()
+	connection.close()
+
+
+#INitialize a global lock. Doing it this way allows it to be inherited by the child processes properly
+#Found on StackOverflow: https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
+#Thanks go to SO user dano
+def init(l):
+    global lock
+    lock = l
+
+#Function to reset lock
+def reset_lock():
+	global lock
+	del lock
 
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
-	locnum = 1
 	#Parse LOCI file and create database
 	for aln in aln_file_tools.read_loci(params.loci):
 		#NOTE: Add error handling, return error code
 		cov = len(aln)
 		alen = aln.get_alignment_length()
-		locnum += 1
 
 		#Skip if coverage or alignment length too short
 		if cov < params.cov or alen < params.minlen:
@@ -118,7 +167,7 @@ def loadLOCI(conn, params):
 			#Add each locus to database
 			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
 			#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, locnum)
+			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NULL")
 			#print("Loading Locus #:",locid)
 
 			#Extract variable positions for database
