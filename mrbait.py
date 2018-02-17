@@ -6,6 +6,7 @@ from timeit import default_timer as timer
 from mrbait_menu import parseArgs
 import manage_bait_db as m
 import mrbait_corefuncs as core
+import mrbait_corefuncs_parallel as pcore
 
 
 ############################### MAIN ###################################
@@ -30,7 +31,8 @@ import mrbait_corefuncs as core
 #TODO: Progress bar for loadXXXX() functions
 #TODO: Implement file chunkers and parallel loading
 #NOTE: Not all database drivers support the "?" syntax I use for passing params to SQLite. Be careful.
-
+#TODO: Make sure to check that database is initialized if given via --resume options
+#TODO: parallelize TR discovery, shouldn't be too hard.
 
 def main():
 	global_start = timer()
@@ -71,20 +73,36 @@ def main():
 			loadAlignments(conn, params)
 			#PASS=1 is PASS=FALSE
 			#Pre-filters: Length, alignment depth
-			print("\t\tFiltering loci...")
+			print("\t\tFiltering loci...",end="")
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
+			print(" Done!\n")
 			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
 			if passedLoci <= 0:
 				sys.exit("\nProgram killed: No loci passed filtering.\n")
 			else:
-				print("\t\t## %s loci passed filtering! ##"%passedLoci)
+				print("\t\t### Results: %s loci passed filtering! ###"%passedLoci)
 			step = 2
 			printTime(start,2)
 		elif step == 2:
+			start = timer()
 			#Target discovery
 			print("\n\tStep 2: Target Discovery")
 			#Check that database has loci
-			#Clear targets and baits
+			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
+			if passedLoci <= 0:
+				sys.exit("\nProgram killed: No loci in database.\n")
+			else:
+				#Check if targets exist
+				#If yes, clear them
+				numTRs = m.getNumTRs(conn)
+				if numTRs > 0:
+					print("\t\tWarning: Database already contains targets. Clearing existing records.")
+					m.clearBaits(conn)
+					m.clearTargets(conn)
+
+				#Target discovery call
+				targetDiscovery(conn, params)
+
 			step = 3
 		elif step == 3:
 			#Target filtering and conflict resolution
@@ -110,8 +128,8 @@ def main():
 #Loading inputs
 def loadAlignments(conn, params):
 	#load alignment to database
+	print("\t\tStep 1 parameters:")
 	if params.alignment or params.loci:
-		print("\t\tStep 1 parameters:")
 		print("\t\t\t--Minimum alignment depth (-c):", params.cov)
 		print("\t\t\t--Minimum alignment length (-l):", params.minlen)
 		print("\t\t\t--Threshold to call \"N\" or gap consensus base (-q):",params.thresh)
@@ -120,17 +138,20 @@ def loadAlignments(conn, params):
 		print("\t\t\t--Maximum allowed masked bases (-K):",params.max_mask)
 		#Load alignments
 		if params.alignment:
-			print("\t\tLoading MAF file:",params.loci)
-			core.loadMAF(conn, params)
+			print("\t\tLoading MAF file:",params.alignment)
+			if int(params.threads) > 1:
+				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
+				pcore.loadPARALLEL(conn, params, "maf")
+			else:
+				core.loadMAF(conn, params)
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
 			if int(params.threads) > 1:
 				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
-				core.loadLOCI_parallel(conn, params)
+				pcore.loadPARALLEL(conn, params, "loci")
 			else:
 				core.loadLOCI(conn, params)
 	elif params.assembly:
-		print("\t\tStep 1 params:")
 		print("\t\t\t--Minimum contig length (-l,--len):", params.minlen)
 		print("\t\t\t--Maximum allowed gap/N bases (-Q):",params.max_ambig)
 		print("\t\t\t--Maximum allowed masked bases (-K):",params.max_mask)
@@ -147,10 +168,26 @@ def loadAlignments(conn, params):
 		if params.gff:
 			print("\t\tLoading GFF file:",params.gff)
 			core.loadGFF(conn, params)
-			print(m.getGFF(conn))
+			#print(m.getGFF(conn))
 	else:
 		#Option to load .loci alignment goes here!
 		sys.exit("No input files provided.")
+
+#Function to call targetDiscoverySlidingWindow and print relevant params
+def targetDiscovery(conn, params):
+	print("\t\tStep 2 parameters:")
+	print("\t\t\t--Sliding window width (-b, --bait):", params.win_width)
+	print("\t\t\t--Sliding window shift distance (-w, --win_shift):", params.win_shift)
+	print("\t\t\t--Variable columns allowed per target (-v, --var_max):", params.var_max)
+	print("\t\t\t--Ambiguities (N's) allowed per target (-n, --numN):", params.numN)
+	print("\t\t\t--Gap characters allowed per target (-g, --numG):", params.numG)
+
+	#Fetch passed loci
+	passedLoci = m.getPassedLoci(conn)
+	numPassedLoci = m.getNumPassedLoci(conn)
+	#sliding window call
+	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci.")
+	core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 
 #Function to print runtime given a start time
@@ -160,7 +197,7 @@ def printTime(start, tabs):
 	h, m = divmod(m, 60)
 	out = ""
 	out = "".join(["\t" for i in range(0,tabs)])
-	print("%sRuntime: %d:%02d:%02d (%2f seconds)" % (out,h, m, s, t))
+	print("%s### Runtime: %d:%02d:%02d (%2f seconds) ###" % (out,h, m, s, t))
 
 
 #Call main function
@@ -171,17 +208,6 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 
-
-
-
-
-
-#First-pass bait design on loci passing pre-filters
-
-
-#TODO: Could add an option here to extract GFF elements, and ONLY design baits for those?
-
-#Target region discovery according to params set
 print("Starting Target Region discovery...")
 core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 

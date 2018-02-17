@@ -16,47 +16,16 @@ def create_connection(db):
 
 #Initialize empty databases
 def init_new_db(connection):
-	cursor = connection.cursor()
-	cursor.execute('''DROP TABLE IF EXISTS loci''')
-	cursor.execute('''DROP TABLE IF EXISTS variants''')
-	cursor.execute('''DROP TABLE IF EXISTS regions''')
+	clearLoci(connection)
+	clearVariants(connection)
+	clearGFF(connection)
+	clearTargets(connection)
+	clearBaits(connection)
+
+#Function to clear baits table
+def clearBaits(conn):
+	cursor = conn.cursor()
 	cursor.execute('''DROP TABLE IF EXISTS baits''')
-	cursor.execute('''DROP TABLE IF EXISTS gff''')
-
-	#Table holding records for each locus
-	cursor.execute('''
-		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
-			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
-			chrom TEXT, ambig REAL, gap REAL, mask REAL, gc REAL)
-	''') #chrom only relevant if --assembly
-	#UNIQUE(chrom) ON CONFLICT ROLLBACK
-
-	#Table holding records for each locus
-	cursor.execute('''
-		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
-			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
-			bad INTEGER, gap INTEGER, mask REAL, gc REAL, start INTEGER NOT NULL,
-			stop INTEGER NOT NULL,pass INTEGER NOT NULL,
-			FOREIGN KEY (locid) REFERENCES loci(id))
-	''')
-
-	#Table holding variant information
-	cursor.execute('''
-		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
-			column INTEGER NOT NULL, value TEXT NOT NULL,
-			FOREIGN KEY (locid) REFERENCES loci(id),
-			PRIMARY KEY(varid),
-			UNIQUE(varid))
-	''')
-
-	#Table holding GFF element information
-	cursor.execute('''
-		CREATE TABLE gff(gffid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
-			type TEXT NOT NULL, start INTEGER NOT NULL,
-			stop INTEGER NOT NULL, alias TEXT, pass INTEGER NOT NULL,
-			FOREIGN KEY (locid) REFERENCES loci(id))
-	''')
-
 	cursor.execute('''
 		CREATE TABLE baits(baitid INTEGER NOT NULL, regid INTEGER NOT NULL,
 			sequence TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER NOT NULL,
@@ -65,14 +34,67 @@ def init_new_db(connection):
 			FOREIGN KEY (regid) REFERENCES regions(regid)
 		)
 	''')
-	#Table holding records for each locus
-	#cursor.execute('''
-	#	CREATE TABLE samples(sampid INTEGER NOT NULL, name TEXT NOT NULL,
-	#		PRIMARY KEY (sampid),
-	#		UNIQUE(name))
-	#''')
+	conn.commit()
 
-	connection.commit()
+#Function to clear targets
+def clearTargets(conn):
+	cursor = conn.cursor()
+	cursor.execute('''DROP TABLE IF EXISTS regions''')
+	#Table holding records for each locus
+	cursor.execute('''
+		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
+			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
+			bad INTEGER, gap INTEGER, mask REAL, gc REAL, start INTEGER NOT NULL,
+			stop INTEGER NOT NULL,pass INTEGER NOT NULL,
+			FOREIGN KEY (locid) REFERENCES loci(id))
+	''')
+	conn.commit()
+
+#function to initialize clean loci
+def clearLoci(conn):
+	cursor = conn.cursor()
+	cursor.execute('''DROP TABLE IF EXISTS loci''')
+	#Table holding records for each locus
+	cursor.execute('''
+		CREATE TABLE loci(id INTEGER PRIMARY KEY, depth INTEGER NOT NULL,
+			length INTEGER NOT NULL, consensus TEXT NOT NULL, pass INTEGER NOT NULL,
+			chrom TEXT, ambig REAL, gap REAL, mask REAL, gc REAL)
+	''') #chrom only relevant if --assembly
+	#UNIQUE(chrom) ON CONFLICT ROLLBACK
+	conn.commit()
+
+#Function to clear variants
+def clearVariants(conn):
+	cursor = conn.cursor()
+	cursor.execute('''DROP TABLE IF EXISTS variants''')
+	#Table holding variant information
+	cursor.execute('''
+		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
+			column INTEGER NOT NULL, value TEXT NOT NULL,
+			FOREIGN KEY (locid) REFERENCES loci(id),
+			PRIMARY KEY(varid),
+			UNIQUE(varid))
+	''')
+	conn.commit()
+
+#Function to clear GFF
+def clearGFF(conn):
+	cursor = conn.cursor()
+	cursor.execute('''DROP TABLE IF EXISTS gff''')
+	#Table holding variant information
+	#Table holding GFF element information
+	cursor.execute('''
+		CREATE TABLE gff(gffid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
+			type TEXT NOT NULL, start INTEGER NOT NULL,
+			stop INTEGER NOT NULL, alias TEXT, pass INTEGER NOT NULL,
+			FOREIGN KEY (locid) REFERENCES loci(id))
+	''')
+	conn.commit()
+
+
+
+################################################################################
+
 
 #Function to filter loci by coverage and length
 def filterLoci(conn, minlen, mincov, max_ambig, max_mask):

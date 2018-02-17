@@ -8,7 +8,6 @@ from Bio import AlignIO
 from mrbait_menu import display_help
 from mrbait_menu import parseArgs
 from substring import SubString
-from functools import partial
 import manage_bait_db as m
 import alignment_tools as a
 import sequence_tools as s
@@ -19,7 +18,6 @@ import pandas as pd
 import numpy as np
 import blast as b
 import vsearch
-import multiprocessing
 import vcf_tools
 import gff3_parser as gff
 
@@ -37,19 +35,18 @@ def printHeader(params):
 	Version: 1.0.1
 	Author: Tyler K. Chafin
 	Contact: tkchafin@uark.edu
-	License: GNU Public License
+	License: GNU Public License v3.0
 
 	Releases: https://github.com/tkchafin/mrbait/releases
-	Documentation: XXXX TODO: ADD LATER XXXX
 
 	Citation: MrBait is currently unpublished. For now, please cite the source
 	code found at: https://github.com/tkchafin/mrbait
 
-	Contributers: Tyler Chafin, Zach Zbinden
-
 	=======================================================================
 	""")
 
+	#Documentation: XXXX TODO: ADD LATER XXXX
+	#Contributers: Tyler Chafin, Zach Zbinden
 
 
 #Function to load a MAF file into database
@@ -73,84 +70,6 @@ def loadMAF(conn, params):
 		for var in locus.alnVars:
 			m.add_variant_record(conn, locid, var.position, var.value)
 
-
-#Function to load .loci file into database.
-def loadLOCI_parallel(conn, params):
-	"""
-	Format:
-	multiprocessing pool.
-	Master:
-		splits file into n chunks
-		creates multiprocessing pool
-	Workers:
-		read file chunk
-		calculate consensus
-		grab lock
-		INSERT data to SQL database
-		release lock
-	"""
-
-	t = int(params.threads)
-	numLoci = aln_file_tools.countLoci(params.loci)
-	if numLoci < 10000:
-		print("\t\t\tReading",numLoci,"alignments.")
-	else:
-		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
-
-	#Make chunks for n threads -1
-	file_list = aln_file_tools.loci_chunker(params.loci, t, params.workdir)
-	#print("Files are:",file_list)
-	#Initialize multiprocessing pool
-	#if 'lock' not in globals():
-	lock = multiprocessing.Lock()
-	pool = multiprocessing.Pool(t,initializer=init, initargs=(lock,))
-	func = partial(loadLOCI_worker,params.db, params.cov, params.minlen, params.thresh, params.mask)
-	results = pool.map(func, file_list)
-	pool.close()
-	pool.join()
-
-
-#Worker function for loadLOCI_parallel
-def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
-	connection = sqlite3.connect(db)
-	#Parse LOCI file and create database
-	for aln in aln_file_tools.read_loci(chunk):
-		#NOTE: Add error handling, return error code
-		cov = len(aln)
-		alen = aln.get_alignment_length()
-
-		#Skip if coverage or alignment length too short
-		if cov < params_cov or alen < params_minlen:
-			#print("Locus skipped")
-			continue
-		else:
-			#Add each locus to database
-			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
-
-			#Acquire lock, submit to Database
-			lock.acquire()
-			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-			#print("Loading Locus #:",locid)
-
-			#Extract variable positions for database
-			for var in locus.alnVars:
-				m.add_variant_record(connection, locid, var.position, var.value)
-			lock.release()
-	connection.close()
-
-
-#INitialize a global lock. Doing it this way allows it to be inherited by the child processes properly
-#Found on StackOverflow: https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
-#Thanks go to SO user dano
-def init(l):
-    global lock
-    lock = l
-
-#Function to reset lock
-def reset_lock():
-	global lock
-	del lock
-
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
 	#Parse LOCI file and create database
@@ -173,7 +92,6 @@ def loadLOCI(conn, params):
 			#Extract variable positions for database
 			for var in locus.alnVars:
 				m.add_variant_record(conn, locid, var.position, var.value)
-
 
 #Function to load FASTA into database
 def loadFASTA(conn, params):

@@ -91,85 +91,6 @@ def read_loci(infile):
 				loci = Bio.Align.MultipleSeqAlignment([])
 	f.close()
 
-#Function by ZVZ to "chunk" a given MAF alignment file into n number of chunks
-def maf_chunker(infile, chunks):
-	# maf_chunker creates specified number of files containing equal numbers
-	# of loci (unless there are remainder loci, which append to the last
-	# chunk.
-	# 1 to n '.maf_chunk' files will be created
-
-# read file from command line
-	with open(infile) as file_object:
-#count number of loci, loci_count = -1 so that header is not counted
-		loci_count = -1
-		chunks = int(sys.argv[2])
-
-		for line in file_object:
-			line = line.strip()
-			if len(line) > 0:
-				pass
-			else:
-				loci_count = loci_count+1
-		chunk_size = loci_count // chunks
-
-#write .maf file into chunk files, with each chunk beginning with header
-#first read header
-	with open(infile) as file_object:
-		max_chunks = int(sys.argv[2])
-		chunks = 0
-		loci_number = 0
-		individual = 1
-
-		for line in file_object:
-			line = line.strip()
-
-#isolate header chunk
-			if loci_number == 0:
-				if len(line) > 0:
-					print(line.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-				else:
-					loci_number = loci_number + 1
-					chunks = chunks + 1
-#move to loci chunks
-			else:
-				if chunks < max_chunks:
-					if loci_number <= chunk_size:
-#print contents of header before printing loci of individual 1
-						if individual == 1 and chunks == 1:
-							with open('0.maf_chunk') as header:
-								for var in header:
-									print(var.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-
-							print("", file=open(str(chunks) + ".maf_chunk", "a"))
-							print(line.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-
-							individual = individual + 1
-						else:
-							if len(line) > 0:
-								print(line.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-								individaul = individual + 1
-
-							else:
-								loci_number = loci_number + 1
-								individual = 1
-								print("", file=open(str(chunks) + ".maf_chunk", "a"))
-					else:
-						loci_number = 1
-						chunks = chunks + 1
-						individual = 1
-
-						with open('0.maf_chunk') as header:
-								for var in header:
-									print(var.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-						print("", file=open(str(chunks) + ".maf_chunk", "a"))
-
-						print(line.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-				else:
-					chunks = max_chunks
-					print(line.strip(), file=open(str(chunks) + ".maf_chunk", "a"))
-
-	os.remove("0.maf_chunk")
-
 #Function to remove existing CHUNK files
 def removeChunks(dir_name):
 	test = os.listdir(dir_name)
@@ -180,26 +101,28 @@ def removeChunks(dir_name):
 
 #function to count number of loci alignments in file
 def countLoci(loci):
-	file  = open(loci, 'r').read()
-	return(file.count("//"))
+	fh  = open(loci, 'r')
+	count=0
+	for line in fh:
+		if line .startswith("//"):
+			count+=1
+	return(count)
 
+#function to count number of loci in FASTA file (by headers)
+def countMAF(loci):
+	fh  = open(str(loci), 'r')
+	count=0
+	for line in fh:
+		if line .startswith("a"):
+			count+=1
+	return(count)
 
-#Function by ZDZ to split a given .loci file into n chunks
+#Function split .loci file into n chunks
 def loci_chunker(infile, chunks, wd):
-	# read file from command line
-	with open(infile) as file_object:
 
-		#count number of loci
-		loci_count = 1
-		chunks = int(chunks)
-
-		for line in file_object:
-			if line[0] == "/":
-				loci_count = loci_count+1
-			else:
-				pass
-		chunk_size = loci_count // chunks
-	file_object.close()
+	chunks = int(chunks)
+	loci_count = countLoci(infile)
+	chunk_size = loci_count // chunks
 	removeChunks(wd)
 
 	files = list()
@@ -214,14 +137,17 @@ def loci_chunker(infile, chunks, wd):
 		files.append(chunk_file)
 
 		for line in file_object:
+			line = line.strip()
+			if not line:
+				continue
 			if chunks < max_chunks:
 				if loci_number <= chunk_size:
 					if line[0] == ">":
-						out = line.strip() + "\n"
+						out = line + "\n"
 						out_object.write(out)
 					else:
 						loci_number = loci_number + 1
-						out = line.strip() + "\n"
+						out = line + "\n"
 						out_object.write(out)
 				else:
 					loci_number = 1
@@ -230,12 +156,88 @@ def loci_chunker(infile, chunks, wd):
 					chunk_file = wd + "/." + str(chunks) + ".chunk"
 					out_object = open(chunk_file, "w")
 					files.append(chunk_file)
-					out = line.strip() + "\n"
+					out = line + "\n"
 					out_object.write(out)
 			else:
 				#If last chunk, keep writing to final chunk file
-				out = line.strip() + "\n"
+				out = line + "\n"
 				out_object.write(out)
+		out_object.close()
+		file_object.close()
+			# else:
+			# 	chunks = max_chunks
+			# 	out_object.write(line.strip())
+	return(files)
+
+#Function to split maf file into n chunks
+def maf_chunker(infile, chunks, wd):
+
+	chunks = int(chunks)
+	loci_count = countMAF(infile)
+	chunk_size = loci_count // chunks
+	removeChunks(wd) #clear any existing chunkfiles
+
+	files = list()
+	#write .loci file into chunk files
+	with open(infile) as file_object:
+		max_chunks = chunks
+		chunks = 1
+		loci_number = 0
+
+		chunk_file = wd + "/." + str(chunks) + ".chunk"
+		out_object = open(chunk_file, "w")
+		files.append(chunk_file)
+
+		header = ""
+		hset = 0
+		for l in file_object:
+			line = l.strip()
+			if not line:
+				continue
+			#First, get header information
+			if hset == 0:
+				if line[0] == "a":
+					loci_number = 1
+					hset=1
+					header += "\n"
+					out_object.write(header)
+					out = "\n" + line + "\n"
+					out_object.write(out)
+				elif line[0] =="#":
+					header +=str(line+"\n")
+			else:
+				#Write chunk_size alignments to each chunk
+				if chunks < max_chunks:
+					#If starting new alignment
+					if line[0] == "a":
+						loci_number += 1 #increment locus number
+					 	#If current chunk not full, add locus to chunk
+						if loci_number <= chunk_size:
+							out = "\n" + line + "\n"
+							out_object.write(out)
+						#Otherwise, start new chunk
+						else:
+							loci_number = 1
+							chunks = chunks + 1
+							out_object.close()
+							chunk_file = wd + "/." + str(chunks) + ".chunk"
+							out_object = open(chunk_file, "w")
+							out_object.write(header)
+							files.append(chunk_file)
+							out = line + "\n"
+							out_object.write(out)
+					#If not new alignment, write to current chunk
+					else:
+						out = line + "\n"
+						out_object.write(out)
+
+				#If last chunk, keep writing to final chunk file
+				else:
+					if line[0] == "a":
+						out = "\n" + line + "\n"
+					else:
+						out = line.strip() + "\n"
+					out_object.write(out)
 		out_object.close()
 		file_object.close()
 			# else:
