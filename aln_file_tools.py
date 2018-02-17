@@ -136,8 +136,8 @@ def loci_chunker(infile, chunks, wd):
 		out_object = open(chunk_file, "w")
 		files.append(chunk_file)
 
-		for line in file_object:
-			line = line.strip()
+		for l in file_object:
+			line = l.strip()
 			if not line:
 				continue
 			if chunks < max_chunks:
@@ -236,7 +236,7 @@ def maf_chunker(infile, chunks, wd):
 					if line[0] == "a":
 						out = "\n" + line + "\n"
 					else:
-						out = line.strip() + "\n"
+						out = line + "\n"
 					out_object.write(out)
 		out_object.close()
 		file_object.close()
