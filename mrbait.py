@@ -32,7 +32,8 @@ import mrbait_corefuncs_parallel as pcore
 #TODO: Implement file chunkers and parallel loading
 #NOTE: Not all database drivers support the "?" syntax I use for passing params to SQLite. Be careful.
 #TODO: Make sure to check that database is initialized if given via --resume options
-#TODO: parallelize TR discovery, shouldn't be too hard.
+#TODO: 'lowmem' option does expensive things in SQLite, highmem option operates on pandas DFs, can parallelize
+#TODO: FlankDistParser is expensive. Could capture seq, and return as Pandas DF, chunk it
 
 def main():
 	global_start = timer()
@@ -187,7 +188,11 @@ def targetDiscovery(conn, params):
 	numPassedLoci = m.getNumPassedLoci(conn)
 	#sliding window call
 	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci.")
-	core.targetDiscoverySlidingWindow(conn, params, passedLoci)
+	if int(params.threads) > 1:
+		print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
+		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)
+	else:
+		core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 
 #Function to print runtime given a start time
