@@ -51,6 +51,11 @@ def printHeader(params):
 
 #Function to load a MAF file into database
 def loadMAF(conn, params):
+	numLoci = aln_file_tools.countMAF(params.alignment)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
 	#Parse MAF file and create database
 	num = 1
 	for aln in AlignIO.parse(params.alignment, "maf"):
@@ -72,6 +77,11 @@ def loadMAF(conn, params):
 
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
+	numLoci = aln_file_tools.countLoci(params.loci)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
 	#Parse LOCI file and create database
 	for aln in aln_file_tools.read_loci(params.loci):
 		#NOTE: Add error handling, return error code
