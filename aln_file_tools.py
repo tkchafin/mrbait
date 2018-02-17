@@ -122,7 +122,7 @@ def loci_chunker(infile, chunks, wd):
 
 	chunks = int(chunks)
 	loci_count = countLoci(infile)
-	if loci_count  > chunks:
+	if loci_count < chunks:
 		chunks = loci_count
 	chunk_size = loci_count // chunks
 	removeChunks(wd)
@@ -176,8 +176,8 @@ def maf_chunker(infile, chunks, wd):
 
 	chunks = int(chunks)
 	loci_count = countMAF(infile)
-	if loci_count  > chunks:
-		chunks = loci_count 
+	if loci_count < chunks:
+		chunks = loci_count
 	chunk_size = loci_count // chunks
 	removeChunks(wd) #clear any existing chunkfiles
 
