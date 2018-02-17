@@ -43,8 +43,10 @@ General options:
 			-r 2 : Continues after Step 2 (Target discovery)
 			-r 3 : Continues after Step 3 (Target filtering/ selection)
 			-r 4 : Continues after step 4 (Bait discovery)
-	--db	: .sqlite file containing pre-existing database. For use with --resume
+	--db		: .sqlite file containing pre-existing database. For use with --resume
 	-T,--threads	: Number of threads to use for processes that can run in parallel [1]
+	--lowmem	: Will perform some operations with greater memory efficiency
+			  --Note that this will generally come at a (sometimes significant) time cost
 	-h,--help	: Displays this help menu
 	""")
 	print("""
@@ -204,7 +206,7 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db="])
+			"resume=","db=", "lowmem"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -287,6 +289,7 @@ class parseArgs():
 		self.ploidy=2
 		self.db=""
 		self.resume=None
+		self.lowmem=False
 
 		#HACKER ONLY OPTIONS
 		self._noGraph = 0
@@ -490,6 +493,8 @@ class parseArgs():
 				self.db = str(arg)
 			elif opt in ('T', 'threads'):
 				self.threads = arg
+			elif opt in ('mem', 'lowmem'):
+				self.lowmem = True
 
 			#HACKER ONLY OPTIONS
 			elif opt in ('hacker'):
