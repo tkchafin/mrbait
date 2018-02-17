@@ -35,6 +35,7 @@ import mrbait_corefuncs_parallel as pcore
 #TODO: 'lowmem' option does expensive things in SQLite, highmem option operates on pandas DFs, can parallelize
 #TODO: FlankDistParser is expensive. Could capture seq, and return as Pandas DF, chunk it
 
+
 def main():
 	global_start = timer()
 	#Parse Command line arguments
@@ -59,7 +60,7 @@ def main():
 		if step == 0:
 			#Establishing new database
 			start = timer()
-			print ("\t\tInitializing empty tables.")
+			print ("\t\tInitializing empty tables.\n")
 			m.init_new_db(conn)
 			step = 1
 			printTime(start,2)
@@ -152,6 +153,7 @@ def loadAlignments(conn, params):
 				pcore.loadPARALLEL(conn, params, "loci")
 			else:
 				core.loadLOCI(conn, params)
+
 	elif params.assembly:
 		print("\t\t\t--Minimum contig length (-l,--len):", params.minlen)
 		print("\t\t\t--Maximum allowed gap/N bases (-Q):",params.max_ambig)
@@ -174,6 +176,7 @@ def loadAlignments(conn, params):
 		#Option to load .loci alignment goes here!
 		sys.exit("No input files provided.")
 
+
 #Function to call targetDiscoverySlidingWindow and print relevant params
 def targetDiscovery(conn, params):
 	print("\t\tStep 2 parameters:")
@@ -187,12 +190,25 @@ def targetDiscovery(conn, params):
 	passedLoci = m.getPassedLoci(conn)
 	numPassedLoci = m.getNumPassedLoci(conn)
 	#sliding window call
-	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci.")
+	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
+	local_start1 = timer()
 	if int(params.threads) > 1:
-		print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
+		print("\t\t\tFinding targets using",str(params.threads),"parallel processes.")
 		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)
 	else:
 		core.targetDiscoverySlidingWindow(conn, params, passedLoci)
+	print("\t\t\tFinished.",end=" ")
+	printTimeClean(local_start1, 0)
+
+	#Now update regions table to include information for flanking regions if available
+	local_start2 = timer()
+	print("\t\tParsing alignments for flanking regions...")
+	print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
+	if int(params.threads) > 1 and not params.lowmem:
+		print("\t\t\tParsing flanking sequences using",str(params.threads),"parallel processes.")
+		#pcore function call
+	else:
+		m.flankDistParser(conn, params.flank_dist)
 
 
 #Function to print runtime given a start time
@@ -203,6 +219,15 @@ def printTime(start, tabs):
 	out = ""
 	out = "".join(["\t" for i in range(0,tabs)])
 	print("%s### Runtime: %d:%02d:%02d (%2f seconds) ###" % (out,h, m, s, t))
+
+#Function to print runtime given a start time
+def printTimeClean(start, tabs):
+	t = (timer() - start)
+	m, s = divmod(t, 60)
+	h, m = divmod(m, 60)
+	out = ""
+	out = "".join(["\t" for i in range(0,tabs)])
+	print("%sRuntime: %d:%02d:%02d (%2f seconds)" % (out,h, m, s, t))
 
 
 #Call main function

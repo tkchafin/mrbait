@@ -217,7 +217,7 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 				#If bait fails, set start to start point of next window
 				start = generator.getI()+params.win_shift
 	#Now update regions table to include information for flanking regions if available
-	m.flankDistParser(conn, params.flank_dist)
+	#m.flankDistParser(conn, params.flank_dist)
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):

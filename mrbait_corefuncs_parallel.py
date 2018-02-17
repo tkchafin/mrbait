@@ -182,8 +182,8 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	t = int(params.threads)
 	chunk = 1
 	loci_num = int(loci.shape[0])
-	print("number of loci:",loci_num)
-	print("number of threads:",t)
+	#print("number of loci:",loci_num)
+	#print("number of threads:",t)
 	chunks = 0
 	if loci_num < t:
 		chunks = loci_num
@@ -191,8 +191,8 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 		chunks = t
 	chunk_size = loci_num // chunks
 	remainder = loci_num % chunks
-	print("Chunk size is:",chunk_size)
-	print("remainder is:",remainder)
+	#print("Chunk size is:",chunk_size)
+	#print("remainder is:",remainder)
 
 	start = 0
 	stop = 0
@@ -222,11 +222,6 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	for item in d:
 	    if item.endswith(".chunk.hdf"):
 	        os.remove(os.path.join(params.workdir, item))
-
-	print("flank dist parsing now")
-	#Now update regions table to include information for flanking regions if available
-	m.flankDistParser(conn, params.flank_dist)
-
 
 
 #Function to discover target regions using a sliding windows through passedLoci
