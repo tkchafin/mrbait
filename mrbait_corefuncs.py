@@ -171,6 +171,7 @@ def loadVCF(conn, params):
 			seq = loci.loc[locid,'consensus']
 			#Get new consensus sequence given VCF records
 			new_cons = vcf_tools.make_consensus_from_vcf(seq,rec_chrom,reclist, params.thresh)
+
 			#Update new consensus seq in db
 			if len(new_cons) != len(seq): #Check length first
 				print("\t\t\tWarning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
@@ -222,8 +223,8 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 					#if tr_counts["*"] <= params.vmax_r:
 					#print("	Target region: ", target)
 					#Submit target region to database
-					flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
-					m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
+					flank_counts = s.getFlankCounts(seq[2], start, stop, params.flank_dist)
+					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
 					generator.setI(stop)
 
 				#If bait fails, set start to start point of next window
@@ -327,24 +328,35 @@ def filterTargetRegions(conn, params):
 	if rand_num:
 		return(rand_num)
 
+#Function to fetch target conflicts
+def findTargetConflicts(conn, params):
+	if params.mult_reg == 0:
+		#print("Multiple regions NOT allowed, apply --select_r within whole loci")
+		m.fetchConflictTRs_NoMult(conn)
+	else:
+		#print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
+		#Build conflict_blocks according to --dist_r and --min_mult parameters
+		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
+	return(m.getNumConflicts(conn))
+
 #Function to filter target regions by --filter_R arguments
 def selectTargetRegions(conn, params):
 	#For all alignments over --min_mult:
 		#If TRs are within --dist
-	print("Select TR criterion is: ",params.select_r)
-	print("Flank dist is: ", params.flank_dist)
-	print("Minimum mult_reg dist is: ",params.min_mult)
+	#print("Select TR criterion is: ",params.select_r)
+	#print("Flank dist is: ", params.flank_dist)
+	#print("Minimum mult_reg dist is: ",params.min_mult)
 
-	#Build conflict tables
-	#print(pd.read_sql_query("SELECT * FROM regions", conn))
-	if params.mult_reg == 0:
-		print("Multiple regions NOT allowed, apply --select_r within whole loci")
-		#TODO: Need function call to buid conflict_blocks by whole loci
-		m.fetchConflictTRs_NoMult(conn)
-	else:
-		print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
-		#Build conflict_blocks according to --dist_r and --min_mult parameters
-		m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
+	# #Build conflict tables
+	# #print(pd.read_sql_query("SELECT * FROM regions", conn))
+	# if params.mult_reg == 0:
+	# 	print("Multiple regions NOT allowed, apply --select_r within whole loci")
+	# 	#TODO: Need function call to buid conflict_blocks by whole loci
+	# 	m.fetchConflictTRs_NoMult(conn)
+	# else:
+	# 	print("Multiple TRs allowed, apply --select_r within conflict_blocks <--dist_r>")
+	# 	#Build conflict_blocks according to --dist_r and --min_mult parameters
+	# 	m.fetchConflictTRs(conn, params.min_mult, params.dist_r)
 
 	#NEXT: Need to select TRs within conflict_blocks
 	if m.getNumConflicts(conn) > 0:
