@@ -106,6 +106,7 @@ def countLoci(loci):
 	for l in fh:
 		line = l.strip()
 		if not line:
+			continue
 		if line.startswith("//"):
 			count+=1
 	return(count)
