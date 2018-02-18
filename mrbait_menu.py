@@ -647,7 +647,7 @@ class parseArgs():
 				sys.exit("ERROR: FASTA inputs cannot be provided with MAF or LOCI")
 			if self.mask or self.thresh:
 				print("WARNING: <-q,--thresh> and <-k,--mask> inputs have no affect when using a FASTA input file. Ignoring them.")
-			self.mincov = 0
+			self.cov = 0
 		if self.gff or self.vcf:
 			if not self.assembly:
 				sys.exit("ERROR: VCF and GFF inputs require a FASTA assembly file.")
