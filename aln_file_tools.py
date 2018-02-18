@@ -103,8 +103,10 @@ def removeChunks(dir_name):
 def countLoci(loci):
 	fh  = open(loci, 'r')
 	count=0
-	for line in fh:
-		if line .startswith("//"):
+	for l in fh:
+		line = l.strip()
+		if not line:
+		if line.startswith("//"):
 			count+=1
 	return(count)
 
@@ -112,8 +114,11 @@ def countLoci(loci):
 def countMAF(loci):
 	fh  = open(str(loci), 'r')
 	count=0
-	for line in fh:
-		if line .startswith("a"):
+	for l in fh:
+		line = l.strip()
+		if not line:
+			continue
+		if line.startswith("a"):
 			count+=1
 	return(count)
 
