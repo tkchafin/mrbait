@@ -18,18 +18,20 @@ import aln_file_tools
 import pandas as pd
 import numpy as np
 import blast as b
+import vcf_tools
 import multiprocessing
 
 """
 
 Parallel versions of some of the MrBait corefuncs.
 
+Much thanks to SO user 'dano' for 2014 post on how to share lock in multiprocessing pool:
+https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
+
 """
 
-
-#Generic function to load whicever alignment file is given by
-#first chunking, then arsing in parallel
-def loadPARALLEL(conn, params, ftype):
+#Function to load LOCI file in parallel
+def loadLOCI_parallel(conn, params):
 	"""
 	Format:
 	multiprocessing pool.
@@ -43,29 +45,27 @@ def loadPARALLEL(conn, params, ftype):
 		INSERT data to SQL database
 		release lock
 	"""
-
-	if ftype not in ["loci", "maf"]:
-		sys.exit("ERROR:",ftype,"not supported by loadPARALLEL()")
-
 	t = int(params.threads)
 
-	if ftype in ["loci", "maf"]:
-		numLoci = getLociCount(params, ftype)
-		if numLoci < 10000:
-			print("\t\t\tReading",numLoci,"alignments.")
-		else:
-			print("\t\t\tReading",numLoci,"alignments... This may take a while.")
+	numLoci = aln_file_tools.countLoci(params.loci)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
 
 	#file chunker call
-	file_list = loadChunker(params, t, ftype)
+	file_list = aln_file_tools.loci_chunker(params.loci, t, params.workdir)
 
 	#print("Files are:",file_list)
 	#Initialize multiprocessing pool
 	#if 'lock' not in globals():
 	lock = multiprocessing.Lock()
-	with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
-		func = getWorkerFunc(params, ftype)
-		results = pool.map(func, file_list)
+	try:
+		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+			func = partial(loadLOCI_worker, params.db, params.cov, params.minlen, params.thresh, params.mask)
+			results = pool.map(func, file_list)
+	except Exception as e:
+		pool.close()
 	pool.close()
 	pool.join()
 
@@ -73,29 +73,59 @@ def loadPARALLEL(conn, params, ftype):
 	#Remove chunkfiles
 	aln_file_tools.removeChunks(params.workdir)
 
-#Function to chunk input aln file
-def loadChunker(params, t, ftype):
-	if ftype == "loci":
-		return(aln_file_tools.loci_chunker(params.loci, t, params.workdir))
-	elif ftype == "maf":
-		print("calling maf chunker")
-		return(aln_file_tools.maf_chunker(params.alignment, t, params.workdir))
+#Function to load MAF file in parallel
+def loadMAF_parallel(conn, params):
 
-#Function to build and return partial function for worker calls
-def getWorkerFunc(params, ftype):
-	if ftype == "loci":
-		f = partial(loadLOCI_worker,params.db, params.cov, params.minlen, params.thresh, params.mask)
-		return(f)
-	elif ftype == "maf":
-		f = partial(loadMAF_worker, params.db, params.cov, params.minlen, params.thresh, params.mask)
-		return(f)
+	t = int(params.threads)
+	numLoci = aln_file_tools.countMAF(params.alignment)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
 
-#Function to get count of loci in aln file
-def getLociCount(params, ftype):
-	if ftype == "loci": #pyRAD LOCI
-		return(aln_file_tools.countLoci(params.loci))
-	elif ftype == "maf": #MAF
-		return(aln_file_tools.countMAF(params.alignment))
+	#file chunker call
+	file_list = aln_file_tools.maf_chunker(params.alignment, t, params.workdir)
+
+	#print("Files are:",file_list)
+	#Initialize multiprocessing pool
+	#if 'lock' not in globals():
+	lock = multiprocessing.Lock()
+	try:
+		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+			func = partial(loadMAF_worker, params.db, params.cov, params.minlen, params.thresh, params.mask)
+			results = pool.map(func, file_list)
+	except Exception as e:
+		pool.close()
+	pool.close()
+	pool.join()
+
+	#reset_lock()
+	#Remove chunkfiles
+	aln_file_tools.removeChunks(params.workdir)
+
+# #first chunking, then arsing in parallel
+# def loadVCF_parallel(conn, params):
+# 	t = int(params.threads)
+# 	#file chunker call
+# 	file_list = vcf_tools.vcf_chunker(params.vcf, t, params.workdir)
+#
+# 	print("Files are:",file_list)
+# 	#Initialize multiprocessing pool
+# 	#if 'lock' not in globals():
+# 	lock = multiprocessing.Lock()
+# 	try:
+# 		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+# 			func = partial(loadVCF_worker, params.db, params.thresh)
+# 			results = pool.map(func, file_list)
+# 	except Exception as e:
+# 		pool.close()
+# 	pool.close()
+# 	pool.join()
+#
+# 	#reset_lock()
+# 	#Remove chunkfiles
+# 	#aln_file_tools.removeChunks(params.workdir)
+
 
 #INitialize a global lock. Doing it this way allows it to be inherited by the child processes properly
 #Found on StackOverflow: https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
@@ -112,26 +142,69 @@ def reset_lock():
 #NOTE: 'params' object can't be pickled, so I have to do it this way.
 #worker function version of loadMAF
 def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
-	connection = sqlite3.connect(db)
-	#Parse MAF file and create database
-	for aln in AlignIO.parse(chunk, "maf"):
-		#NOTE: Add error handling, return error code
-		cov = len(aln)
-		alen = aln.get_alignment_length()
+	try:
+	   	connection = sqlite3.connect(db)
+	   	#Parse MAF file and create database
+	   	for aln in AlignIO.parse(chunk, "maf"):
+	   		#NOTE: Add error handling, return error code
+	   		cov = len(aln)
+	   		alen = aln.get_alignment_length()
 
-		if cov < params_cov or alen < params_minlen:
-			continue
-		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
-		lock.acquire()
-		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-		lock.release()
-		#Extract variable positions for database
-		#for var in locus.alnVars:
-			#m.add_variant_record(connection, locid, var.position, var.value)
+	   		if cov < params_cov or alen < params_minlen:
+	   			continue
+	   		#Add each locus to database
+	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+	   		lock.acquire()
+	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+	   		lock.release()
+	   		#Extract variable positions for database
+	   		#for var in locus.alnVars:
+	   			#m.add_variant_record(connection, locid, var.position, var.value)
+	   	connection.close()
+	except Exception as e:
+	   raise Exception(e.message)
 
-
-	connection.close()
+# #Function to load VCF variants file
+# def loadVCF_worker(db, threshold, chunk):
+# 	try:
+# 		#Each worker opens unique connection to db
+# 		connection = sqlite3.connect(db)
+# 		#Lock DB and read loci, then release lock
+# 		lock.acquire()
+# 		loci = m.getPassedLoci(connection) #get DF of passed loci
+# 		lock.release()
+#
+# 		chrom_lookup = loci.set_index('chrom')['id'].to_dict()
+# 		loci.set_index('id', inplace=True)
+#
+# 		passed=0 #To track number of VCF records for which no locus exists
+# 		failed=0
+# 		for reclist in vcf_tools.read_vcf(chunk):
+# 			rec_chrom = reclist[0].CHROM
+# 			if rec_chrom in chrom_lookup:
+# 				locid = chrom_lookup[rec_chrom]
+# 				passed+=1
+# 				#Grab DF record for the matching CHROM
+# 				seq = loci.loc[locid,'consensus']
+# 				#Get new consensus sequence given VCF records
+# 				new_cons = vcf_tools.make_consensus_from_vcf(seq,rec_chrom,reclist, threshold)
+# 				print(new_cons)
+# 				#Update new consensus seq in db
+# 				if len(new_cons) != len(seq): #Check length first
+# 					print("\t\t\tWarning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
+# 				else:
+# 					#Lock database for update, then relase lock
+# 					lock.acquire()
+# 					m.updateConsensus(connection, locid, new_cons)
+# 					lock.release()
+# 			else:
+# 				failed+=1
+# 		if failed > 0:
+# 			print("\t\t\tWARNING:%s/%s records in <%s> don't match any reference sequences"%(failed, failed+passed, chunk))
+# 		#close connection
+# 		connection.close()
+# 	except Exception as e:
+# 		raise Exception(e.message)
 
 #Worker function for loadLOCI_parallel
 def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
