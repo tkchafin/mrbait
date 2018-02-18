@@ -1542,6 +1542,34 @@ def flankDistParser(conn, dist):
 	parseFlankBad(conn, dist)
 	parseFlankGap(conn, dist)
 
+
+#Function to parse variants table to update regions VARS for flanking information
+def getTargetFlanks(conn, dist):
+	sql = '''
+	SELECT
+		r.start AS start, r.stop AS stop, l.length AS len, l.consensus AS seq, r.sequence AS target
+	FROM
+		regions AS r INNER JOIN loci AS l ON r.locid = l.id
+	'''
+	#Fetch targets with full loci sequences
+	targets = pd.read_sql_query(sql, conn)
+
+	#Re-pull targets + flank distances
+	for index, row in targets.iterrows():
+		start = row["start"] - dist
+		if start < 0:
+			start = 0
+		end = row["stop"] + dist
+		if end > row["len"]:
+			end = row["len"]
+		new_seq = row["seq"][start:end]
+		print("New:",new_seq)
+		print("Old:",row["target"])
+		print()
+
+
+
+
 #Function to return a pandas DF of regions, vars, and 'bad bases'
 def getRegionWeights(conn):
 	sql = """
