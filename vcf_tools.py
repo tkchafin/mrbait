@@ -94,3 +94,87 @@ def make_consensus_from_vcf(ref, chrom, records, thresh):
 	#print("Reference:",ref)
 	#print("Consensus:",consensus)
 	return(consensus)
+
+#function to count number of loci in FASTA file (by headers)
+def countVCF(loci):
+	fh  = open(str(loci), 'r')
+	count=0
+	for l in fh:
+		line = l.strip()
+		if not line:
+			continue
+		if not line.startswith("#"):
+			count+=1
+	return(count)
+
+#Function to remove existing CHUNK files
+def removeChunks(dir_name):
+	test = os.listdir(dir_name)
+
+	for item in test:
+	    if item.endswith(".chunk"):
+	        os.remove(os.path.join(dir_name, item))
+
+#Function to chunk a VCF file
+def vcf_chunker(infile, chunks, wd):
+	chunks = int(chunks)
+	loci_count = countVCF(infile)
+	if loci_count < chunks:
+		chunks = loci_count
+	chunk_size = loci_count // chunks
+	removeChunks(wd) #clear any existing chunkfiles
+
+	files = list()
+	#write .loci file into chunk files
+	with open(infile) as file_object:
+		max_chunks = chunks
+		chunks = 1
+		record = 0
+
+		chunk_file = wd + "/." + str(chunks) + ".chunk"
+		out_object = open(chunk_file, "w")
+		files.append(chunk_file)
+
+		header = ""
+		hset = 0
+		for l in file_object:
+			line = l.strip()
+			if not line:
+				continue
+			#First, get header information
+			if hset == 0:
+				if line[0] == "#":
+					header +=str(line+"\n")
+				else:
+					record = 1
+					hset=1
+					out_object.write(header)
+					out = line + "\n"
+					out_object.write(out)
+			else:
+				#Write chunk_size alignments to each chunk
+				if chunks < max_chunks:
+					record += 1 #increment locus number
+				 	#If current chunk not full, add record to chunk
+					if record <= chunk_size:
+						out = line + "\n"
+						out_object.write(out)
+					#Otherwise, start new chunk
+					else:
+						record= 1
+						chunks = chunks + 1
+						out_object.close()
+						chunk_file = wd + "/." + str(chunks) + ".chunk"
+						out_object = open(chunk_file, "w")
+						out_object.write(header)
+						files.append(chunk_file)
+						out = line + "\n"
+						out_object.write(out)
+
+				#If last chunk, keep writing to final chunk file
+				else:
+					out = line + "\n"
+					out_object.write(out)
+		out_object.close()
+		file_object.close()
+	return(files)
