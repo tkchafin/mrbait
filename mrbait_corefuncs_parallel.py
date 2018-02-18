@@ -127,8 +127,8 @@ def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, ch
 		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
 
 		#Extract variable positions for database
-		for var in locus.alnVars:
-			m.add_variant_record(connection, locid, var.position, var.value)
+		#for var in locus.alnVars:
+			#m.add_variant_record(connection, locid, var.position, var.value)
 		lock.release()
 
 	connection.close()
@@ -156,8 +156,8 @@ def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, c
 			#print("Loading Locus #:",locid)
 
 			#Extract variable positions for database
-			for var in locus.alnVars:
-				m.add_variant_record(connection, locid, var.position, var.value)
+			#for var in locus.alnVars:
+				#m.add_variant_record(connection, locid, var.position, var.value)
 			lock.release()
 	connection.close()
 
@@ -211,7 +211,7 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	#if 'lock' not in globals():
 	lock = multiprocessing.Lock()
 	with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
-		func = partial(targetDiscoverySlidingWindow_worker, params.db, params.win_shift, params.win_width, params.var_max, params.numN, params.numG, params.blen)
+		func = partial(targetDiscoverySlidingWindow_worker, params.db, params.win_shift, params.win_width, params.var_max, params.numN, params.numG, params.blen, params.flank_dist)
 		results = pool.map(func, files)
 	pool.close()
 	pool.join()
@@ -225,7 +225,7 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 
 
 #Function to discover target regions using a sliding windows through passedLoci
-def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, chunk):
+def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank_dist, chunk):
 	connection = sqlite3.connect(db)
 	#print("process: reading hdf from",chunk)
 	loci = pd.read_hdf(chunk)
@@ -258,9 +258,10 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, chunk
 					#if tr_counts["*"] <= params.vmax_r:
 					#print("	Target region: ", target)
 					#Submit target region to database
-					#print("process: grabbing lock")
+					#print("process: grabbing lock")'
+					flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
 					lock.acquire()
-					m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
+					m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
 					#print("process: releasing lock")
 					lock.release()
 					#set start of next window to end of current TR

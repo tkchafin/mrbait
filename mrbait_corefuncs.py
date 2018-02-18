@@ -100,8 +100,8 @@ def loadLOCI(conn, params):
 			#print("Loading Locus #:",locid)
 
 			#Extract variable positions for database
-			for var in locus.alnVars:
-				m.add_variant_record(conn, locid, var.position, var.value)
+			#or var in locus.alnVars:
+				#m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load FASTA into database
 def loadFASTA(conn, params):
@@ -111,8 +111,9 @@ def loadFASTA(conn, params):
 		locid = m.add_locus_record(conn, 1, contig[1], 1, contig[0])
 
 		#Parse consensus for vars, submit those vars to db
-		for var in a.get_vars(contig[1]):
-			m.add_variant_record(conn, locid, var.position, var.value)
+		"""Deprecated"""
+		#for var in a.get_vars(contig[1]):
+			#m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load GFF file into database
 def loadGFF(conn, params):
@@ -166,7 +167,7 @@ def loadVCF(conn, params):
 			#for rec in reclist:
 			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
 			#Grab DF record for the matching CHROM
-			seq = loci.loc[locid]['consensus']
+			seq = loci.loc[locid,'consensus']
 			#Get new consensus sequence given VCF records
 			new_cons = vcf_tools.make_consensus_from_vcf(seq,rec_chrom,reclist, params.thresh)
 			#Update new consensus seq in db
@@ -175,10 +176,13 @@ def loadVCF(conn, params):
 			else:
 				m.updateConsensus(conn, locid, new_cons)
 				#Delete old vars for locus, and parse new consensus
-				m.purgeVars(conn, locid)
+				"""
+				#Deprecated
+				#m.purgeVars(conn, locid)
 				#Get new vars and add records to table
-				for var in a.get_vars(new_cons):
-					m.add_variant_record(conn, locid, var.position, var.value)
+				#for var in a.get_vars(new_cons):
+					#m.add_variant_record(conn, locid, var.position, var.value)
+				"""
 
 		else:
 			#print(rec_chrom, "not found.")
@@ -217,8 +221,8 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 					#if tr_counts["*"] <= params.vmax_r:
 					#print("	Target region: ", target)
 					#Submit target region to database
-					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, n_mask, n_gc)
-					#set start of next window to end of current TR
+					flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
+					m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
 					generator.setI(stop)
 
 				#If bait fails, set start to start point of next window

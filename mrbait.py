@@ -85,6 +85,8 @@ def main():
 				print("\t\t### Results: %s loci passed filtering! ###"%passedLoci)
 			step = 2
 			printTime(start,2)
+			print()
+
 		elif step == 2:
 			start = timer()
 			#Target discovery
@@ -104,6 +106,7 @@ def main():
 
 				#Target discovery call
 				targetDiscovery(conn, params)
+				print(m.getRegions(conn))
 
 			step = 3
 		elif step == 3:
@@ -185,6 +188,7 @@ def targetDiscovery(conn, params):
 	print("\t\t\t--Variable columns allowed per target (-v, --var_max):", params.var_max)
 	print("\t\t\t--Ambiguities (N's) allowed per target (-n, --numN):", params.numN)
 	print("\t\t\t--Gap characters allowed per target (-g, --numG):", params.numG)
+	print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
 
 	#Fetch passed loci
 	passedLoci = m.getPassedLoci(conn)
@@ -201,14 +205,14 @@ def targetDiscovery(conn, params):
 	printTimeClean(local_start1, 0)
 
 	#Now update regions table to include information for flanking regions if available
-	local_start2 = timer()
-	print("\t\tParsing alignments for flanking regions...")
-	print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
-	if int(params.threads) > 1 and not params.lowmem:
-		print("\t\t\tParsing flanking sequences using",str(params.threads),"parallel processes.")
-		pcore.flankDistParser_parallel(conn, params.flank_dist)
-	else:
-		m.flankDistParser(conn, params.flank_dist)
+	# local_start2 = timer()
+	# print("\t\tParsing alignments for flanking regions...")
+	# print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
+	# if int(params.threads) > 1 and not params.lowmem:
+	# 	print("\t\t\tParsing flanking sequences using",str(params.threads),"parallel processes.")
+	# 	pcore.flankDistParser_parallel(conn, params.flank_dist)
+	# else:
+	# 	m.flankDistParser(conn, params.flank_dist)
 
 
 #Function to print runtime given a start time
