@@ -165,7 +165,7 @@ def getNumPassedBaits(conn):
 def getNumConflicts(conn):
 	cur = conn.cursor()
 	try:
-		cur.execute("""SELECT count(*) FROM conflicts""")
+		cur.execute("""SELECT count(*) FROM conflicts WHERE choose != 1""")
 		return(parseFetchNum(cur.fetchone()))
 	except OperationalError:
 		return(False)
@@ -490,7 +490,6 @@ def randomChooseRegionMINLEN(conn, min_len):
 #Function to update consensus sequence of a locus
 def updateConsensus(conn, key, seq):
 	cur = conn.cursor()
-
 	sql = '''
 		UPDATE loci
 		SET
@@ -700,70 +699,62 @@ def fetchConflictTRs(conn, min_len, dist):
 	block = int(max(df["locid"]) + 1) #make sure to enforce integer type, or it fucks up in sql later
 	#Split df into locid groups (retains INDEX of each entry, but in separate dfs)
 	groups = df.groupby("locid")
-	for group, group_df in groups:
-		#print("\n########Group is: ",group,"\n")
+	for group, _df in groups:
+		group_df = _df.sort_values(by="start", ascending=True, kind='mergesort')
 		#If only one TR for alignment, set choose to 1:
 		if group_df.shape[0] == 1:
 			for name, row in group_df.iterrows():
 				#modify original dataframe
 				df.loc[name, "conflict_block"] = row["locid"]
+				df.loc[name, "choose"] = 1
 		else:
+			#print("\n########Group is: ",group,"\n")
+			#print(group_df)
 			#For each TR in locus
-			for name, row in group_df.iterrows():
-				#print("\nName in group_df:",name)
-				#print("Last INDEX in group_df:",group_df.index[-1])
-
-				#If alignment length below minlen, set conflict_group to locid
-				if row["length"] <= min_len:
-					df.loc[name, "conflict_block"] = row["locid"]
+			#Create iterable
+			row_iterator = group_df.iterrows()
+			_i, last_row = row_iterator.__next__() #grab first item
+			#print("First row:",_i,last_row)
+			#Make sure it is from a long enough locus
+			if last_row["length"] <= min_len:
+				df.loc[_i, "conflict_block"] = last_row["locid"]
+			#For each next row (starting at row 2)
+			for i, next_row in row_iterator:
+				#print("Comparing row ",_i," and ", i)
+				if next_row["length"] <= min_len:
+					df.loc[i, "conflict_block"] = next_row["locid"]
+				#If they overlap, assign them both to same conflict block
+				if checkOverlap(last_row, next_row, dist) == 1:
+					#print("overlap!")
+					#Fetch conflict_block currents from parent df
+					cb = df.loc[i, "conflict_block"]
+					_cb = df.loc[_i, "conflict_block"]
+					#If neither is assigned, assign both to new block
+					if (cb == "NULL") and (_cb == "NULL"):
+						#print("Assigning block: ",block)
+						df.loc[_i, "conflict_block"] = block
+						df.loc[i, "conflict_block"] = block
+						block+=1
+					#Else if row1 is assigned, give row2 the block of row1
+					#If last_row is assigned, move next_row to same block
+					elif cb == "NULL":
+						df.loc[i, "conflict_block"] = df.loc[_i, "conflict_block"]
+					#Or if row2 has block, assign it to row1
+					elif _cb == "NULL":
+						df.loc[_i, "conflict_block"] = df.loc[i, "conflict_block"]
+				#If they don't overlap, assign last_row to its own conflict block
+				#current next_row will then get checked with its next neighbor
+				#in the next iteration.
 				else:
-					#Else, compare with RIGHT NEIGHBOR
-					#Assumes ordered left to right within locus
-					#Maybe make sure to ORDER BY in query??
-					_name = int(name) + 1
+					df.loc[_i, "conflict_block"] = block
+					block += 1
 
-					#If this is the last TR in locus (i.e. no right neighbor)
-					if name == (group_df.index[-1]):
-						if df.loc[name, "conflict_block"] == "NULL":
-							df.loc[name, "conflict_block"] = block
-							block += 1
-						break
-					else:
-						_row = group_df.loc[_name]
-						#print(_row)
-						#	print(_row)
-						#for _name, _row in group_df.iterrows():
-						#if name == _name:
-						#	continue
-						#else:
-						#If within dist_r bases, assign same conflict block
-						#print("Comparing row ",name," and ", _name)
-						#print()
-						#If they overlap, assign them both to same conflict block
-						if checkOverlap(row, _row, dist) == 1:
-							#print("overlap!")
-							#Fetch conflict_block currents from parent df
-							cb = df.loc[name, "conflict_block"]
-							_cb = df.loc[_name, "conflict_block"]
-							#If neither is assigned, assign both to new block
-							if (cb == "NULL") and (_cb == "NULL"):
-								#print("Assigning block: ",block)
-								df.loc[_name, "conflict_block"] = block
-								df.loc[name, "conflict_block"] = block
-								block+=1
-							#Else if row1 is assigned, give row2 the block of row1
-							elif _cb == "NULL":
-								df.loc[_name, "conflict_block"] = df.loc[name, "conflict_block"]
-							#Or if row2 has block, assign to row1
-							elif cb == "NULL":
-								df.loc[name, "conflict_block"] = df.loc[_name, "conflict_block"]
-							#If no overlap, assign Row1 to its own conflict_block
-						else:
-							df.loc[name, "conflict_block"] = block
-							block += 1
-
+	#Set choose=1 for any which have no conflicts
+	df.loc[~df.duplicated("conflict_block",keep=False),"choose"] = 1
+	#print(df)
 	#Next step, send df back to SQLite and update conflicts table
 	updateConflictsFromPandas(conn, df)
+	updateChosenFromPandas(conn, df)
 	#DEBUG print
 	#print(pd.read_sql_query("SELECT * FROM conflicts", conn))
 
@@ -927,9 +918,9 @@ def parseCountsMin(df):
 				df.loc[df["conflict_block"] == group, "choose"] = 0
 				for i in chosen_ones:
 					df.loc[i, "choose"] = "NULL"
-			else:
-				message = "Error: No TR chosen for block " + group + ", something went wrong"
-				raise RuntimeError(message)
+			# else:
+			# 	message = "Error: No TR chosen for block " + group + ", something went wrong"
+			# 	raise RuntimeError(message)
 	return(df)
 
 #Function to go through pandas df of conflict counts and choose best by "maximum"
@@ -968,9 +959,9 @@ def parseCountsMax(df):
 				df.loc[df["conflict_block"] == group, "choose"] = 0
 				for i in chosen_ones:
 					df.loc[i, "choose"] = "NULL"
-			else:
-				message = "Error: No TR chosen for block " + group + ", something went wrong"
-				raise RuntimeError(message)
+			# else:
+			# 	message = "Error: No TR chosen for block %s, something went wrong"%(group)
+			# 	raise RuntimeError(message)
 	return(df)
 
 #Function to prints flanking SNPs for conflicting regions...
