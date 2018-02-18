@@ -45,7 +45,7 @@ def read_vcf(v):
 #If called as gap, we overwrite FASTA reference at that position.
 #MASKING information is retained from FASTA reference and NOT considered in VCF
 #Function to return new consensus sequence given REF and VCF records
-def make_consensus_from_vcf(ref, records, thresh):
+def make_consensus_from_vcf(ref, chrom, records, thresh):
 	consensus = ""
 	for rec in records:
 		current_ref = ""
@@ -82,7 +82,7 @@ def make_consensus_from_vcf(ref, records, thresh):
 				cons = aln.reverse_iupac(temp)
 				chosen = 1
 		else:
-			print("WARNING: Nucleotide (%s) at position %s in reference sequence does not match REF allele from VCF file (%s). This is most commonly caused by incorrect indexing in your VCF file."%(current_ref[rec.POS-1],rec.POS,rec.REF))
+			print("\t\t\tWARNING: CHROM %s position %s (%s) doesn't match REF in VCF record (%s). "%(chrom, rec.POS, current_ref[rec.POS-1],rec.REF))
 
 		#Incorporate new consensus base
 		if chosen == 1 and cons:
