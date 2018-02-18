@@ -142,29 +142,36 @@ def loadGFF(conn, params):
 def loadVCF(conn, params):
 
 	loci = m.getPassedLoci(conn) #get DF of passed loci
-	print(loci)
-	chrom_lookup = set(loci["chrom"].tolist()) #lookup table of locus IDs
-	loci = loci.set_index(['chrom']) #index loci DF by chrom column
+	#print(loci)
+	#chrom_lookup = set(loci["chrom"].tolist()) #lookup table of locus IDs
+	chrom_lookup = loci.set_index('chrom')['id'].to_dict()
+	loci.set_index('id', inplace=True)
+	#print(loci)
+	#print(chrom_lookup)
+	#Using set_index causes a bug for some reason.
+	#loci.set_index('chrom', inplace=True) #index loci DF by chrom column
+
 	#print(loci)
 	passed=0 #To track number of VCF records for which no locus exists
 	failed=0
 
 	for reclist in vcf_tools.read_vcf(params.vcf):
 		rec_chrom = reclist[0].CHROM
-		print("Starting locus",rec_chrom)
+		#print("Starting locus",rec_chrom)
 		if rec_chrom in chrom_lookup:
-			locid = int(loci.loc[rec_chrom]["id"])
+			#print("chrom:",rec_chrom, " - id:",chrom_lookup[rec_chrom])
+			locid = chrom_lookup[rec_chrom]
 			#print("locid is",locid)
 			passed+=1
 			#for rec in reclist:
 			#	print(rec.CHROM, rec.POS, rec.REF, rec.ALT, len(rec.samples), rec.call_rate, rec.aaf)
 			#Grab DF record for the matching CHROM
-			sub = loci.loc[rec_chrom]
+			seq = loci.loc[locid]['consensus']
 			#Get new consensus sequence given VCF records
-			new_cons = vcf_tools.make_consensus_from_vcf(sub['consensus'],reclist, params.thresh)
+			new_cons = vcf_tools.make_consensus_from_vcf(seq,rec_chrom,reclist, params.thresh)
 			#Update new consensus seq in db
-			if len(new_cons) != len(sub['consensus']): #Check length first
-				print("Warning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
+			if len(new_cons) != len(seq): #Check length first
+				print("\t\t\tWarning: New consensus sequence for locus %s (locid=<%s>) is the wrong length! Skipping."%(rec_chrom, locid))
 			else:
 				m.updateConsensus(conn, locid, new_cons)
 				#Delete old vars for locus, and parse new consensus
@@ -177,7 +184,7 @@ def loadVCF(conn, params):
 			#print(rec_chrom, "not found.")
 			failed+=1
 	if failed > 0:
-		print("WARNING:%s/%s records in <%s> referenced sequences not found in <%s> FASTA headers"%(failed, failed+passed, params.vcf, params.assembly))
+		print("\t\t\tWARNING:%s/%s records in <%s> don't match any reference sequences"%(failed, failed+passed, params.vcf))
 
 #Function to discover target regions using a sliding windows through passedLoci
 def targetDiscoverySlidingWindow(conn, params, loci):
