@@ -112,11 +112,23 @@ def seqCounter(seq):
 	+ d['K'] + d['M'] + d['B'] + d['D'] + d['H'] + d['V']
 	return d
 
+#Function to get vars, gaps, and N counts for flanking regions of a substring
+def getFlankCounts(ref, x, y, dist):
+	x2 = x-dist
+	if x2 < 0:
+		x2 = 0
+	y2 = y+dist
+	if y2 > len(ref):
+		y2 = len(ref)
+	flanks=ref[x2:x]+ref[y:y2] #flanks = right + left flank 
+	counts=seqCounterSimple(simplifySeq(flanks))
+	return(counts)
+
+
 #Returns dict of character counts from a simplified consensus sequence
 def seqCounterSimple(seq):
 	d = {}
 	d = {
-		'.':0,
 		'N':0,
 		'-':0,
 		'*':0
