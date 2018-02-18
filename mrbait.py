@@ -11,30 +11,11 @@ import mrbait_corefuncs_parallel as pcore
 
 ############################### MAIN ###################################
 
-#BELOW IS WORKFLOW FOR UCE DESIGN, FINISH AND THEN CONVERT TO FUNCTIONS
-#ADD GFF FUNCTIONALITY LATER
-#Add multithreading support later... Each thread will need its own db conn
-#If TR too short, can add option to include variable flanking regions?
-#TODO: Add better checking to make sure database isn't empty before proceeding (e.g. if filters too stringent)
-#TODO: Add "flow control" options, e.g. only make db, load previous db, only TR, etc
-#TODO: Add BRANCHING option for Flow Control. e.g. Branch RUN1 from Regions level to try new method of bait design, etc
-#TODO: Parallelize loadLOCI and loadMAF, implement ZDZ's chunking functions
-#TODO: Parallelize TR discovery somehow??
-#TODO: Filter by flanking masked, and flanking GFF elements
-#TODO: Functions to read and write params as JSON? Or maybe just stick in database?
 #TODO: Filter targets and baits by low-complexity (Dusting)
-#TODO: Option to apply SDUST to all loci, and pass/fail loci/alignments on complexity
 #TODO: Python implementation of SDUST algorithm (gonna be a lot of work, hold off for now)
 #TODO: Option to output baits as +, -, or both strands
-#TODO: Runtime bottleneck profiling: cProfile + pstats or prun (??)
-#TODO: Memory usage profiling: Check out mprof, looks easy, maybe look at guppy
-#TODO: Progress bar for loadXXXX() functions
-#TODO: Implement file chunkers and parallel loading
-#NOTE: Not all database drivers support the "?" syntax I use for passing params to SQLite. Be careful.
+#TODO: Implement file chunkers and parallel loading for VCF and GFF
 #TODO: Make sure to check that database is initialized if given via --resume options
-#TODO: 'lowmem' option does expensive things in SQLite, highmem option operates on pandas DFs, can parallelize
-#TODO: FlankDistParser is expensive. Could capture seq, and return as Pandas DF, chunk it
-
 
 def main():
 	global_start = timer()
@@ -85,7 +66,6 @@ def main():
 				print("\t\t### Results: %s loci passed filtering! ###"%passedLoci)
 			step = 2
 			printTime(start,2)
-
 		elif step == 2:
 			start = timer()
 			#Target discovery
@@ -109,14 +89,27 @@ def main():
 				if passed <= 0:
 					sys.exit("\nProgram killed: No viable targets found.\n")
 				else:
-					print("\n\t\t### Results: %s potential targets identified! ###"%passedLoci)
+					print("\n\t\t### Results: %s potential targets identified! ###"%passed)
 				step = 3
 				printTime(start,2)
-				print()
 			step = 3
+			#print(m.getRegions(conn))
 		elif step == 3:
+			start = timer()
+			print("\n\tStep 3: Target Filtering and Selection")
 			#Target filtering and conflict resolution
-			#Clear baits
+			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
+			passedTargets = m.getNumPassedTRs(conn)
+			if passedLoci <= 0:
+				sys.exit("\nProgram killed: No loci in database.\n")
+			elif passedTargets <= 0:
+				sys.exit("\nProgram killed: No targets in database.\n")
+			else:
+				#Clear baits
+				m.clearBaits(conn)
+				#select: resolve conflicts
+				selectTargets(conn, params)
+				#filter: fail targets
 			step = 4
 		elif step == 4:
 			#Bait discovery
@@ -140,32 +133,32 @@ def loadAlignments(conn, params):
 	#load alignment to database
 	print("\t\tStep 1 parameters:")
 	if params.alignment or params.loci:
-		print("\t\t\t--Minimum alignment depth (-c):", params.cov)
-		print("\t\t\t--Minimum alignment length (-l):", params.minlen)
-		print("\t\t\t--Threshold to call \"N\" or gap consensus base (-q):",params.thresh)
-		print("\t\t\t--Threshold to retain masked base (-k):",params.mask)
-		print("\t\t\t--Maximum allowed gap/N bases (-Q):",params.max_ambig)
-		print("\t\t\t--Maximum allowed masked bases (-K):",params.max_mask)
+		print("\t\t\tMinimum alignment depth (-c):", params.cov)
+		print("\t\t\tMinimum alignment length (-l):", params.minlen)
+		print("\t\t\tThreshold to call \"N\" or gap consensus base (-q):",params.thresh)
+		print("\t\t\tThreshold to retain masked base (-k):",params.mask)
+		print("\t\t\tMaximum allowed gap/N bases (-Q):",params.max_ambig)
+		print("\t\t\tMaximum allowed masked bases (-K):",params.max_mask)
 		#Load alignments
 		if params.alignment:
 			print("\t\tLoading MAF file:",params.alignment)
 			if int(params.threads) > 1:
 				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
-				pcore.loadPARALLEL(conn, params, "maf")
+				pcore.loadMAF_parallel(conn, params)
 			else:
 				core.loadMAF(conn, params)
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
 			if int(params.threads) > 1:
 				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
-				pcore.loadPARALLEL(conn, params, "loci")
+				pcore.loadLOCI_parallel(conn, params)
 			else:
 				core.loadLOCI(conn, params)
 
 	elif params.assembly:
-		print("\t\t\t--Minimum contig length (-l,--len):", params.minlen)
-		print("\t\t\t--Maximum allowed gap/N bases (-Q):",params.max_ambig)
-		print("\t\t\t--Maximum allowed masked bases (-K):",params.max_mask)
+		print("\t\t\tMinimum contig length (-l,--len):", params.minlen)
+		print("\t\t\tMaximum allowed gap/N bases (-Q):",params.max_ambig)
+		print("\t\t\tMaximum allowed masked bases (-K):",params.max_mask)
 		#Load assembly file
 		print("\t\tLoading FASTA file:",params.assembly)
 		core.loadFASTA(conn, params)
@@ -173,6 +166,10 @@ def loadAlignments(conn, params):
 		#If VCF file
 		if params.vcf:
 			print("\t\tLoading VCF file:",params.vcf)
+			# if int(params.threads) > 1:
+			# 	print("\t\t\tLoading VCF records using",str(params.threads),"parallel processes.")
+			# 	pcore.loadVCF_parallel(conn, params)
+			# else:
 			core.loadVCF(conn, params)
 
 		#if GFF file
@@ -188,12 +185,12 @@ def loadAlignments(conn, params):
 #Function to call targetDiscoverySlidingWindow and print relevant params
 def targetDiscovery(conn, params):
 	print("\t\tStep 2 parameters:")
-	print("\t\t\t--Sliding window width (-b, --bait):", params.win_width)
-	print("\t\t\t--Sliding window shift distance (-w, --win_shift):", params.win_shift)
-	print("\t\t\t--Variable columns allowed per target (-v, --var_max):", params.var_max)
-	print("\t\t\t--Ambiguities (N's) allowed per target (-n, --numN):", params.numN)
-	print("\t\t\t--Gap characters allowed per target (-g, --numG):", params.numG)
-	print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
+	print("\t\t\tSliding window width (-b, --bait):", params.win_width)
+	print("\t\t\tSliding window shift distance (-w, --win_shift):", params.win_shift)
+	print("\t\t\tVariable columns allowed per target (-v, --var_max):", params.var_max)
+	print("\t\t\tAmbiguities (N's) allowed per target (-n, --numN):", params.numN)
+	print("\t\t\tGap characters allowed per target (-g, --numG):", params.numG)
+	print("\t\t\tFlanking distance to parse (-d,--flank_dist):",params.flank_dist)
 
 	#Fetch passed loci
 	passedLoci = m.getPassedLoci(conn)
@@ -201,10 +198,42 @@ def targetDiscovery(conn, params):
 	#sliding window call
 	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
 	if int(params.threads) > 1:
-		print("\t\t\tFinding targets using",str(params.threads),"parallel processes.")
+		print("\t\t\tFinding targets using",str(params.threads),"parallel processes...")
 		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)
 	else:
 		core.targetDiscoverySlidingWindow(conn, params, passedLoci)
+
+#Function to print params and make calls for target region selection
+def selectTargets(conn, params):
+	print("\t\tStep 3 parameters:")
+	if(params.mult_reg):
+		print("\t\t\tMultiple targets allowed per locus (-R, --mult_reg): True")
+		print("\t\t\tMinimum locus length for multiple targets (-m, --min_mult):",params.min_mult)
+		print("\t\t\tMinimum distance between targets within locus (-D, --dist_r):",params.dist_r)
+	else:
+		print("\t\t\tMultiple targets allowed per locus (-R, --mult_reg): False")
+	print("\t\t\tFlanking distance for target selection (-d,--flank_dist):",params.flank_dist)
+
+
+	#Build conflict tables
+	conflicts = core.findTargetConflicts(conn, params)
+	if (conflicts > 0):
+		print("\t\tResolving conflicting targets... Found",conflicts,"needing resolution.")
+		print("\t\t\tSelection criterion (-S, --select_r): ",end="")
+		if params.select_r == "rand":
+			print("Random selection")
+		else:
+			if params.select_r == "snp":
+				print("Most SNPs w/in",params.flank_dist,"bases")
+			elif params.select_r == "bad":
+				print("Least ambiguities w/in",params.flank_dist,"bases")
+			elif params.select_r == "cons":
+				print("Most conserved w/in",params.flank_dist,"bases")
+			print("\t\t\tNote: Remaining conflicts will be randomly resolved.")
+		core.selectTargetRegions(conn, params)
+	else:
+		print("\t\tNo conflicting targets found. Skipping target selection.")
+
 
 
 #Function to print runtime given a start time
@@ -233,9 +262,6 @@ if __name__ == '__main__':
 	except KeyboardInterrupt:
 		sys.exit(1)
 
-
-print("Starting Target Region discovery...")
-core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 #Assert that there are TRs chosen, and that not all have been filtered out
 core.checkTargetRegions(conn)
