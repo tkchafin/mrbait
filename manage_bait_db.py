@@ -17,7 +17,7 @@ def create_connection(db):
 #Initialize empty databases
 def init_new_db(connection):
 	clearLoci(connection)
-	clearVariants(connection)
+	#clearVariants(connection)
 	clearGFF(connection)
 	clearTargets(connection)
 	clearBaits(connection)
@@ -44,7 +44,8 @@ def clearTargets(conn):
 	cursor.execute('''
 		CREATE TABLE regions(regid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
 			length INTEGER NOT NULL, sequence TEXT NOT NULL, vars INTEGER,
-			bad INTEGER, gap INTEGER, mask REAL, gc REAL, start INTEGER NOT NULL,
+			bad INTEGER, gap INTEGER, mask REAL, gc REAL, vars_flank INTEGER,
+			bad_flank INTEGER, gap_flank INTEGER, start INTEGER NOT NULL,
 			stop INTEGER NOT NULL,pass INTEGER NOT NULL,
 			FOREIGN KEY (locid) REFERENCES loci(id))
 	''')
@@ -64,18 +65,20 @@ def clearLoci(conn):
 	conn.commit()
 
 #Function to clear variants
-def clearVariants(conn):
-	cursor = conn.cursor()
-	cursor.execute('''DROP TABLE IF EXISTS variants''')
-	#Table holding variant information
-	cursor.execute('''
-		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
-			column INTEGER NOT NULL, value TEXT NOT NULL,
-			FOREIGN KEY (locid) REFERENCES loci(id),
-			PRIMARY KEY(varid),
-			UNIQUE(varid))
-	''')
-	conn.commit()
+"""DEPRECATED"""
+# def clearVariants(conn):
+# 	cursor = conn.cursor()
+# 	cursor.execute('''DROP TABLE IF EXISTS variants''')
+# 	#Table holding variant information
+# 	cursor.execute('''
+# 		CREATE TABLE variants(varid INTEGER NOT NULL, locid INTEGER NOT NULL,
+# 			column INTEGER NOT NULL, value TEXT NOT NULL,
+# 			FOREIGN KEY (locid) REFERENCES loci(id),
+# 			PRIMARY KEY(varid),
+# 			UNIQUE(varid))
+# 	''')
+# 	conn.commit()
+
 
 #Function to clear GFF
 def clearGFF(conn):
@@ -126,11 +129,12 @@ def parseFetchNum(fet):
 	else:
 		return fet[0]
 
-#returns number of variants
-def getNumVars(conn):
-	cur = conn.cursor()
-	cur.execute("""SELECT count(varid) FROM variants""")
-	return(parseFetchNum(cur.fetchone()))
+"""DEPRECATED"""
+# #returns number of variants
+# def getNumVars(conn):
+# 	cur = conn.cursor()
+# 	cur.execute("""SELECT count(varid) FROM variants""")
+# 	return(parseFetchNum(cur.fetchone()))
 
 #returns number of GFF elements
 def getNumGFF(conn):
@@ -224,9 +228,10 @@ def getGFF(conn):
 def getPassedBaits(conn):
 	return(pd.read_sql_query("""SELECT baitid, sequence FROM baits WHERE pass=1""", conn))
 
-#Function to return variants table
-def getVariants(conn):
-	return(pd.read_sql_query("""SELECT * FROM variants """, conn))
+"""DEPRECATED"""
+# #Function to return variants table
+# def getVariants(conn):
+# 	return(pd.read_sql_query("""SELECT * FROM variants """, conn))
 
 #Code to add record to 'loci' table
 def add_locus_record(conn, depth, consensus, passed, name):
@@ -280,26 +285,27 @@ def add_gff_record(conn,seqid, gff_type, start, stop, alias):
 		cur.execute(sql, stuff)
 		conn.commit()
 
-#Code to add to 'variants' table
-def add_variant_record(conn, loc, pos, val):
-	#Establish cursor
-	cur = conn.cursor()
-
-	#Check if sample has a sampid, fetch if it exists
-	#sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
-	#cur.execute(sql)
-	#fetch = "SELECT sampid FROM samples WHERE name = %r"%name
-	#cur.execute(fetch)
-	#sampid = cur.fetchone()[0] #fecth the sample id
-
-	#Check if position has a posid, fetch if it exists
-	sql2 = '''INSERT OR IGNORE INTO variants(locid, column, value) VALUES(?,?,?)'''
-	stuff = [loc, pos, val]
-	cur.execute(sql2,stuff)
-	conn.commit()
+"""DEPRECATED"""
+# #Code to add to 'variants' table
+# def add_variant_record(conn, loc, pos, val):
+# 	#Establish cursor
+# 	cur = conn.cursor()
+#
+# 	#Check if sample has a sampid, fetch if it exists
+# 	#sql= "INSERT OR IGNORE INTO samples(name) VALUES (%r);"%name
+# 	#cur.execute(sql)
+# 	#fetch = "SELECT sampid FROM samples WHERE name = %r"%name
+# 	#cur.execute(fetch)
+# 	#sampid = cur.fetchone()[0] #fecth the sample id
+#
+# 	#Check if position has a posid, fetch if it exists
+# 	sql2 = '''INSERT OR IGNORE INTO variants(locid, column, value) VALUES(?,?,?)'''
+# 	stuff = [loc, pos, val]
+# 	cur.execute(sql2,stuff)
+# 	conn.commit()
 
 #Function to add region to regions table
-def add_region_record(conn, locid, start, stop, seq, counts, mask, gc):
+def add_region_record(conn, locid, start, stop, seq, counts, fcounts, mask, gc):
 	#Establish cursor
 	cur = conn.cursor()
 
@@ -307,8 +313,8 @@ def add_region_record(conn, locid, start, stop, seq, counts, mask, gc):
 	gc_p = float(gc/len(seq))
 	#build sql and pack values to insert
 	sql = '''INSERT INTO regions(locid, length, sequence, vars, bad, gap, mask, gc,
-		start, stop, pass) VALUES (?,?,?,?,?,?,?,?,?,?,1)'''
-	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], mask_p, gc_p, start, stop]
+		vars_flank, bad_flank, gap_flank, start, stop, pass) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,1)'''
+	stuff = [locid, len(seq), seq, counts["*"], counts["N"], counts["-"], mask_p, gc_p, fcounts["*"], fcounts["N"], fcounts["-"],start, stop]
 
 	#insert
 	cur.execute(sql, stuff)
@@ -334,76 +340,79 @@ def validateGFFRecords(conn):
 	cur.execute(sql)
 	conn.commit()
 
-#Function to filter regions relation by minimum flanking SNPs
-def regionFilterMinVar(conn, val, flank):
-	cur = conn.cursor()
-	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is less than minimum
-	sql = '''
-		UPDATE regions
-		SET pass = 0
-		WHERE regid in
-			(SELECT regid FROM
-			(SELECT
-				regid,
-				COUNT(DISTINCT column) as counts
-			FROM
-				regions INNER JOIN variants ON regions.locid = variants.locid
-			WHERE
-				value != "N" AND value != "-"
-			AND
-				((column < (stop+?)) AND (column > start-?))
-			GROUP BY regid)
-			WHERE counts < ?);
+"""DEPRECATED"""
+# #Function to filter regions relation by minimum flanking SNPs
+# def regionFilterMinVar(conn, val, flank):
+# 	cur = conn.cursor()
+# 	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is less than minimum
+# 	sql = '''
+# 		UPDATE regions
+# 		SET pass = 0
+# 		WHERE regid in
+# 			(SELECT regid FROM
+# 			(SELECT
+# 				regid,
+# 				COUNT(DISTINCT column) as counts
+# 			FROM
+# 				regions INNER JOIN variants ON regions.locid = variants.locid
+# 			WHERE
+# 				value != "N" AND value != "-"
+# 			AND
+# 				((column < (stop+?)) AND (column > start-?))
+# 			GROUP BY regid)
+# 			WHERE counts < ?);
+#
+# 	'''
+# 	stuff = [flank, flank, val]
+# 	cur.execute(sql, stuff)
+# 	conn.commit()
 
-	'''
-	stuff = [flank, flank, val]
-	cur.execute(sql, stuff)
-	conn.commit()
+"""DEPRECATED"""
+# #Function to filter regions relation by maximum flanking SNPs
+# def regionFilterMaxVar(conn, val, flank):
+# 	cur = conn.cursor()
+# 	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is greater than maximum
+# 	sql = '''
+# 		UPDATE regions
+# 		SET pass = 0
+# 		WHERE regid in
+# 			(SELECT regid FROM
+# 			(SELECT
+# 				regid,
+# 				COUNT(DISTINCT column) as counts
+# 			FROM
+# 				regions INNER JOIN variants ON regions.locid = variants.locid
+# 			WHERE
+# 				value != "N" AND value != "-"
+# 			AND
+# 				((column < (stop+?)) AND (column > start-?))
+# 			GROUP BY regid)
+# 			WHERE counts > ?);
+#
+# 	'''
+# 	stuff = [flank, flank, val]
+# 	cur.execute(sql, stuff)
+# 	conn.commit()
 
-#Function to filter regions relation by maximum flanking SNPs
-def regionFilterMaxVar(conn, val, flank):
-	cur = conn.cursor()
-	#Update pass to "0/FALSE" where COUNT(vars) in flanking region + TR is greater than maximum
-	sql = '''
-		UPDATE regions
-		SET pass = 0
-		WHERE regid in
-			(SELECT regid FROM
-			(SELECT
-				regid,
-				COUNT(DISTINCT column) as counts
-			FROM
-				regions INNER JOIN variants ON regions.locid = variants.locid
-			WHERE
-				value != "N" AND value != "-"
-			AND
-				((column < (stop+?)) AND (column > start-?))
-			GROUP BY regid)
-			WHERE counts > ?);
-
-	'''
-	stuff = [flank, flank, val]
-	cur.execute(sql, stuff)
-	conn.commit()
-
-#Function for debug printing of variant counts flanking TRs
-def printVarCounts(conn, flank):
-	cur = conn.cursor()
-	print("Variants within %r bases of TRs:"%flank)
-	#FOR TESTING/DEBUGGING
-	sql2 = '''
-	SELECT
-		regid,
-		COUNT(DISTINCT column) as counts
-	FROM
-		regions INNER JOIN variants ON regions.locid = variants.locid
-	WHERE
-		value != "N" AND value != "-"
-	AND
-		((column <= (stop+%s)) AND (column >= start-%s))
-	GROUP BY regid
-	'''%(flank, flank)
-	print (pd.read_sql_query(sql2, conn))
+"""DEPRECATED"""
+# #Function for debug printing of variant counts flanking TRs
+# def printVarCounts(conn, flank):
+# 	cur = conn.cursor()
+# 	print("Variants within %r bases of TRs:"%flank)
+# 	#FOR TESTING/DEBUGGING
+# 	sql2 = '''
+# 	SELECT
+# 		regid,
+# 		COUNT(DISTINCT column) as counts
+# 	FROM
+# 		regions INNER JOIN variants ON regions.locid = variants.locid
+# 	WHERE
+# 		value != "N" AND value != "-"
+# 	AND
+# 		((column <= (stop+%s)) AND (column >= start-%s))
+# 	GROUP BY regid
+# 	'''%(flank, flank)
+# 	print (pd.read_sql_query(sql2, conn))
 
 #Function for random selection of TRs
 def regionFilterRandom(conn, num):
@@ -465,17 +474,18 @@ def randomChooseRegionMINLEN(conn, min_len):
 	'''
 	cur.execute(sql_minlen, (minlen,))
 
-#Function to delete from variable table on locid
-def purgeVars(conn, key):
-	cur = conn.cursor()
-
-	sql = '''
-	DELETE FROM variants
-	WHERE locid = ?
-	'''
-
-	cur.execute(sql,(key,))
-	conn.commit()
+"""DEPRECATED"""
+# #Function to delete from variable table on locid
+# def purgeVars(conn, key):
+# 	cur = conn.cursor()
+#
+# 	sql = '''
+# 	DELETE FROM variants
+# 	WHERE locid = ?
+# 	'''
+#
+# 	cur.execute(sql,(key,))
+# 	conn.commit()
 
 #Function to update consensus sequence of a locus
 def updateConsensus(conn, key, seq):
@@ -831,7 +841,7 @@ def regionSelect_SNP(conn):
 			c.regid,
 			conflict_block,
 			choose,
-			vars as counts
+			(vars+vars_flank) as counts
 		FROM
 			conflicts AS c INNER JOIN regions AS r USING (regid)
 		WHERE
@@ -855,22 +865,22 @@ def regionSelect_SNP(conn):
 
 #Function to prints flanking SNPs for conflicting regions...
 #Function for use when debugging
-def printFlankingSNPs_conflicts(conn):
-	cur = conn.cursor()
-
-	#Query conflicts temp table to make a pandas dataframe for parsing
-	sql = '''
-		SELECT
-			c.regid,
-			conflict_block,
-			choose,
-			vars
-		FROM
-			conflicts AS c INNER JOIN regions AS r USING (regid)
-		WHERE
-			c.choose="NULL"
-	'''
-	print(pd.read_sql_query(sql, conn))
+# def printFlankingSNPs_conflicts(conn):
+# 	cur = conn.cursor()
+#
+# 	#Query conflicts temp table to make a pandas dataframe for parsing
+# 	sql = '''
+# 		SELECT
+# 			c.regid,
+# 			conflict_block,
+# 			choose,
+# 			vars
+# 		FROM
+# 			conflicts AS c INNER JOIN regions AS r USING (regid)
+# 		WHERE
+# 			c.choose="NULL"
+# 	'''
+# 	print(pd.read_sql_query(sql, conn))
 
 
 #Function to loop though pandas DF of conflict counts and choose best by "minimum"
@@ -974,7 +984,7 @@ def printFlankingSNPCounts_conflicts(conn):
 			c.regid,
 			conflict_block,
 			choose,
-			vars AS counts
+			(vars+vars_flank) AS counts
 		FROM
 			conflicts AS c INNER JOIN regions AS r USING (regid)
 		WHERE
@@ -1005,7 +1015,7 @@ def regionSelect_MINBAD(conn):
 			c.regid,
 			conflict_block,
 			choose,
-			SUM(gap + bad) as counts
+			(gap + bad + bad_flank + gap_flank) as counts
 		FROM
 			conflicts AS c INNER JOIN regions AS r USING (regid)
 		WHERE
@@ -1024,7 +1034,7 @@ def regionSelect_MINBAD(conn):
 	#Push modified DF to SQL as temp table
 	updateChosenFromPandas(conn, df)
 
-#Function for resolving conflict blocks by minimizing "bad" bases in flanking region
+#Function for resolving conflict blocks by minimizing all variable bases in flanking region
 def regionSelect_MINVAR_TR(conn):
 	cur = conn.cursor()
 
@@ -1040,7 +1050,7 @@ def regionSelect_MINVAR_TR(conn):
 			c.regid,
 			conflict_block,
 			choose,
-			(vars + gap + bad) AS counts
+			(vars + flank_vars) AS counts
 		FROM
 			conflicts AS c INNER JOIN regions AS r USING (regid)
 		WHERE
@@ -1076,7 +1086,7 @@ def regionSelect_MINSNP(conn):
 			c.regid,
 			conflict_block,
 			choose,
-			vars as counts
+			(vars + vars_flank) as counts
 		FROM
 			conflicts AS c INNER JOIN regions AS r USING (regid)
 		WHERE
@@ -1154,7 +1164,7 @@ def varMaxFilterTR(conn, varmax):
 	SET
 		pass=0
 	WHERE
-		vars > ?
+		(vars+vars_flank) AS counts > ?
 	'''
 	#print(pd.read_sql_query(sql, conn))
 	cur.execute(sql, (varmax,))
@@ -1455,128 +1465,124 @@ def parseJoinGFFTable(df, dist):
 	whitelist = df[df["pass"]==1].regid.unique()
 	return(whitelist)
 
+"""DEPRECATED"""
+# #Function to parse variants table to update regions VARS for flanking information
+# def parseFlankVars(conn, dist):
+# 	cur = conn.cursor()
+# 	sql = '''
+# 		WITH other AS
+# 			(SELECT
+# 				r.regid,
+# 				COUNT(v.value) as counts
+# 			FROM
+# 				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+# 			WHERE
+# 				v.value !="N" AND v.value != "-"
+# 			AND
+# 				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
+# 			GROUP BY
+# 				r.regid)
+# 		UPDATE
+# 			regions
+# 		SET
+# 			vars = vars + (SELECT counts FROM other WHERE regions.regid = other.regid)
+# 		WHERE
+# 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+# 	'''
+# 	stuff = [dist, dist]
+# 	cur.execute(sql, stuff)
+# 	conn.commit()
+#
+# def parseFlankBad(conn, dist):
+# 	cur = conn.cursor()
+# 	sql2 = '''
+# 		WITH other AS
+# 			(SELECT
+# 				r.regid,
+# 				COUNT(v.value) as counts
+# 			FROM
+# 				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+# 			WHERE
+# 				v.value ="N"
+# 			AND
+# 				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
+# 			GROUP BY
+# 				r.regid)
+# 		UPDATE
+# 			regions
+# 		SET
+# 			bad = bad + (SELECT counts FROM other WHERE regions.regid = other.regid)
+# 		WHERE
+# 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+# 	'''
+# 	stuff = [dist, dist]
+# 	cur.execute(sql2, stuff)
+# 	conn.commit()
+#
+# def parseFlankGap(conn, dist):
+# 	cur = conn.cursor()
+# 	sql3 = '''
+# 		WITH other AS
+# 			(SELECT
+# 				r.regid,
+# 				COUNT(v.value) as counts
+# 			FROM
+# 				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
+# 			WHERE
+# 				v.value = "-"
+# 			AND
+# 				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
+# 			GROUP BY
+# 				r.regid)
+# 		UPDATE
+# 			regions
+# 		SET
+# 			gap = gap + (SELECT counts FROM other WHERE regions.regid = other.regid)
+# 		WHERE
+# 			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
+# 	'''
+# 	stuff = [dist, dist]
+# 	cur.execute(sql3, stuff)
+# 	conn.commit()
+#
+#
+# #Function to parse variants table to population flanking character columns for regions table
+# def flankDistParser(conn, dist):
+# 	parseFlankVars(conn, dist)
+# 	parseFlankBad(conn, dist)
+# 	parseFlankGap(conn, dist)
 
-#Function to parse variants table to update regions VARS for flanking information
-def parseFlankVars(conn, dist):
-	cur = conn.cursor()
-	sql = '''
-		WITH other AS
-			(SELECT
-				r.regid,
-				COUNT(v.value) as counts
-			FROM
-				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
-			WHERE
-				v.value !="N" AND v.value != "-"
-			AND
-				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
-			GROUP BY
-				r.regid)
-		UPDATE
-			regions
-		SET
-			vars = vars + (SELECT counts FROM other WHERE regions.regid = other.regid)
-		WHERE
-			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''
-	stuff = [dist, dist]
-	cur.execute(sql, stuff)
-	conn.commit()
-
-def parseFlankBad(conn, dist):
-	cur = conn.cursor()
-	sql2 = '''
-		WITH other AS
-			(SELECT
-				r.regid,
-				COUNT(v.value) as counts
-			FROM
-				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
-			WHERE
-				v.value ="N"
-			AND
-				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
-			GROUP BY
-				r.regid)
-		UPDATE
-			regions
-		SET
-			bad = bad + (SELECT counts FROM other WHERE regions.regid = other.regid)
-		WHERE
-			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''
-	stuff = [dist, dist]
-	cur.execute(sql2, stuff)
-	conn.commit()
-
-def parseFlankGap(conn, dist):
-	cur = conn.cursor()
-	sql3 = '''
-		WITH other AS
-			(SELECT
-				r.regid,
-				COUNT(v.value) as counts
-			FROM
-				regions AS r INNER JOIN variants AS v ON r.locid = v.locid
-			WHERE
-				v.value = "-"
-			AND
-				v.column <= (r.stop + CAST(? as integer)) AND v.column >= (r.start-CAST(? as integer))
-			GROUP BY
-				r.regid)
-		UPDATE
-			regions
-		SET
-			gap = gap + (SELECT counts FROM other WHERE regions.regid = other.regid)
-		WHERE
-			regid IN (SELECT regid FROM other WHERE regions.regid=other.regid)
-	'''
-	stuff = [dist, dist]
-	cur.execute(sql3, stuff)
-	conn.commit()
-
-
-#Function to parse variants table to population flanking character columns for regions table
-def flankDistParser(conn, dist):
-	parseFlankVars(conn, dist)
-	parseFlankBad(conn, dist)
-	parseFlankGap(conn, dist)
-
-
-#Function to parse variants table to update regions VARS for flanking information
-def getTargetFlanks(conn, dist):
-	sql = '''
-	SELECT
-		r.start AS start, r.stop AS stop, l.length AS len, l.consensus AS seq, r.sequence AS target
-	FROM
-		regions AS r INNER JOIN loci AS l ON r.locid = l.id
-	'''
-	#Fetch targets with full loci sequences
-	targets = pd.read_sql_query(sql, conn)
-
-	#Re-pull targets + flank distances
-	for index, row in targets.iterrows():
-		start = row["start"] - dist
-		if start < 0:
-			start = 0
-		end = row["stop"] + dist
-		if end > row["len"]:
-			end = row["len"]
-		new_seq = row["seq"][start:end]
-		print("New:",new_seq)
-		print("Old:",row["target"])
-		print()
-
-
-
+"""DEPRECATED"""
+# #Function to parse variants table to update regions VARS for flanking information
+# def getTargetFlanks(conn, dist):
+# 	sql = '''
+# 	SELECT
+# 		r.regid, r.start AS start, r.stop AS stop, l.length AS len, l.consensus AS seq
+# 	FROM
+# 		regions AS r INNER JOIN loci AS l ON r.locid = l.id
+# 	'''
+# 	#Fetch targets with full loci sequences
+# 	targets = pd.read_sql_query(sql, conn)
+# 	targets.set_index('regid', inplace=True)
+#
+# 	#Re-pull targets + flank distances
+# 	for index, row in targets.iterrows():
+# 		start = row["start"] - dist
+# 		if start < 0:
+# 			start = 0
+# 		end = row["stop"] + dist
+# 		if end > row["len"]:
+# 			end = row["len"]
+# 		new_seq = row["seq"][start:end]
+# 		targets.loc[index, 'seq'] = new_seq
 
 #Function to return a pandas DF of regions, vars, and 'bad bases'
 def getRegionWeights(conn):
 	sql = """
 	SELECT
 		regid,
-		vars,
-		(bad + gap) AS sum_bad
+		(vars+vars_flank) AS vars,
+		(bad + gap + bad_flank + gap_flank) AS sum_bad
 	FROM
 		regions
 	"""
@@ -1593,8 +1599,8 @@ def getRegionWeightsByList(conn, fetch):
 	sql = """
 	SELECT
 		regions.regid,
-		vars,
-		(bad + gap) as sum_bad
+		(vars+vars_flank) AS vars,
+		(bad + gap + bad_flank + gap_flank) as sum_bad
 	FROM
 		regions
 	WHERE
@@ -1617,7 +1623,7 @@ def getRegionWeightsByList_BAD(conn, fetch):
 	sql = """
 	SELECT
 		regions.regid,
-		(bad + gap) AS weight
+		(bad + gap + bad_flank + gap_flank) AS weight
 	FROM
 		regions
 	WHERE
@@ -1645,7 +1651,7 @@ def getRegionWeightsByList_VAR(conn, fetch):
 	sql = """
 	SELECT
 		regions.regid,
-		vars AS weight
+		(vars+vars_flank) AS weight
 	FROM
 		regions
 	WHERE
@@ -1673,5 +1679,5 @@ def simpleFilterTargets_bad(conn, thresh):
 #Function to update REGIONS table based on existing vars attribute
 def simpleFilterTargets_SNP(conn, minS, maxS):
 	cur = conn.cursor()
-	cur.execute("UPDATE regions SET pass=0 WHERE vars < ? OR vars > ?",(minS,maxS))
+	cur.execute("UPDATE regions SET pass=0 WHERE (vars+vars_flank) < ? OR (vars+vars_flank) > ?",(minS,maxS))
 	conn.commit()
