@@ -78,14 +78,13 @@ def main():
 			print("\t\tFiltering loci...",end="")
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
 			print(" Done!\n")
-			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
+			passedLoci = m.getNumPassedLoci(conn)
 			if passedLoci <= 0:
 				sys.exit("\nProgram killed: No loci passed filtering.\n")
 			else:
 				print("\t\t### Results: %s loci passed filtering! ###"%passedLoci)
 			step = 2
 			printTime(start,2)
-			print()
 
 		elif step == 2:
 			start = timer()
@@ -106,8 +105,14 @@ def main():
 
 				#Target discovery call
 				targetDiscovery(conn, params)
-				print(m.getRegions(conn))
-
+				passed = m.getNumPassedTRs(conn)
+				if passed <= 0:
+					sys.exit("\nProgram killed: No viable targets found.\n")
+				else:
+					print("\n\t\t### Results: %s potential targets identified! ###"%passedLoci)
+				step = 3
+				printTime(start,2)
+				print()
 			step = 3
 		elif step == 3:
 			#Target filtering and conflict resolution
@@ -195,24 +200,11 @@ def targetDiscovery(conn, params):
 	numPassedLoci = m.getNumPassedLoci(conn)
 	#sliding window call
 	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
-	local_start1 = timer()
 	if int(params.threads) > 1:
 		print("\t\t\tFinding targets using",str(params.threads),"parallel processes.")
 		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)
 	else:
 		core.targetDiscoverySlidingWindow(conn, params, passedLoci)
-	print("\t\t\tFinished.",end=" ")
-	printTimeClean(local_start1, 0)
-
-	#Now update regions table to include information for flanking regions if available
-	# local_start2 = timer()
-	# print("\t\tParsing alignments for flanking regions...")
-	# print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
-	# if int(params.threads) > 1 and not params.lowmem:
-	# 	print("\t\t\tParsing flanking sequences using",str(params.threads),"parallel processes.")
-	# 	pcore.flankDistParser_parallel(conn, params.flank_dist)
-	# else:
-	# 	m.flankDistParser(conn, params.flank_dist)
 
 
 #Function to print runtime given a start time

@@ -125,11 +125,11 @@ def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, ch
 		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
 		lock.acquire()
 		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-
+		lock.release()
 		#Extract variable positions for database
 		#for var in locus.alnVars:
 			#m.add_variant_record(connection, locid, var.position, var.value)
-		lock.release()
+
 
 	connection.close()
 

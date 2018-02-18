@@ -71,9 +71,10 @@ def loadMAF(conn, params):
 
 	#	print("Loading Locus #:",locid)
 
+		"""deprecated"""
 		#Extract variable positions for database
-		for var in locus.alnVars:
-			m.add_variant_record(conn, locid, var.position, var.value)
+		#for var in locus.alnVars:
+			#m.add_variant_record(conn, locid, var.position, var.value)
 
 #Function to load .loci file into database.
 def loadLOCI(conn, params):
