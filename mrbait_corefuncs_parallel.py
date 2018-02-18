@@ -269,3 +269,9 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, chunk
 				#If bait fails, set start to start point of next window
 				start = generator.getI()+shift
 	connection.close()
+
+
+#Function to get DataFrame of targets + flank regions, and calculate some stuff
+def flankDistParser_parallel(conn, dist):
+	#Call manage_bait_db function to return DataFrame
+	targets = m.getTargetFlanks(conn, dist)

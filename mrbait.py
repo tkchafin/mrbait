@@ -206,7 +206,7 @@ def targetDiscovery(conn, params):
 	print("\t\t\t--Flanking distance to parse (-d,--flank_dist):",params.flank_dist)
 	if int(params.threads) > 1 and not params.lowmem:
 		print("\t\t\tParsing flanking sequences using",str(params.threads),"parallel processes.")
-		#pcore function call
+		pcore.flankDistParser_parallel(conn, params.flank_dist)
 	else:
 		m.flankDistParser(conn, params.flank_dist)
 
