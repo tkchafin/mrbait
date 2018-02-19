@@ -6,3 +6,4 @@ blastdb.*
 .temp*
 .DS_Store
 out.*
+mprofile_*
