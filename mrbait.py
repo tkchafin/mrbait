@@ -153,7 +153,7 @@ def main():
 				if passedBaits <= 0:
 					sys.exit("\nProgram killed: No baits passed filtering.\n")
 				else:
-					print("\t\t\t",passed,"passed filtering.")
+					print("\t\t\t",passedBaits,"passed filtering.")
 					#Print baits
 					print("\t\tFormatting for printing...")
 					formatPrintBaits(conn, params)
