@@ -277,7 +277,7 @@ def add_gff_record(conn,seqid, gff_type, start, stop, alias):
 	if res is not None:
 		#If any match exists, fetch locid
 		locid = res[0]
-		print("Locid for",seqid,"is:",locid)
+		#print("Locid for",seqid,"is:",locid)
 		#BUILT INSERT SQL
 		sql = ''' INSERT INTO gff(locid, type, start, stop, alias, pass)
 					VALUES(?,?,?,?,?,1);'''
@@ -1247,7 +1247,7 @@ def removeBaitsByList(conn, blacklist):
 	if len(blacklist) <= 0:
 		return(0)
 	df = pd.DataFrame({"baitid" : blacklist})
-	print(df)
+	#print(df)
 
 	df.to_sql('b', conn, if_exists='replace')
 

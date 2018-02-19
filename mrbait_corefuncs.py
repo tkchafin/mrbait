@@ -241,92 +241,94 @@ def filterTargetRegions(conn, params):
 	blast = 0
 	minid = None
 	mincov = None
-
-	for option in params.filter_r_objects:
-		#print("Filter Region Option: ", option.o1)
-		if option.o1 == "rand":
-			#Set 'rand' to TRUE for random selection AFTER other filters
-			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
-		elif option.o1 == "gap":
-			m.simpleFilterTargets_gap(conn, int(option.o2))
-		elif option.o1 == "bad":
-			m.simpleFilterTargets_bad(conn, int(option.o2))
-		elif option.o1 == "snp":
-			m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
-		elif option.o1 == "mask":
-			max_mask_prop = option.o2
-			m.regionFilterMask(conn, maxprop=max_mask_prop)
-		elif option.o1 == "gc":
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "len":
-			minlen = option.o2
-			maxlen= option.o3
-			assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
-			m.lengthFilterTR(conn, maxlen, minlen)
-		elif option.o1 == "pw":
-			aln = 1
-			minid = option.o2
-			mincov= option.o3
-		elif option.o1 in ("blast_x", "blast_i", "blast_a"):
-			#if blast database given as fasta, make a blastdb:
-			db_path = None
-			if (params.blastdb):
-				db_path = params.blastdb
-			elif (params.fastadb):
-				db_path = params.workdir + "/blastdb/" + params.out
-				b.makeblastdb(params.makedb, params.fastadb, db_path)
-				params.blastdb = db_path
-			elif(not params.blastdb and not params.fastadb):
-				print("\t\t\tWARNING: No blast database provided. Skipping <--filter_r> option %s"%option.o1)
-				break
-			#print("BLASTDB PATH IS: ", db_path)
-			#Get targets, print to fasta
-			seqs = m.getPassedTRs(conn)
-			fas = params.workdir + "/.temp.fasta"
-			aln_file_tools.writeFasta(seqs, fas)
-			outfile = params.workdir + "/.temp.blast"
-			if option.o1 == "blast_x":
-				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeRegionsByList(conn, blacklist)
-			elif option.o1 == "blast_i":
-				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeRegionsByWhitelist(conn, whitelist)
-			elif option.o1 == "blast_a":
-				sys.exit("blast_a option is not yet implemented.")
-				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-				#m.removeRegionsByList(conn, blacklist)
-			os.remove(fas)
-			os.remove(outfile)
-			#sys.exit()
-		elif option.o1 in ("gff", "gff_a"):
-			if params.gff and params.assembly:
-				if option.o1 == "gff":
-					m.regionFilterGFF(conn, option.o2, params.flank_dist)
-				elif option.o1 == "gff_a":
-					m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
+	if (len(params.filter_r_objects) <= 0):
+		pass
+	else:
+		for option in params.filter_r_objects:
+			#print("Filter Region Option: ", option.o1)
+			if option.o1 == "rand":
+				#Set 'rand' to TRUE for random selection AFTER other filters
+				rand_num = int(option.o2)
+				assert rand_num > 0, "Number for random TR selection must be greater than zero!"
+			elif option.o1 == "gap":
+				m.simpleFilterTargets_gap(conn, int(option.o2))
+			elif option.o1 == "bad":
+				m.simpleFilterTargets_bad(conn, int(option.o2))
+			elif option.o1 == "snp":
+				m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
+			elif option.o1 == "mask":
+				max_mask_prop = option.o2
+				m.regionFilterMask(conn, maxprop=max_mask_prop)
+			elif option.o1 == "gc":
+				min_mask_prop = option.o2
+				max_mask_prop = option.o3
+				m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			elif option.o1 == "len":
+				minlen = option.o2
+				maxlen= option.o3
+				assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
+				m.lengthFilterTR(conn, maxlen, minlen)
+			elif option.o1 == "pw":
+				aln = 1
+				minid = option.o2
+				mincov= option.o3
+			elif option.o1 in ("blast_x", "blast_i", "blast_a"):
+				#if blast database given as fasta, make a blastdb:
+				db_path = None
+				if (params.blastdb):
+					db_path = params.blastdb
+				elif (params.fastadb):
+					db_path = params.workdir + "/blastdb/" + params.out
+					b.makeblastdb(params.makedb, params.fastadb, db_path)
+					params.blastdb = db_path
+				elif(not params.blastdb and not params.fastadb):
+					print("\t\t\tWARNING: No blast database provided. Skipping <--filter_r> option %s"%option.o1)
+					break
+				#print("BLASTDB PATH IS: ", db_path)
+				#Get targets, print to fasta
+				seqs = m.getPassedTRs(conn)
+				fas = params.workdir + "/.temp.fasta"
+				aln_file_tools.writeFasta(seqs, fas)
+				outfile = params.workdir + "/.temp.blast"
+				if option.o1 == "blast_x":
+					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByList(conn, blacklist)
+				elif option.o1 == "blast_i":
+					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByWhitelist(conn, whitelist)
+				elif option.o1 == "blast_a":
+					sys.exit("blast_a option is not yet implemented.")
+					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+					#m.removeRegionsByList(conn, blacklist)
+				os.remove(fas)
+				os.remove(outfile)
+				#sys.exit()
+			elif option.o1 in ("gff", "gff_a"):
+				if params.gff and params.assembly:
+					if option.o1 == "gff":
+						m.regionFilterGFF(conn, option.o2, params.flank_dist)
+					elif option.o1 == "gff_a":
+						m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
+				else:
+					sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
 			else:
-				sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
-		else:
-			assert False, "Unhandled option %r"%option
+				assert False, "Unhandled option %r"%option
 
-	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	#Target region deduplication by pairwise alignment
-	if aln:
-		passedTargets = m.getPassedTRs(conn)
-		assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
-		if (len(blacklist_edges) > 0):
-			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
-			if len(revised_blacklist) > 0:
-				m.removeRegionsByList(conn, revised_blacklist)
+		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+		#Target region deduplication by pairwise alignment
+		if aln:
+			passedTargets = m.getPassedTRs(conn)
+			assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
+			if (len(blacklist_edges) > 0):
+				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+				if len(revised_blacklist) > 0:
+					m.removeRegionsByList(conn, revised_blacklist)
 
-	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
-	if rand_num:
-		return(rand_num)
+		#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
+		if rand_num:
+			return(rand_num)
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions_verbose(conn, params):
@@ -337,149 +339,151 @@ def filterTargetRegions_verbose(conn, params):
 	blast = 0
 	minid = None
 	mincov = None
-
-	for option in params.filter_r_objects:
-		#print("Filter Region Option: ", option.o1)
-		if option.o1 == "rand":
-			#Set 'rand' to TRUE for random selection AFTER other filters
-			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random TR selection must be greater than zero!"
-		elif option.o1 == "gap":
-			print("\t\t\tFiltering criterion: Maximum of",option.o2,"gaps")
-			m.simpleFilterTargets_gap(conn, int(option.o2))
-		elif option.o1 == "bad":
-			print("\t\t\tFiltering criterion: Maximum of",option.o2,"ambiguities")
-			m.simpleFilterTargets_bad(conn, int(option.o2))
-		elif option.o1 == "snp":
-			print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"flanking SNPs")
-			m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
-		elif option.o1 == "mask":
-			print("\t\t\tFiltering criterion: Maximum",option.o2,"proportion masked")
-			max_mask_prop = option.o2
-			m.regionFilterMask(conn, maxprop=max_mask_prop)
-		elif option.o1 == "gc":
-			print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"GC content")
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "len":
-			print("\t\t\tFiltering criterion: Target length between",option.o2,"and",option.o3)
-			minlen = option.o2
-			maxlen= option.o3
-			assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
-			m.lengthFilterTR(conn, maxlen, minlen)
-		elif option.o1 == "pw":
-			aln = 1
-			minid = option.o2
-			mincov= option.o3
-		elif option.o1 in ("blast_x", "blast_i", "blast_a"):
-			#if blast database given as fasta, make a blastdb:
-			db_path = None
-			if (params.blastdb):
-				db_path = params.blastdb
-			elif (params.fastadb):
-				db_path = params.workdir + "/blastdb/" + params.out
-				b.makeblastdb(params.makedb, params.fastadb, db_path)
-				params.blastdb = db_path
-			elif(not params.blastdb and not params.fastadb):
-				print("\t\t\tWARNING: No blast database provided. Skipping <--filter_r> option %s"%option.o1)
-				break
-			#print("BLASTDB PATH IS: ", db_path)
-			#Get targets, print to fasta
-			seqs = m.getPassedTRs(conn)
-			fas = params.workdir + "/.temp.fasta"
-			aln_file_tools.writeFasta(seqs, fas)
-			outfile = params.workdir + "/.temp.blast"
-			if option.o1 == "blast_x":
-				print("\t\t\tFiltering criterion: BLAST exclusion")
-				print("\t\t\t  --blastn path:",params.blastn)
-				print("\t\t\t  --Database:",db_path)
-				print("\t\t\t  --Percent identity:",option.o2)
-				print("\t\t\t  --Query coverage:",option.o3)
-				print("\t\t\t  --N threads:",params.threads)
-				print("\t\t\t  --Word size",params.word_size)
-				print("\t\t\t  --Gap open penalty:",params.gapopen)
-				print("\t\t\t  --Gap extend:",params.gapextend)
-				print("\t\t\t  --E-value cutoff:",params.evalue)
-				if (params.nodust):
-					print("\t\t\t  --DUST: False")
-				else:
-					print("\t\t\t  --DUST: True")
-				print("\t\t\t  --Method:",params.blast_method)
-				print("\t\t\t  --Method:",params.blast_method)
-				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeRegionsByList(conn, blacklist)
-			elif option.o1 == "blast_i":
-				print("\t\t\tFiltering criterion: BLAST inclusion")
-				print("\t\t\t  --blastn path:",params.blastn)
-				print("\t\t\t  --Database:",db_path)
-				print("\t\t\t  --Percent identity:",option.o2)
-				print("\t\t\t  --Query coverage:",option.o3)
-				print("\t\t\t  --N threads:",params.threads)
-				print("\t\t\t  --Word size",params.word_size)
-				print("\t\t\t  --Gap open penalty:",params.gapopen)
-				print("\t\t\t  --Gap extend:",params.gapextend)
-				print("\t\t\t  --E-value cutoff:",params.evalue)
-				if (params.nodust):
-					print("\t\t\t  --DUST: False")
-				else:
-					print("\t\t\t  --DUST: True")
-				print("\t\t\t  --Method:",params.blast_method)
-				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeRegionsByWhitelist(conn, whitelist)
-			elif option.o1 == "blast_a":
-				sys.exit("blast_a option is not yet implemented.")
-				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-				#m.removeRegionsByList(conn, blacklist)
-			os.remove(fas)
-			os.remove(outfile)
-			#sys.exit()
-		elif option.o1 in ("gff", "gff_a"):
-			if params.gff and params.assembly:
-				if option.o1 == "gff":
-					print("\t\t\tFiltering criterion: Proximity to",option.o2,"GFF elements")
-					m.regionFilterGFF(conn, option.o2, params.flank_dist)
-				elif option.o1 == "gff_a":
-					print("\t\t\tFiltering criterion: Proximity to",option.o2,"GFF aliases")
-					m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
-			else:
-				sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
-		else:
-			assert False, "Unhandled option %r"%option
-
-	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	#Target region deduplication by pairwise alignment
-	if aln:
-		print("\t\t\tFiltering criterion: Pairwise alignment")
-		passedTargets = m.getPassedTRs(conn)
-		assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		print("\t\t\t  --VSEARCH executable:",params.vsearch)
-		print("\t\t\t  --VSEARCH threads:",params.vthreads)
-		print("\t\t\t  --Percent identity:",minid)
-		print("\t\t\t  --Query coverage:",mincov)
-		blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
-		if (len(blacklist_edges) > 0):
-			print("\t\t\tResolving edges...")
-			if(params._noGraph):
-				print("\t\t\t  --Resolve by graph: False (deleting all conflicts)")
-			else:
-				print("\t\t\t  --Resolve by graph: True")
-				if (params._noWeightGraph):
-					print("\t\t\t  --MIS method: Approximate")
-				else:
-					print("\t\t\t  --MIS method: Weighted")
-					if (params._weightByMin):
-						print("\t\t\t  --Weights: Minimum ambiguity")
+	if (len(params.filter_r_objects) <= 0):
+		print("\t\t\tNo filtering criteria provided. Retaining all targets.")
+	else:
+		for option in params.filter_r_objects:
+			#print("Filter Region Option: ", option.o1)
+			if option.o1 == "rand":
+				#Set 'rand' to TRUE for random selection AFTER other filters
+				rand_num = int(option.o2)
+				assert rand_num > 0, "Number for random TR selection must be greater than zero!"
+			elif option.o1 == "gap":
+				print("\t\t\tFiltering criterion: Maximum of",option.o2,"gaps")
+				m.simpleFilterTargets_gap(conn, int(option.o2))
+			elif option.o1 == "bad":
+				print("\t\t\tFiltering criterion: Maximum of",option.o2,"ambiguities")
+				m.simpleFilterTargets_bad(conn, int(option.o2))
+			elif option.o1 == "snp":
+				print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"flanking SNPs")
+				m.simpleFilterTargets_SNP(conn, int(option.o2), int(option.o3))
+			elif option.o1 == "mask":
+				print("\t\t\tFiltering criterion: Maximum",option.o2,"proportion masked")
+				max_mask_prop = option.o2
+				m.regionFilterMask(conn, maxprop=max_mask_prop)
+			elif option.o1 == "gc":
+				print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"GC content")
+				min_mask_prop = option.o2
+				max_mask_prop = option.o3
+				m.regionFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			elif option.o1 == "len":
+				print("\t\t\tFiltering criterion: Target length between",option.o2,"and",option.o3)
+				minlen = option.o2
+				maxlen= option.o3
+				assert minlen < maxlen, "<--filter_r> suboption \"len\": Min must be less than max"
+				m.lengthFilterTR(conn, maxlen, minlen)
+			elif option.o1 == "pw":
+				aln = 1
+				minid = option.o2
+				mincov= option.o3
+			elif option.o1 in ("blast_x", "blast_i", "blast_a"):
+				#if blast database given as fasta, make a blastdb:
+				db_path = None
+				if (params.blastdb):
+					db_path = params.blastdb
+				elif (params.fastadb):
+					db_path = params.workdir + "/blastdb/" + params.out
+					b.makeblastdb(params.makedb, params.fastadb, db_path)
+					params.blastdb = db_path
+				elif(not params.blastdb and not params.fastadb):
+					print("\t\t\tWARNING: No blast database provided. Skipping <--filter_r> option %s"%option.o1)
+					break
+				#print("BLASTDB PATH IS: ", db_path)
+				#Get targets, print to fasta
+				seqs = m.getPassedTRs(conn)
+				fas = params.workdir + "/.temp.fasta"
+				aln_file_tools.writeFasta(seqs, fas)
+				outfile = params.workdir + "/.temp.blast"
+				if option.o1 == "blast_x":
+					print("\t\t\tFiltering criterion: BLAST exclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
 					else:
-						print("\t\t\t  --Weights: Maximum variation")
-			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
-			if len(revised_blacklist) > 0:
-				m.removeRegionsByList(conn, revised_blacklist)
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					print("\t\t\t  --Method:",params.blast_method)
+					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByList(conn, blacklist)
+				elif option.o1 == "blast_i":
+					print("\t\t\tFiltering criterion: BLAST inclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
+					else:
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByWhitelist(conn, whitelist)
+				elif option.o1 == "blast_a":
+					sys.exit("blast_a option is not yet implemented.")
+					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+					#m.removeRegionsByList(conn, blacklist)
+				os.remove(fas)
+				os.remove(outfile)
+				#sys.exit()
+			elif option.o1 in ("gff", "gff_a"):
+				if params.gff and params.assembly:
+					if option.o1 == "gff":
+						print("\t\t\tFiltering criterion: Proximity to",option.o2,"GFF elements")
+						m.regionFilterGFF(conn, option.o2, params.flank_dist)
+					elif option.o1 == "gff_a":
+						print("\t\t\tFiltering criterion: Proximity to",option.o2,"GFF aliases")
+						m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
+				else:
+					sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
+			else:
+				assert False, "Unhandled option %r"%option
 
-	#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
-	if rand_num:
-		return(rand_num)
+		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+		#Target region deduplication by pairwise alignment
+		if aln:
+			print("\t\t\tFiltering criterion: Pairwise alignment")
+			passedTargets = m.getPassedTRs(conn)
+			assert (0.0 <= minid <= 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 <= mincov <= 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			print("\t\t\t  --VSEARCH executable:",params.vsearch)
+			print("\t\t\t  --VSEARCH threads:",params.vthreads)
+			print("\t\t\t  --Percent identity:",minid)
+			print("\t\t\t  --Query coverage:",mincov)
+			blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
+			if (len(blacklist_edges) > 0):
+				print("\t\t\tResolving edges...")
+				if(params._noGraph):
+					print("\t\t\t  --Resolve by graph: False (deleting all conflicts)")
+				else:
+					print("\t\t\t  --Resolve by graph: True")
+					if (params._noWeightGraph):
+						print("\t\t\t  --MIS method: Approximate")
+					else:
+						print("\t\t\t  --MIS method: Weighted")
+						if (params._weightByMin):
+							print("\t\t\t  --Weights: Minimum ambiguity")
+						else:
+							print("\t\t\t  --Weights: Maximum variation")
+				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+				if len(revised_blacklist) > 0:
+					m.removeRegionsByList(conn, revised_blacklist)
+
+		#If 'random' select is turned on, then apply AFTER resolving conflicts (--select_r)
+		if rand_num:
+			return(rand_num)
 
 #Function to fetch target conflicts
 def findTargetConflicts(conn, params):
@@ -768,123 +772,126 @@ def filterBaits_verbose(conn, params):
 	aln = False
 	minid = None
 	mincov = None
-
-	for option in params.filter_b_objects:
-	#	print("Bait filtering option: ", option.o1)
-		if option.o1 == "rand":
-		#Set 'rand' to TRUE for random selection AFTER other filters
-			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
-		elif option.o1 == "mask":
-			print("\t\t\tFiltering criterion: Maximum",option.o2,"proportion masked")
-			max_mask_prop = option.o2
-			m.baitFilterMask(conn, maxprop=max_mask_prop)
-		elif option.o1 == "gc":
-			print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"GC content")
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "pw":
-			#print("Filtering baits by pairwise alignment")
-			aln = True
-			minid = option.o2
-			mincov = option.o3
-		elif option.o1 in ("blast_x", "blast_i"):
-			#if blast database given as fasta, make a blastdb:
-			db_path = None
-			if (params.blastdb):
-				db_path = params.blastdb
-			elif (params.fastadb):
-				db_path = params.workdir + "/blastdb/" + params.out
-				b.makeblastdb(params.makedb, params.fastadb, db_path)
-				params.blastdb = db_path
-			elif(not params.blastdb and not params.fastadb):
-				print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
-				break
-			#print("BLASTDB PATH IS: ", db_path)
-			#Get targets, print to fasta
-			seqs = m.getPassedTRs(conn)
-			fas = params.workdir + "/.temp.fasta"
-			aln_file_tools.writeFasta(seqs, fas)
-			outfile = params.workdir + "/.temp.blast"
-			if option.o1 == "blast_x":
-				print("\t\t\tFiltering criterion: BLAST exclusion")
-				print("\t\t\t  --blastn path:",params.blastn)
-				print("\t\t\t  --Database:",db_path)
-				print("\t\t\t  --Percent identity:",option.o2)
-				print("\t\t\t  --Query coverage:",option.o3)
-				print("\t\t\t  --N threads:",params.threads)
-				print("\t\t\t  --Word size",params.word_size)
-				print("\t\t\t  --Gap open penalty:",params.gapopen)
-				print("\t\t\t  --Gap extend:",params.gapextend)
-				print("\t\t\t  --E-value cutoff:",params.evalue)
-				if (params.nodust):
-					print("\t\t\t  --DUST: False")
-				else:
-					print("\t\t\t  --DUST: True")
-				print("\t\t\t  --Method:",params.blast_method)
-				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeBaitsByList(conn, blacklist)
-			elif option.o1 == "blast_i":
-				print("\t\t\tFiltering criterion: BLAST inclusion")
-				print("\t\t\t  --blastn path:",params.blastn)
-				print("\t\t\t  --Database:",db_path)
-				print("\t\t\t  --Percent identity:",option.o2)
-				print("\t\t\t  --Query coverage:",option.o3)
-				print("\t\t\t  --N threads:",params.threads)
-				print("\t\t\t  --Word size",params.word_size)
-				print("\t\t\t  --Gap open penalty:",params.gapopen)
-				print("\t\t\t  --Gap extend:",params.gapextend)
-				print("\t\t\t  --E-value cutoff:",params.evalue)
-				if (params.nodust):
-					print("\t\t\t  --DUST: False")
-				else:
-					print("\t\t\t  --DUST: True")
-				print("\t\t\t  --Method:",params.blast_method)
-				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeBaitsByWhitelist(conn, whitelist)
-			os.remove(fas)
-			os.remove(outfile)
-		else:
-			assert False, "Unhandled option %r"%option
-
-	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	if aln:
-		print("\t\t\tFiltering criterion: Pairwise alignment")
-		passedBaits = m.getPassedBaits(conn)
-		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		print("\t\t\t  --VSEARCH executable:",params.vsearch)
-		print("\t\t\t  --VSEARCH threads:",params.vthreads)
-		print("\t\t\t  --Percent identity:",minid)
-		print("\t\t\t  --Query coverage:",mincov)
-
-		blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
-
-		#print("Blacklisted edges:",blacklist_edges)
-		if (len(blacklist_edges) > 0):
-			print("\t\t\tResolving edges...")
-			if(params._noGraph):
-				print("\t\t\t  --Resolve by graph: False (deleting all conflicts)")
-			else:
-				print("\t\t\t  --Resolve by graph: True")
-				if (params._noWeightGraph):
-					print("\t\t\t  --MIS method: Approximate")
-				else:
-					print("\t\t\t  --MIS method: Weighted")
-					if (params._weightByMin):
-						print("\t\t\t  --Weights: Minimum ambiguity")
+	if (len(params.filter_b_objects) <= 0):
+		print("\t\t\tNo filtering criteria provided. Retaining all baits.")
+		return(0)
+	else:
+		for option in params.filter_b_objects:
+		#	print("Bait filtering option: ", option.o1)
+			if option.o1 == "rand":
+			#Set 'rand' to TRUE for random selection AFTER other filters
+				rand_num = int(option.o2)
+				assert rand_num > 0, "Number for random bait selection must be greater than zero!"
+			elif option.o1 == "mask":
+				print("\t\t\tFiltering criterion: Maximum",option.o2,"proportion masked")
+				max_mask_prop = option.o2
+				m.baitFilterMask(conn, maxprop=max_mask_prop)
+			elif option.o1 == "gc":
+				print("\t\t\tFiltering criterion: Between",option.o2,"and",option.o3,"GC content")
+				min_mask_prop = option.o2
+				max_mask_prop = option.o3
+				m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			elif option.o1 == "pw":
+				#print("Filtering baits by pairwise alignment")
+				aln = True
+				minid = option.o2
+				mincov = option.o3
+			elif option.o1 in ("blast_x", "blast_i"):
+				#if blast database given as fasta, make a blastdb:
+				db_path = None
+				if (params.blastdb):
+					db_path = params.blastdb
+				elif (params.fastadb):
+					db_path = params.workdir + "/blastdb/" + params.out
+					b.makeblastdb(params.makedb, params.fastadb, db_path)
+					params.blastdb = db_path
+				elif(not params.blastdb and not params.fastadb):
+					print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
+					break
+				#print("BLASTDB PATH IS: ", db_path)
+				#Get targets, print to fasta
+				seqs = m.getPassedTRs(conn)
+				fas = params.workdir + "/.temp.fasta"
+				aln_file_tools.writeFasta(seqs, fas)
+				outfile = params.workdir + "/.temp.blast"
+				if option.o1 == "blast_x":
+					print("\t\t\tFiltering criterion: BLAST exclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
 					else:
-						print("\t\t\t  --Weights: Maximum variation")
-			params._noWeightGraph = 1
-			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
-			if len(revised_blacklist) > 0:
-				m.removeBaitsByList(conn, revised_blacklist)
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeBaitsByList(conn, blacklist)
+				elif option.o1 == "blast_i":
+					print("\t\t\tFiltering criterion: BLAST inclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
+					else:
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeBaitsByWhitelist(conn, whitelist)
+				os.remove(fas)
+				os.remove(outfile)
+			else:
+				assert False, "Unhandled option %r"%option
 
-	#If 'random' select is turned on, then apply AFTER all other options
-	if rand_num:
-		print("\t\t\tRandomly selecting",rand_num,"baits.")
-		m.baitFilterRandom(conn, rand_num)
+		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+		if aln:
+			print("\t\t\tFiltering criterion: Pairwise alignment")
+			passedBaits = m.getPassedBaits(conn)
+			assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			print("\t\t\t  --VSEARCH executable:",params.vsearch)
+			print("\t\t\t  --VSEARCH threads:",params.vthreads)
+			print("\t\t\t  --Percent identity:",minid)
+			print("\t\t\t  --Query coverage:",mincov)
+
+			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
+
+			#print("Blacklisted edges:",blacklist_edges)
+			if (len(blacklist_edges) > 0):
+				print("\t\t\tResolving edges...")
+				if(params._noGraph):
+					print("\t\t\t  --Resolve by graph: False (deleting all conflicts)")
+				else:
+					print("\t\t\t  --Resolve by graph: True")
+					if (params._noWeightGraph):
+						print("\t\t\t  --MIS method: Approximate")
+					else:
+						print("\t\t\t  --MIS method: Weighted")
+						if (params._weightByMin):
+							print("\t\t\t  --Weights: Minimum ambiguity")
+						else:
+							print("\t\t\t  --Weights: Maximum variation")
+				params._noWeightGraph = 1
+				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+				if len(revised_blacklist) > 0:
+					m.removeBaitsByList(conn, revised_blacklist)
+
+		#If 'random' select is turned on, then apply AFTER all other options
+		if rand_num:
+			print("\t\t\tRandomly selecting",rand_num,"baits.")
+			m.baitFilterRandom(conn, rand_num)
 
 #Function to filter target regions by --filter_R arguments
 def filterBaits(conn, params):
@@ -892,75 +899,77 @@ def filterBaits(conn, params):
 	aln = False
 	minid = None
 	mincov = None
+	if (len(params.filter_b_objects) <= 0):
+		return(0)
+	else:
+		for option in params.filter_b_objects:
+			#print("Bait filtering option: ", option.o1)
+			if option.o1 == "rand":
+			#Set 'rand' to TRUE for random selection AFTER other filters
+				rand_num = int(option.o2)
+				assert rand_num > 0, "Number for random bait selection must be greater than zero!"
+			elif option.o1 == "mask":
+				max_mask_prop = option.o2
+				m.baitFilterMask(conn, maxprop=max_mask_prop)
+			elif option.o1 == "gc":
+				min_mask_prop = option.o2
+				max_mask_prop = option.o3
+				m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+			elif option.o1 == "pw":
+				#print("Filtering baits by pairwise alignment")
+				aln = True
+				minid = option.o2
+				mincov = option.o3
+			elif option.o1 in ("blast_x", "blast_i"):
+				#if blast database given as fasta, make a blastdb:
+				db_path = None
+				if (params.blastdb):
+					db_path = params.blastdb
+				elif (params.fastadb):
+					db_path = params.workdir + "/blastdb/" + params.out
+					b.makeblastdb(params.makedb, params.fastadb, db_path)
+					params.blastdb = db_path
+				elif(not params.blastdb and not params.fastadb):
+					print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
+					break
+				#print("BLASTDB PATH IS: ", db_path)
+				#Get targets, print to fasta
+				seqs = m.getPassedTRs(conn)
+				fas = params.workdir + "/.temp.fasta"
+				aln_file_tools.writeFasta(seqs, fas)
+				outfile = params.workdir + "/.temp.blast"
+				if option.o1 == "blast_x":
+					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeBaitsByList(conn, blacklist)
+				elif option.o1 == "blast_i":
+					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeBaitsByWhitelist(conn, whitelist)
+				elif option.o1 == "blast_a":
+					sys.exit("blast_a option is not yet implemented.")
+					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+					#m.removeRegionsByList(conn, blacklist)
+				os.remove(fas)
+				os.remove(outfile)
+			else:
+				assert False, "Unhandled option %r"%option
 
-	for option in params.filter_b_objects:
-		print("Bait filtering option: ", option.o1)
-		if option.o1 == "rand":
-		#Set 'rand' to TRUE for random selection AFTER other filters
-			rand_num = int(option.o2)
-			assert rand_num > 0, "Number for random bait selection must be greater than zero!"
-		elif option.o1 == "mask":
-			max_mask_prop = option.o2
-			m.baitFilterMask(conn, maxprop=max_mask_prop)
-		elif option.o1 == "gc":
-			min_mask_prop = option.o2
-			max_mask_prop = option.o3
-			m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-		elif option.o1 == "pw":
-			#print("Filtering baits by pairwise alignment")
-			aln = True
-			minid = option.o2
-			mincov = option.o3
-		elif option.o1 in ("blast_x", "blast_i"):
-			#if blast database given as fasta, make a blastdb:
-			db_path = None
-			if (params.blastdb):
-				db_path = params.blastdb
-			elif (params.fastadb):
-				db_path = params.workdir + "/blastdb/" + params.out
-				b.makeblastdb(params.makedb, params.fastadb, db_path)
-				params.blastdb = db_path
-			elif(not params.blastdb and not params.fastadb):
-				print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
-				break
-			#print("BLASTDB PATH IS: ", db_path)
-			#Get targets, print to fasta
-			seqs = m.getPassedTRs(conn)
-			fas = params.workdir + "/.temp.fasta"
-			aln_file_tools.writeFasta(seqs, fas)
-			outfile = params.workdir + "/.temp.blast"
-			if option.o1 == "blast_x":
-				blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeBaitsByList(conn, blacklist)
-			elif option.o1 == "blast_i":
-				whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-				m.removeBaitsByWhitelist(conn, whitelist)
-			elif option.o1 == "blast_a":
-				sys.exit("blast_a option is not yet implemented.")
-				#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-				#m.removeRegionsByList(conn, blacklist)
-			os.remove(fas)
-			os.remove(outfile)
-		else:
-			assert False, "Unhandled option %r"%option
+		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+		if aln:
+			passedBaits = m.getPassedBaits(conn)
+			assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
+			#print("Blacklisted edges:",blacklist_edges)
+			if (len(blacklist_edges) > 0):
+				params._noWeightGraph = 1
+				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+				if len(revised_blacklist) > 0:
+					m.removeBaitsByList(conn, revised_blacklist)
 
-	#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-	if aln:
-		passedBaits = m.getPassedBaits(conn)
-		assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-		assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-		blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
-		#print("Blacklisted edges:",blacklist_edges)
-		if (len(blacklist_edges) > 0):
-			params._noWeightGraph = 1
-			revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
-			if len(revised_blacklist) > 0:
-				m.removeBaitsByList(conn, revised_blacklist)
-
-	#If 'random' select is turned on, then apply AFTER all other options
-	if rand_num:
-		print("Randomly selecting",rand_num,"baits.")
-		m.baitFilterRandom(conn, rand_num)
+		#If 'random' select is turned on, then apply AFTER all other options
+		if rand_num:
+			#print("Randomly selecting",rand_num,"baits.")
+			m.baitFilterRandom(conn, rand_num)
 
 
 #Function to print baits in final output

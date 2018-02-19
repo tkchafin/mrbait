@@ -37,7 +37,7 @@ def main():
 		step = params.resume + 1
 	else:
 		step = 0
-	while step < 5:
+	while step < 6:
 		if step == 0:
 			#Establishing new database
 			start = timer()
@@ -130,17 +130,44 @@ def main():
 				#clear baits
 				m.clearBaits(conn)
 				baitDiscovery(conn, params)
-
+				passed = m.getNumPassedBaits(conn)
+				if passed <= 0:
+					sys.exit("\nProgram killed: No baits found.\n")
+				else:
+					print("\n\t\t### Results: %s potential baits identified! ###"%passed)
 			printTime(start,2)
 			step = 5
 		elif step == 5:
-			#Bait filtering
-			#Print baits
-			#DONE
+			start = timer()
+			print("\n\tStep 5: Bait filtering")
+			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
+			passedTargets = m.getNumPassedTRs(conn)
+			if passedLoci <= 0:
+				sys.exit("\nProgram killed: No passed loci in database.\n")
+			elif passedTargets <= 0:
+				sys.exit("\nProgram killed: No passed targets in database.\n")
+			else:
+				#Bait filtering
+				filterBaits(conn,params)
+				passedBaits = m.getNumPassedBaits(conn)
+				if passedBaits <= 0:
+					sys.exit("\nProgram killed: No baits passed filtering.\n")
+				else:
+					print("\t\t\t",passed,"passed filtering.")
+					#Print baits
+					print("\t\tFormatting for printing...")
+					formatPrintBaits(conn, params)
+					passed = m.getNumPassedBaits(conn)
+					if passed <= 0:
+						sys.exit("\nProgram killed: No baits passed filtering.\n")
+					else:
+						print("\n\t\t### Results: %s baits output to file! ###"%passed)
+			printTime(start,2)
 			step = 6
 
 	print("\n\t=======================================================================")
-	print("\tDone!")
+	out = params.workdir + "/" + params.out + ".fasta"
+	print("\t### Final output: %s ###"%out)
 	printTime(global_start, 1)
 	print()
 	conn.close()
@@ -284,14 +311,27 @@ def baitDiscovery(conn, params):
 	#core function call
 	core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 
+#Function to filter baits
+def filterBaits(conn, params):
 	passed=m.getNumPassedBaits(conn)
 	if (passed > 0):
 		print("\t\tFound",passed,"potential baits!")
 		print("\t\tApplying filters to",passed,"baits...")
-		core.filterBaits(conn, params)
+		core.filterBaits_verbose(conn, params)
 	else:
-		sys.exit("Program killed: No baits found.")
+		sys.exit("Program killed: No baits in database.")
 
+#Print options and core call for printBaits
+def formatPrintBaits(conn, params):
+	if(params.expand):
+		print("\t\t\tExpanding all ambiguities (-X, --expand)")
+	if (params.strand == "-"):
+		print("\t\t\tOnly reporting reverse complement (--strand -)")
+	elif (params.strand == "both"):
+		print("\t\t\tReporting bait and reverse complement (--strand both)")
+	out = params.workdir + "/" + params.out + ".fasta"
+	core.printBaits(conn, params)
+	print("\t\tFinal baits output to:",out)
 
 #Function to print runtime given a start time
 def printTime(start, tabs):
@@ -318,14 +358,3 @@ if __name__ == '__main__':
 		main()
 	except KeyboardInterrupt:
 		sys.exit(1)
-
-#Create final outputs
-if m.getNumPassedBaits(conn) > 0:
-	core.printBaits(conn, params)
-else:
-	sys.exit("Program killed: No baits passed filtering.")
-
-print("\n\nProgram ending...Here are some results\n\n")
-
-conn.commit()
-conn.close()
