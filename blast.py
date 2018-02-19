@@ -141,10 +141,10 @@ def blastn(binary, fasta, blastdb, method, gapopen, gapextend, e_value, threads,
 		"-out", str(outfile)]
 
 	command = " ".join(blastn_cli)
-	print("BLASTN command is:",command )
+	#print("BLASTN command is:",command )
 
 	#Vsearch subprocess
-	print("Running blast...")
+	#print("Running blast...")
 	proc = Popen(blastn_cli, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
 
 	#WRap to enable keyboard interrupe
@@ -166,10 +166,10 @@ def makeblastdb(binary, reference, outfile):
 		"-out", str(outfile)]
 
 	command = " ".join(makedb)
-	print("Command is:",command )
+	#print("Command is:",command )
 
 	#Vsearch subprocess
-	print("Running blast...")
+	#print("Running blast...")
 	proc = Popen(makedb, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
 
 	#WRap to enable keyboard interrupe
