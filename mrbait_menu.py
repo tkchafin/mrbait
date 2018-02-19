@@ -151,7 +151,7 @@ VSEARCH Parameters (use when --select_b or --select_r = \"aln\"):
 	--vsearch	: Path to VSEARCH executable if other than provided
 		--MrBait will try to detect OS and appropriate exectable to use
 	--vthreads	: Number of threads for VSEARCH
-		--Will set to the value of <--threads> if not defined=""")
+		--Will set to the value of <--threads> if not defined""")
 
 	print("""
 BLAST Parameters (use when --select_b or --select_r = \"blast\"):
