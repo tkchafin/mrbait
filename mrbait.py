@@ -118,7 +118,20 @@ def main():
 			step = 4
 		elif step == 4:
 			#Bait discovery
-			#clear baits
+			start = timer()
+			print("\n\tStep 4: Bait discovery")
+			passedLoci = m.getNumPassedLoci(conn)#returns pandas dataframe
+			passedTargets = m.getNumPassedTRs(conn)
+			if passedLoci <= 0:
+				sys.exit("\nProgram killed: No loci in database.\n")
+			elif passedTargets <= 0:
+				sys.exit("\nProgram killed: No targets in database.\n")
+			else:
+				#clear baits
+				m.clearBaits(conn)
+				baitDiscovery(conn, params)
+
+			printTime(start,2)
 			step = 5
 		elif step == 5:
 			#Bait filtering
@@ -223,7 +236,7 @@ def selectFilterTargets(conn, params):
 	passed=m.getNumPassedTRs(conn)
 	if (passed > 0):
 		print("\t\tApplying filters to",passed,"targets.")
-		rand = core.filterTargetRegions(conn, params)
+		rand = core.filterTargetRegions_verbose(conn, params)
 		core.checkTargetRegions(conn)
 	else:
 		sys.exit("Program killed: No targets in database.")
@@ -257,6 +270,29 @@ def selectFilterTargets(conn, params):
 			print("\t\tRandomly selecting",rand,"targets from",passed,"passing filtering")
 			m.regionFilterRandom(conn, rand)
 
+#function to print and call core functions for probe development
+def baitDiscovery(conn, params):
+	print("\t\tStep 4 parameters:")
+	print("\t\t\tBait length (-b, --blen):",params.blen)
+
+	if (params.select_b == "tile"):
+		print("\t\t\tTiling baits with",params.bait_shift,"base overlap")
+	elif (params.select_b == "center"):
+		print("\t\t\tCentering",params.select_b_num,"baits with",params.bait_shift,"overlap")
+	elif(params.select_b == "flank"):
+		print("\t\t\tDesigning",params.select_b_num,"baits with",params.bait_shift,"flanking targets")
+	#core function call
+	core.baitDiscovery(conn, params, m.getPassedTRs(conn))
+
+	passed=m.getNumPassedBaits(conn)
+	if (passed > 0):
+		print("\t\tFound",passed,"potential baits!")
+		print("\t\tApplying filters to",passed,"baits...")
+		core.filterBaits(conn, params)
+	else:
+		sys.exit("Program killed: No baits found.")
+
+
 #Function to print runtime given a start time
 def printTime(start, tabs):
 	t = (timer() - start)
@@ -283,41 +319,6 @@ if __name__ == '__main__':
 	except KeyboardInterrupt:
 		sys.exit(1)
 
-
-
-#First pass filtering of target regions
-rand = core.filterTargetRegions(conn, params)
-
-#Check again that not all have been filtered out
-core.checkTargetRegions(conn)
-
-#Apply --select_r filters to sort any conflicting TRs
-core.selectTargetRegions(conn, params)
-
-#If RANDOM filter for TRs was applied, apply if AFTER TR conflict resolution
-if rand:
-	print("Randomly filtering all TRs")
-	m.regionFilterRandom(conn, rand)
-
-numTR = m.getNumPassedTRs(conn)
-print("Finished Target Region selection... %r targets passed filtering."%numTR)
-
-#Bait discovery
-print("Starting probe design...")
-
-#Check again that not all have been filtered out
-core.checkTargetRegions(conn)
-
-#Sliding window bait discovery
-if m.getNumPassedTRs(conn) <= 0:
-	sys.exit("Program killed: No targets passed filtering.")
-core.baitDiscovery(conn, params, m.getPassedTRs(conn))
-
-#Bait Filtering
-if m.getNumPassedBaits(conn) > 0:
-	print("Filtering probe sequences")
-	core.filterBaits(conn, params)
-
 #Create final outputs
 if m.getNumPassedBaits(conn) > 0:
 	core.printBaits(conn, params)
@@ -325,11 +326,6 @@ else:
 	sys.exit("Program killed: No baits passed filtering.")
 
 print("\n\nProgram ending...Here are some results\n\n")
-
-print(m.getLoci(conn))
-#print(m.getVariants(conn))
-print(m.getRegions(conn))
-print(m.getBaits(conn))
 
 conn.commit()
 conn.close()
