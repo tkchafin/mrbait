@@ -883,7 +883,7 @@ def filterBaits_verbose(conn, params):
 
 	#If 'random' select is turned on, then apply AFTER all other options
 	if rand_num:
-		print("Randomly selecting",rand_num,"baits.")
+		print("\t\t\tRandomly selecting",rand_num,"baits.")
 		m.baitFilterRandom(conn, rand_num)
 
 #Function to filter target regions by --filter_R arguments
