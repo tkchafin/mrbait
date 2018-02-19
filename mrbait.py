@@ -107,9 +107,14 @@ def main():
 			else:
 				#Clear baits
 				m.clearBaits(conn)
-				#select: resolve conflicts
-				selectTargets(conn, params)
-				#filter: fail targets
+				#select: resolve conflicts, apply filters
+				selectFilterTargets(conn, params)
+			passed = m.getNumPassedTRs(conn)
+			if passed <= 0:
+				sys.exit("\nProgram killed: No targets passed filtering.\n")
+			else:
+				print("\n\t\t### Results: %s targets passed filtering! ###"%passed)
+			printTime(start,2)
 			step = 4
 		elif step == 4:
 			#Bait discovery
@@ -204,7 +209,7 @@ def targetDiscovery(conn, params):
 		core.targetDiscoverySlidingWindow(conn, params, passedLoci)
 
 #Function to print params and make calls for target region selection
-def selectTargets(conn, params):
+def selectFilterTargets(conn, params):
 	print("\t\tStep 3 parameters:")
 	if(params.mult_reg):
 		print("\t\t\tMultiple targets allowed per locus (-R, --mult_reg): True")
@@ -213,6 +218,15 @@ def selectTargets(conn, params):
 	else:
 		print("\t\t\tMultiple targets allowed per locus (-R, --mult_reg): False")
 	print("\t\t\tFlanking distance for target selection (-d,--flank_dist):",params.flank_dist)
+
+	rand = 0
+	passed=m.getNumPassedTRs(conn)
+	if (passed > 0):
+		print("\t\tApplying filters to",passed,"targets.")
+		rand = core.filterTargetRegions(conn, params)
+		core.checkTargetRegions(conn)
+	else:
+		sys.exit("Program killed: No targets in database.")
 
 
 	#Build conflict tables
@@ -234,7 +248,14 @@ def selectTargets(conn, params):
 	else:
 		print("\t\tNo conflicting targets found. Skipping target selection.")
 
-
+	#If RANDOM filter for TRs was applied, apply AFTER TR conflict resolution
+	passed=m.getNumPassedTRs(conn)
+	if rand:
+		if rand > passed:
+			print("\t\tYou chose to randomly keep",rand,"targets but only",passed,"remain.")
+		else:
+			print("\t\tRandomly selecting",rand,"targets from",passed,"passing filtering")
+			m.regionFilterRandom(conn, rand)
 
 #Function to print runtime given a start time
 def printTime(start, tabs):
@@ -263,12 +284,6 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 
-#Assert that there are TRs chosen, and that not all have been filtered out
-core.checkTargetRegions(conn)
-
-#Filter target regions
-#If multiple regions NOT allowed, need to choose which to keep
-print("Starting Target Region selection...")
 
 #First pass filtering of target regions
 rand = core.filterTargetRegions(conn, params)

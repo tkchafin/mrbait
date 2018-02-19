@@ -427,7 +427,7 @@ def regionFilterRandom(conn, num):
 	cur.execute("SELECT COUNT(*) FROM regions WHERE pass=0")
 	fails = int(cur.fetchone()[0])
 
-	print("Number of rows:",rows)
+	#print("Number of rows:",rows)
 	if rows is 0 or rows is None:
 		raise ValueError("There are no rows in <regions>!")
 	if num < rows-fails:
