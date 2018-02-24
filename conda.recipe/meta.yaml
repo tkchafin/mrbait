@@ -1,10 +1,10 @@
 package:
   name: mrbait
-  version: "1.0.1"
+  version: "1.0.3"
 
 source:
   git_url: https://github.com/tkchafin/mrbait.git
-  git_rev: v1.0.1
+  git_rev: v1.0.3
 
 build:
   skip: True  # [win]

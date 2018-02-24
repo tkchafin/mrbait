@@ -5,7 +5,7 @@ import sys
 import os
 import re
 import ntpath
-from mrbait import misc_utils as utils
+import misc_utils as utils
 
 def string_containsAny(str, set):
 	for c in set:
