@@ -9,7 +9,7 @@ def requires():
 
 setup(
     name="mrbait",
-    version="1.0.1",
+    version="1.0.2",
     url="https://github.com/tkchafin/mrbait",
     author="Tyler K. Chafin",
     author_email="tkchafin@uark.edu",
