@@ -1,1 +1,3 @@
-include bin/
+include mrbait/bin
+include mrbait/bin/*
+LICENSE
