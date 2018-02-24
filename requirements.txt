@@ -1,0 +1,8 @@
+multiprocessing >=2.6
+sqlite3
+pandas >=0.22
+biopython
+numpy
+vcf_tools
+networkx >= 2.0
+setuptools

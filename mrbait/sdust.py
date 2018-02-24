@@ -1,3 +1,4 @@
+#!/usr/bin/python
 class DustMasker:
 	"""Python class for applying DUST algorithm to
 	a nucleotide sequence, to find low-complexity

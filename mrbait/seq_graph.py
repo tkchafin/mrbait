@@ -2,7 +2,7 @@
 
 import networkx as nx
 import networkx.algorithms.approximation as nxaa
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 from networkx.utils import powerlaw_sequence
 
