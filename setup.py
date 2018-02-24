@@ -9,22 +9,18 @@ def requires():
 
 setup(
     name="mrbait",
+    packages=['mrbait'],
     version="1.0.2",
-    url="https://github.com/tkchafin/mrbait",
-    author="Tyler K. Chafin",
-    author_email="tkchafin@uark.edu",
-    description="Interactive assembly and analysis of RADseq data sets",
-    packages=find_packages(),
+    description="Universal design of target-enrichment capture probes from genomic data",
+    author='Tyler K. Chafin',
+    author_email='tkchafin@uark.edu',
+    url='https://github.com/tkchafin/mrbait',
     install_requires=requires(),
-    entry_points={
-            'console_scripts': [
-                'mrbait = mrbait.mrbait:main'
-            ],
-    },
-    license='GPL',
+	packages=find_packages(),
+    include_package_data=True,
+    entry_points={'console_scripts': ['mrbait = mrbait.mrbait:main']},
+    zip_safe=False,
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
-    ],
+    ]
 )
