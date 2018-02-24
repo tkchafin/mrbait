@@ -249,7 +249,7 @@ class parseArgs():
 		self.filter_r_objects=[]
 
 		#VSEARCH options - deduplication
-		self.vsearch = None
+		self.vsearch = "vsearch"
 		self.vthreads = None
 
 		#BLAST options - contaminant removal and filtering by specificity
@@ -260,8 +260,8 @@ class parseArgs():
 		self.gapextend=2
 		self.word_size = None
 		self.blast_method = "blastn"
-		self.blastn = None
-		self.makedb = None
+		self.blastn = "blastn"
+		self.makedb = "makeblastdb"
 		self.nodust = None
 
 		#Bait selection options
@@ -591,15 +591,15 @@ class parseArgs():
 			self._os = "darwin (MacOS)"
 
 		#If vsearch path not given, try to figure it out
-		if self.vsearch is None:
-			os_platform = utils.getOS()
-			#print("Found OS platform:", os_platform)
-			if os_platform == "linux" or os_platform == "unknown":
-				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX VSEARCH executable.")
-				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-linux"
-			elif os_platform == "darwin": #mac os
-				print("Automatically detected MACOS platform: Using MACOS VSEARCH executable.")
-				self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-macos"
+		# if self.vsearch is None:
+		# 	os_platform = utils.getOS()
+		# 	#print("Found OS platform:", os_platform)
+		# 	if os_platform == "linux" or os_platform == "unknown":
+		# 		print("Automatically detected LINUX or UNKNOWN platform: Using LINUX VSEARCH executable.")
+		# 		self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-linux"
+		# 	elif os_platform == "darwin": #mac os
+		# 		print("Automatically detected MACOS platform: Using MACOS VSEARCH executable.")
+		# 		self.vsearch = utils.getScriptPath() + "/bin/vsearch-2.4.4-macos"
 
 		if self.vthreads is None:
 			self.vthreads = self.threads
@@ -612,25 +612,25 @@ class parseArgs():
 			else:
 				self.word_size = 11
 
-		if self.blastn is None:
-			os_platform = utils.getOS()
-			#print("Found OS platform:", os_platform)
-			if os_platform == "linux" or os_platform == "unknown":
-				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
-				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
-			elif os_platform == "darwin": #mac os
-				print("Automatically detected MACOS platform: Using MACOS BLASTN executable.")
-				self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-macos"
+		# if self.blastn is None:
+		# 	os_platform = utils.getOS()
+		# 	#print("Found OS platform:", os_platform)
+		# 	if os_platform == "linux" or os_platform == "unknown":
+		# 		print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
+		# 		self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-linux"
+		# 	elif os_platform == "darwin": #mac os
+		# 		print("Automatically detected MACOS platform: Using MACOS BLASTN executable.")
+		# 		self.blastn = utils.getScriptPath() + "/bin/ncbi-blastn-2.6.0-macos"
 
-		if self.makedb is None:
-			os_platform = utils.getOS()
-			#print("Found OS platform:", os_platform)
-			if os_platform.lower() in ("linux", "ubuntu", "unknown", None):
-				print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
-				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
-			elif os_platform.lower() in ("darwin", "mac", "macos", "unix", "apple"): #mac os
-				print("Automatically detected MACOS platform: Using MACOS MAKEBLASTDB executable.")
-				self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-macos"
+		# if self.makedb is None:
+		# 	os_platform = utils.getOS()
+		# 	#print("Found OS platform:", os_platform)
+		# 	if os_platform.lower() in ("linux", "ubuntu", "unknown", None):
+		# 		print("Automatically detected LINUX or UNKNOWN platform: Using LINUX BLASTN executable.")
+		# 		self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-linux"
+		# 	elif os_platform.lower() in ("darwin", "mac", "macos", "unix", "apple"): #mac os
+		# 		print("Automatically detected MACOS platform: Using MACOS MAKEBLASTDB executable.")
+		# 		self.makedb = utils.getScriptPath() + "/bin/ncbi-makeblastdb-2.6.0-macos"
 
 		#Default bait design behavior
 		if self.select_b == "tile" and self.overlap is None:
