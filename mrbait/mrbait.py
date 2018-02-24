@@ -4,7 +4,7 @@ import sqlite3
 import pandas
 import time
 from timeit import default_timer as timer
-from mrbait import parseArgs
+from mrbait.mrbait_menu import ParseArgs
 import manage_bait_db as m
 import mrbait_corefuncs as core
 import mrbait_corefuncs_parallel as pcore
