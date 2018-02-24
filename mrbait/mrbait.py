@@ -5,9 +5,9 @@ import pandas
 import time
 from timeit import default_timer as timer
 from mrbait import mrbait_menu
-import manage_bait_db as m
-import mrbait_corefuncs as core
-import mrbait_corefuncs_parallel as pcore
+from mrbait import manage_bait_db as m
+from mrbait import mrbait_corefuncs as core
+from mrbait import mrbait_corefuncs_parallel as pcore
 
 
 ############################### MAIN ###################################

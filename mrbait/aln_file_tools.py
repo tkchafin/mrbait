@@ -4,7 +4,7 @@ import os
 import sys
 import Bio
 import vcf
-import misc_utils as utils
+from mrbait import misc_utils as utils
 from Bio import AlignIO
 
 """Functions for parsing and manipulating sequence alignment files

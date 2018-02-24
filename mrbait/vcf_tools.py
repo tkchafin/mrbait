@@ -2,8 +2,8 @@
 import os
 import sys
 import vcf
-import misc_utils as utils
-import alignment_tools as aln
+from mrbait import misc_utils as utils
+from mrbait import alignment_tools as aln
 
 #Read VCF variant calls
 #Generator function, yields each locus
