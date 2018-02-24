@@ -18,10 +18,10 @@ from mrbait import aln_file_tools
 from mrbait import vcf_tools
 from mrbait import vsearch
 from mrbait import gff3_parser as gff
+from mrbait import blast as b
 
 import pandas as pd
 import numpy as np
-import blast as b
 import multiprocessing
 
 """
