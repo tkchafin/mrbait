@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
-No supported releases yet. 
+v1.0.0 https://github.com/tkchafin/mrbait/releases/tag/v1.0.0
+- Functional version, pre-packaging for conda and before benchmarking 
 
 Please see the [source code](https://github.com/tkchafin/mrbait) for the most up-to-date development version, and see the complete [development history](https://github.com/tkchafin/mrbait/commits/master) for all changes. 
