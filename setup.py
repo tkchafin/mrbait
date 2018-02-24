@@ -2,6 +2,11 @@
 
 from setuptools import setup, find_packages
 
+def requires():
+    """ gets packages from requirements.txt """
+    with open('requirements.txt') as infile:
+        return infile.read().splitlines()
+
 setup(
     name="mrbait",
     install_requires=requires(),
