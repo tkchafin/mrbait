@@ -8,7 +8,7 @@ Python program for universal design of targeted-enrichment probes from multiple 
 I currently only support installation on Linux and Mac OS. Sorry, Windows users, you're on your own! :) 
 
 The easiest way is using conda:
-    conda install mrbait -c tylerkchafin -c bioconda -c conda-forge 
+   conda install mrbait -c tylerkchafin -c bioconda -c conda-forge 
 
 
 
