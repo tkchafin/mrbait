@@ -7,15 +7,8 @@ Python program for universal design of targeted-enrichment probes from multiple 
 ## Installation
 I currently only support installation on Linux and Mac OS. Sorry, Windows users, you're on your own! :) 
 
-<Fill in later>
-
-### Dependencies: 
-1. Python 3
-2. sqlite3 and Python package
-3. Biopython
-4. pyvcf
-
-Currently in development. Contact me at tkchafin@uark.edu if you are interested in progress or contributing. 
+The easiest way is using conda:
+    conda install mrbait -c tylerkchafin -c bioconda -c conda-forge 
 
 
 
