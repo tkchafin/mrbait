@@ -66,8 +66,8 @@ def stringSubstitute(s, pos, c):
 
 #Function to return sorted unique string from list of chars
 def listToSortUniqueString(l):
-	l.sort()
-	return(str(''.join(l)))
+	sl = sorted(set(l))
+	return(str(''.join(sl)))
 
 #Function to count number of lower case in a string
 def n_lower_chars(string):
