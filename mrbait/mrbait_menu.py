@@ -5,7 +5,7 @@ import sys
 import os
 import re
 import ntpath
-from mrbait import misc_utils as utils
+import misc_utils as utils
 
 def string_containsAny(str, set):
 	for c in set:
@@ -177,6 +177,7 @@ Output options:
 		--\"N\"s are expanded as [ACGT]
 	--strand	: Output strand. Options: "+", "-", "both"
 		--"-" print antiparallel (reverse complement)
+	-t,--print_tr	: Boolean. Print target regions to FASTA file
 	-o,--out	: Prefix for output files""")
 
 	print()
@@ -193,7 +194,7 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:r:T:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:r:T:t', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=", "max_ambig="
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
@@ -203,7 +204,7 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db="])
+			"resume=","db=", "print_tr"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -280,6 +281,7 @@ class parseArgs():
 		self.expand = None
 		self.strand = "+"
 		self.out = ""
+		self.print_tr=False
 		self.workdir = ""
 		self.threads = 1
 
@@ -485,6 +487,8 @@ class parseArgs():
 				self.resume = int(arg)
 			elif opt in ('o', 'out'):
 				self.out = arg
+			elif opt in ('t', 'print_tr'):
+				self.print_tr = True
 			elif opt == "db":
 				self.db = str(arg)
 			elif opt in ('T', 'threads'):

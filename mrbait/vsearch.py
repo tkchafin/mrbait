@@ -3,7 +3,7 @@
 from subprocess import Popen, PIPE, CalledProcessError
 import os
 import re
-from mrbait import seq_graph as sg
+import seq_graph as sg
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
 

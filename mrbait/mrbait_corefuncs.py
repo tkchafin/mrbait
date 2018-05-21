@@ -6,18 +6,19 @@ import Bio
 import os
 import time
 from Bio import AlignIO
-from mrbait import mrbait_menu
-from mrbait.substring import SubString
-from mrbait import manage_bait_db as m
-from mrbait import alignment_tools as a
-from mrbait import sequence_tools as s
-from mrbait import misc_utils as utils
-from mrbait import seq_graph as graph
-from mrbait import aln_file_tools
-from mrbait import vcf_tools
-from mrbait import vsearch
-from mrbait import gff3_parser as gff
-from mrbait import blast as b
+import mrbait_menu
+import substring
+from substring import SubString
+import manage_bait_db as m
+import alignment_tools as a
+import sequence_tools as s
+import misc_utils as utils
+import seq_graph as graph
+import aln_file_tools
+import vcf_tools
+import vsearch
+import gff3_parser as gff
+import blast as b
 
 import pandas as pd
 import numpy as np
@@ -521,7 +522,7 @@ def selectTargetRegions(conn, params):
 	if m.getNumConflicts(conn) > 0:
 	#Apply select_r filters for all conflicting TRs
 		if params.select_r == "rand":
-			print("--select_r is RANDOM")
+			#print("--select_r is RANDOM")
 			#Do it later
 			pass
 		elif params.select_r == "snp":
@@ -1009,3 +1010,30 @@ def printBaits(conn, params):
 				seq = s.reverseComplement(r.sequence) + "\n"
 				file_object.write(header)
 				file_object.write(seq)
+	file_object.close()
+
+#Function to print baits in final output
+def printTargets(conn, params):
+	df = m.getRegions(conn)
+
+	out = params.workdir + "/" + params.out + "_targets.fasta"
+	file_object = open(out, "w")
+
+	rel_num = dict() #dictionary to keep target number relative to locus num
+	for i, r in df.iterrows():
+		#add locus to dict if it isn't there already
+		if r.locid in rel_num:
+			rel_num[r.locid] += 1
+		else:
+			rel_num[r.locid] = 1
+
+		#build FASTA header
+		p = "T"
+		if r["pass"]==0:
+			p="F"
+		header = ">Locus" + str(r.locid) + "_Target" + str(rel_num[r.locid]) + "_Pass=" + str(p) + "\n"
+		seq = r.sequence + "\n"
+		file_object.write(header)
+		file_object.write(seq)
+
+	file_object.close()

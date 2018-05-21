@@ -4,8 +4,8 @@ import sys
 import sqlite3
 from sqlite3 import OperationalError
 import pandas as pd
-from mrbait import misc_utils as utils
-from mrbait import sequence_tools as s
+import misc_utils as utils
+import sequence_tools as s
 
 #Function to create database connection
 #Add code later to enable re-running from existing database

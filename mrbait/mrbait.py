@@ -4,11 +4,11 @@ import sqlite3
 import pandas
 import time
 from timeit import default_timer as timer
-from mrbait import mrbait_menu
-from mrbait.mrbait_menu import parseArgs
-from mrbait import manage_bait_db as m
-from mrbait import mrbait_corefuncs as core
-from mrbait import mrbait_corefuncs_parallel as pcore
+import mrbait_menu
+from mrbait_menu import parseArgs
+import manage_bait_db as m
+import mrbait_corefuncs as core
+import mrbait_corefuncs_parallel as pcore
 
 
 ############################### MAIN ###################################
@@ -27,7 +27,7 @@ from mrbait import mrbait_corefuncs_parallel as pcore
 #TODO: add --print_tr option
 #TODO: change format of output file names
 #TODO: XMFA parser (I think AlignIO already has one)
-#TODO: Remove random --select_r is random print 
+#TODO: Remove random --select_r is random print
 
 def main():
 	global_start = timer()
@@ -122,6 +122,9 @@ def main():
 				#select: resolve conflicts, apply filters
 				selectFilterTargets(conn, params)
 			passed = m.getNumPassedTRs(conn)
+			if params.print_tr:
+				print("\t\tPrinting targets to file...")
+				core.printTargets(conn, params)
 			if passed <= 0:
 				sys.exit("\nProgram killed: No targets passed filtering.\n")
 			else:
