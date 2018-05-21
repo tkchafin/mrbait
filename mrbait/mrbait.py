@@ -19,6 +19,16 @@ from mrbait import mrbait_corefuncs_parallel as pcore
 #TODO: Implement file chunkers and parallel loading for VCF and GFF
 #TODO: Make sure to check that database is initialized if given via --resume options
 
+#NEW TODO list
+#TODO: Make sure flags match some changes made in manual
+#TODO: Finish manual
+#TODO: Move some hacker options to full visible options
+#TODO: When doing PW align with baits, query targets table to get weights!
+#TODO: add --print_tr option
+#TODO: change format of output file names
+#TODO: XMFA parser (I think AlignIO already has one)
+#TODO: Remove random --select_r is random print 
+
 def main():
 	global_start = timer()
 	#Parse Command line arguments

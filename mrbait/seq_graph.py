@@ -10,9 +10,6 @@ from networkx.utils import powerlaw_sequence
 of conflicting sequences (e.g. aligned > threshold in pairwise alignment).
 Unfortunately, this problem is NP-hard and can't be done efficiently... """
 
-"""Conclusions: My naive version seems to be faster somehow.
-I must have fucked something up. """
-
 #TODO: Test that nodes retained in NAIVE definitely dont have any edges!!!
 
 def multiGraphFromList(data):

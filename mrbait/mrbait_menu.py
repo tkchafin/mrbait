@@ -20,11 +20,10 @@ def bad_opts(message=""):
 def display_help(message=None):
 	if message is not None:
 		print (message)
-	print ("\nMrBait version alpha 0.01\n")
+	print ("\nMrBait.py\n")
 	print ("Contact:\n\n\tTyler K. Chafin\n\tUniversity of Arkansas\n\ttkchafin@uark.edu\n")
 	print ("\nUsage:\n\n\t", sys.argv[0], "-a </path/to/MAF> <-c><-l><-t>\n")
 	print ("Description:\n")
-	print("\tCURRENTLY IN DEVELOPMENT\n")
 	print("\tMrBait is a program for designing baits for targeted enrichment studies\n",\
 	"\tincluding Ultraconverved Elements (UCEs), Anchored enrichment, and RAD-capture.\n",\
 	"\tIt can also be used to customize bait design for any of these methods based on\n",\
@@ -52,12 +51,12 @@ Input options:
 
 	-M,--maf	: Input multiple alignment MAF file
 	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
-	-A,--assembly	: Input whole genome assembly as FASTA [NOT WORKING YET]""")
+	-A,--assembly	: Input whole genome assembly as FASTA""")
 	print("""
 Assembly input options (for use only with -A <genome.fasta>):
 
-	-V,--vcf	: VCF file containing variant information [NOT WORKING YET]
-	-G,--gff	: GFF file containing annotation information [NOT WORKING YET]""")
+	-V,--vcf	: VCF file containing variant information
+	-G,--gff	: GFF file containing annotation information""")
 	print("""
 Alignment filtering/ consensus options (use with -M or -L inputs):
 
