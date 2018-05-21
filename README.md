@@ -5,14 +5,14 @@
 Python program for universal design of targeted-enrichment probes from multiple input datatypes. Can be used to generate probe sets for ultraconserved elements, anchored enrichment, RAD-capture, etc. 
 
 ## Installation
-I currently only support installation on Linux and Mac OS. Sorry, Windows users, you're on your own! :) 
+I currently supports native installation on Linux and Mac OS. MrBait is not natively supported on Windows, however will run using the Linux subsystem for Windows 10 (see: https://docs.microsoft.com/en-us/windows/wsl/install-win10). MrBait was tested using the Ubuntu Windows-10 subsystem. 
 
-The easiest way is using conda:
+
+Regardless of OS, the easiest way to install is using the conda package manager (https://conda.io/docs/):
 ```conda install mrbait -c tylerkchafin -c bioconda -c conda-forge ```
-
 
 
 [CHANGELOG]: ./CHANGELOG.md
 [LICENSE]: ./LICENSE
-[version-badge]: https://img.shields.io/badge/version-1.0.0-blue.svg
+[version-badge]: https://img.shields.io/badge/version-1.2.1-blue.svg
 [license-badge]: 	https://img.shields.io/aur/license/yaourt.svg
