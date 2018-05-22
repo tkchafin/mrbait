@@ -19,7 +19,7 @@ import vcf_tools
 import vsearch
 import gff3_parser as gff
 import blast as b
-
+import subprocess
 import pandas as pd
 import numpy as np
 
@@ -35,7 +35,7 @@ def printHeader(params):
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version: 1.1.1
+	Version: 1.2.1
 	Author: Tyler K. Chafin
 	Contact: tkchafin@uark.edu
 	License: GNU Public License v3.0
@@ -980,7 +980,18 @@ def printBaits(conn, params):
 	df = m.getPrintBaits(conn)
 	out = params.workdir + "/" + params.out + ".fasta"
 	file_object = open(out, "w")
+	rel_targ = dict() #dictionary to keep target number relative to locus
+	rel_bait = dict() # dictionary to keep bait number relative to target
+
 	for i, r in df.iterrows():
+		if r.locid in rel_targ:
+			rel_targ[r.locid] += 1
+		else:
+			rel_targ[r.locid] = 1
+		if r.regid in rel_bait:
+			rel_bait[r.regid] += 1
+		else:
+			rel_bait[r.regid] = 1
 		#If user wants expanded sequences:
 		if params.expand:
 			var = 1
@@ -988,12 +999,12 @@ def printBaits(conn, params):
 			for expanded in s.expandAmbiquousDNA(r.sequence):
 				expanded = expanded.replace("-","")
 				if params.strand in ("+", "both"):
-					header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "." + str(var) + "\n"
+					header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "." + str(var) + "\n"
 					seq = expanded + "\n"
 					file_object.write(header)
 					file_object.write(seq)
 				if params.strand in ("-", "both"):
-					header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "." + str(var) + "_revcomp" + "\n"
+					header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "." + str(var) + "_revcomp" + "\n"
 					seq = s.reverseComplement(expanded) + "\n"
 					file_object.write(header)
 					file_object.write(seq)
@@ -1001,12 +1012,12 @@ def printBaits(conn, params):
 		#Otherwise just print it
 		else:
 			if params.strand in ("+", "both"):
-				header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "\n"
+				header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "\n"
 				seq = r.sequence + "\n"
 				file_object.write(header)
 				file_object.write(seq)
 			if params.strand in ("-", "both"):
-				header = ">Locus" + str(r.locid) + "_Target" + str(r.regid) + "_Bait" + str(r.baitid) + "_revcomp" + "\n"
+				header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "_revcomp" + "\n"
 				seq = s.reverseComplement(r.sequence) + "\n"
 				file_object.write(header)
 				file_object.write(seq)

@@ -20,7 +20,7 @@ import vcf_tools
 import vsearch
 import gff3_parser as gff
 import blast as b
-
+import subprocess
 import pandas as pd
 import numpy as np
 import multiprocessing
