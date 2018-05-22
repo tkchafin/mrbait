@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
+v1.1.2
+- Changed numbering of baits and targets in FASTA output
+- Added now functional --print_tr option 
+- Other minor edits in response to reviewer criticisms
+
+v1.1.0 https://github.com/tkchafin/mrbait/releases/tag/v1.1.0
+- Now installabe via conda
+- Changes to directory structure
+- Non-compatible with v1.0.0
 
 v1.0.0 https://github.com/tkchafin/mrbait/releases/tag/v1.0.0
 - Functional version, pre-packaging for conda and before benchmarking 
