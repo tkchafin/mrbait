@@ -10,16 +10,16 @@ from mrbait import mrbait_menu
 import substring
 from substring import SubString
 from functools import partial
-import manage_bait_db as m
-import alignment_tools as a
-import sequence_tools as s
-import misc_utils as utils
-import seq_graph as graph
-import aln_file_tools
-import vcf_tools
-import vsearch
-import gff3_parser as gff
-import blast as b
+from mrbait import manage_bait_db as m
+from mrbait import alignment_tools as a
+from mrbait import sequence_tools as s
+from mrbait import misc_utils as utils
+from mrbait import seq_graph as graph
+from mrbait import aln_file_tools
+from mrbait import vcf_tools
+from mrbait import vsearch
+from mrbait import gff3_parser as gff
+from mrbait import blast as b
 import subprocess
 import pandas as pd
 import numpy as np

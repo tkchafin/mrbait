@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-import misc_utils as utils
+from mrbait import misc_utils as utils
 from Bio import AlignIO
 
 ############################# CLASSES ##################################
