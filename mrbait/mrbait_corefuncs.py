@@ -27,30 +27,6 @@ import numpy as np
 
 ############################# FUNCTIONS ################################
 
-#Function to print header information
-def printHeader(params):
-	print("""
-
-	=======================================================================
-	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
-	=======================================================================
-
-	Version: 1.2.1
-	Author: Tyler K. Chafin
-	Contact: tkchafin@uark.edu
-	License: GNU Public License v3.0
-
-	Releases: https://github.com/tkchafin/mrbait/releases
-
-	Citation: MrBait is currently unpublished. For now, please cite the source
-	code found at: https://github.com/tkchafin/mrbait
-
-	=======================================================================
-	""")
-
-	#Documentation: XXXX TODO: ADD LATER XXXX
-	#Contributers: Tyler Chafin, Zach Zbinden
-
 
 #Function to load a MAF file into database
 def loadMAF(conn, params):

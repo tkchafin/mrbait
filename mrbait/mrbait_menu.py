@@ -17,12 +17,32 @@ def bad_opts(message=""):
 	print("Invalid options: Exiting program. Please see manual or use <--help>\n")
 	sys.exit(1)
 
+#Function to print header information
+def printHeader():
+	print("""
+
+	=======================================================================
+	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
+	=======================================================================
+
+	Version: 1.1.2
+	Author: Tyler K. Chafin
+	Contact: tkchafin@uark.edu
+	License: GNU Public License v3.0
+
+	Releases: https://github.com/tkchafin/mrbait/releases
+
+	Citation: MrBait is currently unpublished. For now, please cite the source
+	code found at: https://github.com/tkchafin/mrbait
+
+	=======================================================================
+	""")
+
 def display_help(message=None):
 	if message is not None:
 		print (message)
-	print ("\nMrBait.py\n")
-	print ("Contact:\n\n\tTyler K. Chafin\n\tUniversity of Arkansas\n\ttkchafin@uark.edu\n")
-	print ("\nUsage:\n\n\t", sys.argv[0], "-a </path/to/MAF> <-c><-l><-t>\n")
+	print ("\nMrBait Help Menu\n\nFor more detailed information, please see the manual.\n")
+	print ("\nUsage:\n\n\t", sys.argv[0], "-A </path/to/MAF> <-c><-l><-t><...>\n")
 	print ("Description:\n")
 	print("\tMrBait is a program for designing baits for targeted enrichment studies\n",\
 	"\tincluding Ultraconverved Elements (UCEs), Anchored enrichment, and RAD-capture.\n",\
@@ -301,7 +321,7 @@ class parseArgs():
 		#First pass to see if help menu was called
 		for o, a in options:
 			if o in ("-h", "-help", "--help"):
-				display_help("Exiting because help menu was called.")
+				display_help("\tExiting because help menu was called.")
 				sys.exit(0)
 
 		#Second pass to set all args.

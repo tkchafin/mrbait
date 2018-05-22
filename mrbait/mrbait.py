@@ -32,11 +32,13 @@ import mrbait_corefuncs_parallel as pcore
 def main():
 	global_start = timer()
 	#Parse Command line arguments
-	print("\nParsing command line arguments...")
+	#Print header information
+	mrbait_menu.printHeader()
+
+	print("\n\tParsing command line arguments...")
 	params = parseArgs()
 
-	#Print header information
-	core.printHeader(params)
+
 
 	#Intiate database connection
 	print ("\tLoading SQLite Database...")
