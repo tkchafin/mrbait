@@ -7,8 +7,8 @@ import os
 import time
 from Bio import AlignIO
 from mrbait import mrbait_menu
-import substring
-from substring import SubString
+from mrbait import substring
+from mrbait.substring import SubString
 from functools import partial
 from mrbait import manage_bait_db as m
 from mrbait import alignment_tools as a
