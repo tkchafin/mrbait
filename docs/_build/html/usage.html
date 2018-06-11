@@ -86,6 +86,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#main-parameters">Main Parameters</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#general-options">General options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#input-options">Input Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alignment-filtering-consensus-options-use-with-m-x-l">Alignment filtering/ consensus options (use with -M, -X, -L)</a></li>
 </ul>
 </li>
 </ul>
@@ -206,6 +207,47 @@ being called. [default=1]</td></tr>
 -A,–assembly   <em>FASTA input</em>: Genome assembly provided as FASTA
 -V,–vcf   <em>VCF input</em>: For use with –assembly: VCF file containing variant data
 -G,–gff   <em>GFF input</em>: For use with –assembly: GFF file containing feature data</p>
+</div>
+<div class="section" id="alignment-filtering-consensus-options-use-with-m-x-l">
+<h3>Alignment filtering/ consensus options (use with -M, -X, -L)<a class="headerlink" href="#alignment-filtering-consensus-options-use-with-m-x-l" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>-c,–cov   <em>Coverage</em>: Minimum number of individuals/sequences per alignment, <br></dt>
+<dd>for MAF, XMFA, or LOCI inputs [default=1]</dd>
+<dt>-l,–len</dt>
+<dd><em>Minimum length</em>: Minimum alignment length to attempt bait design [default=80]</dd>
+<dt>-q,–tresh   <em>Bad base threshold</em>: Threshold proportion of gaps or N (ambiguous or <br></dt>
+<dd><dl class="first last docutils">
+<dt>poor quality) characters to over-ride the consensus base. For example, <em>-q 0.2</em> <br></dt>
+<dd>would be interpreted as 20% of bases at a nucleotide position must be an “N” <br>
+or gap character in order for that character to be represented as the consensus <br>
+base. [default=0.1]</dd>
+</dl>
+</dd>
+<dt>-Q,–max_ambig   <em>Max bad bases</em>: Maximum allowable proportion of gap/N characters <br></dt>
+<dd><dl class="first last docutils">
+<dt>allowed in a consensus sequence before it will be discarded. <em>-Q 0.5</em> means a <br></dt>
+<dd>consensus sequence can be 50% N’s or gap characters (“-“) before being dropped <br>
+from consideration. [default=0.5]</dd>
+</dl>
+</dd>
+<dt>-k,–mask   <em>Mask threshold</em>: Threshold proportion of masked characters per nucleotide <br></dt>
+<dd><dl class="first last docutils">
+<dt>column to mask the consensus base call. For use when case represents masking <br></dt>
+<dd>information (where lowercase = masked), as when using the <em>-xsmall</em> option in <br>
+<a class="reference external" href="http://www.repeatmasker.org/">RepeatMasker</a> to flag low-complexity or repetitive sequences. <br>
+Case will be retained in the consensus on a per-base basis according to this threshold. <br>
+[default=0.1]</dd>
+</dl>
+</dd>
+<dt>-K,–max_mask   <em>Max masked bases</em>: Maximum allowable proportion of masked characters <br></dt>
+<dd><dl class="first docutils">
+<dt>allowed in a consensus sequence before it will be discarded. <em>-K 0.5</em> means a <br></dt>
+<dd>consensus sequence can be 50% masked (lowercase) before being dropped from consideration. <br>
+[default=0.5].</dd>
+</dl>
+<p class="last">If lowercase bases do not contain masking information, set to <em>-K 1.0</em></p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
