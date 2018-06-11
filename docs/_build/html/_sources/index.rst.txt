@@ -9,7 +9,7 @@ mrbait: Universal identification and design of targeted-enrichment capture probe
 =================================================================================
 
 
-mrbait is a software pipeline for identifying regions of interest in DNA
+mrbait_ is a software pipeline for identifying regions of interest in DNA
 sequence data and designing probes to enrich them.
 
 The motivation behind mrbait is ease and flexibility of use. As such, mrbait
@@ -22,14 +22,14 @@ can learn about the overall process employed by mrbait (:ref: `Pipeline <pipelin
 how to install mrbait for use on a personal desktop or remote workstation or HPC
 (:ref: `Getting Started <installation>`), or
 
-mrbait code is open-source and freely available at:
-https://github.com/tkchafin/mrbait
+mrbait_ code is open-source and freely available at on (:ref: `GitHub <https://github.com/tkchafin/mrbait>`)
 
-Official releases can be found at:
-https://github.com/tkchafin/mrbait/releases
+Official releases can be found (:ref: `here <https://github.com/tkchafin/mrbait/releases>`)
 
-Having issues running or installing mrbait? Contact me at tkchafin@uark.edu
-or post an Issue on the GitHub page: https://github.com/tkchafin/mrbait/issues
+
+
+Having issues running or installing mrbait_? Contact me at tkchafin@uark.edu
+or post an Issue on the (:ref: `GitHub page <https://github.com/tkchafin/mrbait/issues>`).
 
 Citation: Chafin, et al. 2018. MrBait: Universal identification and design of
 targeted-enrichment capture probes. Bioinformatics. Submitted

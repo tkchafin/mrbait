@@ -4,7 +4,7 @@
 
 Getting Started
 ===============
-mrbait has been tested on Mac and Linux operating systems and is primarily supported on
+mrbait_ has been tested on Mac and Linux operating systems and is primarily supported on
 those platforms. However, Windows users can easily install using the built-in
 Linux subsystem for Windows 10.
 
@@ -23,23 +23,22 @@ https://github.com/tkchafin/mrbait/releases
 
 Dependencies
 ------------
-mrbait is written for Python3, and requires Python version >= 3.6.0. The recommended
+mrbait_ is written for Python3, and requires Python version >= 3.6.0. The recommended
 method of acquiring Python and all other dependencies is via the Anaconda distribution,
 as outlined in Section 3.3. A full list of dependencies is given below.
 
-Python >= 3.6: https://www.python.org/
-SQLite3: https://www.sqlite.org
-BioPython: http://biopython.org/
-Pandas >=0.22: https://pandas.pydata.org/
-NumPy: http://www.numpy.org/
-PyVcf: https://pyvcf.readthedocs.io
-NetworkX: https://networkx.github.io/
+Python_ >= 3.6
+SQLite3_
+BioPython_
+Pandas_ >=0.22
+numpy_
+pyVCF_
+networkx_
 
 mrbait can optionally use the following programs during bait development:
 
-NCBI BLAST+: https://blast.ncbi.nlm.nih.gov/Blast.cgi
-
-VSEARCH: https://github.com/torognes/vsearch
+BLAST+_
+vsearch_
 
 For these utilities, please cite the following:
 Camacho C, Coulouris G, Avagyan V, Ma N, Papadopoulos J, Bealer K, Madden TL. 2009.
