@@ -45,6 +45,7 @@ Software and documentation provided under the GNU Public License v3.0 and distri
    installation.rst
    files.rst
    usage.rst
+   output.rst
 
 
 

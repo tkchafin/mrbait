@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; mrbait 1.1.2 documentation</title>
+  <title>Output Files &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -27,7 +26,7 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 
   
@@ -83,7 +82,6 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
 </ul>
 
             
@@ -129,12 +127,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>Output Files</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/output.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -146,11 +146,49 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="output-files">
+<span id="output"></span><h1>Output Files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h1>
+<p>Final output of baits will be formatted as FASTA and named $out_baits.fasta
+(where $out is defined using the -o/–out flag). When the <em>-t/–print_tr</em> option is in
+use, targets will also be output as $out_targets.fasta, with an additional field
+in the header indicating if these targets passed or failed target selection and filtering.</p>
+<p>By default, baits are reported with any ambiguity sequences included (e.g. as a
+consensus sequence) like so:</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;Locus2_Target4_Bait1.1
+ATGTAATAAGGTATATG……
+&gt;Locus2_Target4_Bait1.1_revcomp
+TACATTATTCCATATAC……
+&gt;Locus2_Target4_Bait1.1
+ATGTAATGAGGTATATG……
+&gt;Locus2_Target4_Bait1.1_revcomp
+TACATTACTCCATATAC ……
+&gt;Locus1_Target4_Bait2.1
+TATGAATGTCGCGCGAT……
+&gt;Locus1_Target4_Bait2.1_revcomp
+ATACTTACAGCGCGCTA……
+…
+…
+</pre></div>
+</td></tr></table></div>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> will also produce a .sqlite file (e.g. $out.sqlite) which can be used with
+the <em>–resume</em> flag to restart the pipeline at different stages- for example to
+re-perform bait filtering with different options. This stores the complete database,
+including all consensus loci parsed from the alignment input files, all targets, and
+all bait sequences (including those which failed filtering) and can be used independently
+with your own SQLite queries.</p>
 </div>
 
 
