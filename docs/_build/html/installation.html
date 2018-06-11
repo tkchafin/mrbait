@@ -84,6 +84,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#availability">Availability</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id1">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-mrbait">Running mrbait</a></li>
 </ul>
 </li>
 </ul>
@@ -157,7 +158,7 @@ those platforms. However, Windows users can easily install using the built-in
 Linux subsystem for Windows 10.</p>
 <p>In-development code can be found on the Github page: <a class="reference external" href="https://github.com/tkchafin/mrbait">https://github.com/tkchafin/mrbait</a></p>
 <p>If you find any issues with the program, please email me at <a class="reference external" href="mailto:tkchafin&#37;&#52;&#48;uark&#46;edu">tkchafin<span>&#64;</span>uark<span>&#46;</span>edu</a> or
-submit as an ‘issue’ on <cite>Github &lt;https://github.com/tkchafin/mrbait/issues&gt;</cite>, which can
+submit as an issue on <a class="reference external" href="https://github.com/tkchafin/mrbait/issues">Github</a>, which can
 also be used for submitting feature requests. When submitting bugs or issues, please
 include input files, your command-line call, and any output MrBait produced to the screen
 or output files.</p>
@@ -215,7 +216,7 @@ for you if you used <a class="reference external" href="http://docs.continuum.io
 <p><strong>Windows users</strong>: MrBait is installable using the built-in Linux subsystem for Windows 10.
 I have only tested using the Ubuntu OS subsystem configuration but assume that other Linux
 distros would work equally well. If you prefer, you can also use a Linux installation on a
-virtual machine, or installed portably on a (:ref: <cite>USB-attached drive &lt;https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0&gt;</cite>), although
+virtual machine, or installed portably on a <a class="reference external" href="https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0">USB-attached drive</a>, although
 this may impact performance. Contact me at <a class="reference external" href="mailto:tkchafin&#37;&#52;&#48;uark&#46;edu">tkchafin<span>&#64;</span>uark<span>&#46;</span>edu</a> if you have any issues getting
 <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> installed, or feel free to launch an ‘Issue’ on the GitHub page.</p>
 <p><strong>HPC users</strong>: One of the reasons I recommend using conda to manage your Python environment,
@@ -226,6 +227,25 @@ your home directory, where is will also install any additional packages you choo
 your conda environment. If you would like to manually manage versions of these programs, or
 use an existing installation, you can provide the paths to those binaries using the <em>–vsearch</em>
 and <em>–blastn</em> commands for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>.</p>
+</div>
+<div class="section" id="running-mrbait">
+<h2>Running <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a><a class="headerlink" href="#running-mrbait" title="Permalink to this headline">¶</a></h2>
+<p>Assuming you have completed the recommended <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> install, <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> and it’s <a class="reference internal" href="#dependencies">Dependencies</a>
+should already be in your path and is now fully ready to go. You can verify successful
+installation, and view the help menu, by typing:
+mrbait -h</p>
+<p>Instructions for bait design are provided as arguments (see Section 5 for thorough usage
+instructions, and Section 8 for tutorials). For example, to generate baits of length
+80, tiled across target regions with an overlap of 40 bases, from a Multiple Alignment
+File (MAF) “example.maf”:
+.. code-block:: bash</p>
+<blockquote>
+<div>mrbait -M example.maf -b 80 -s tile=40</div></blockquote>
+<p>Or, to also filter for only alignments including 5 or more individuals, and
+of length &gt;500:
+.. code-block:: bash</p>
+<blockquote>
+<div>mrbait -M example.maf -b 80 -s tile=40 -l 500 -c 5</div></blockquote>
 </div>
 </div>
 

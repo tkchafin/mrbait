@@ -11,7 +11,7 @@ Linux subsystem for Windows 10.
 In-development code can be found on the Github page: https://github.com/tkchafin/mrbait
 
 If you find any issues with the program, please email me at tkchafin@uark.edu or
-submit as an ‘issue’ on `Github <https://github.com/tkchafin/mrbait/issues>`, which can
+submit as an issue on `Github <https://github.com/tkchafin/mrbait/issues>`_, which can
 also be used for submitting feature requests. When submitting bugs or issues, please
 include input files, your command-line call, and any output MrBait produced to the screen
 or output files.
@@ -79,7 +79,7 @@ for you if you used conda_.
 **Windows users**: MrBait is installable using the built-in Linux subsystem for Windows 10.
 I have only tested using the Ubuntu OS subsystem configuration but assume that other Linux
 distros would work equally well. If you prefer, you can also use a Linux installation on a
-virtual machine, or installed portably on a (:ref: `USB-attached drive <https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0>`), although
+virtual machine, or installed portably on a `USB-attached drive <https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0>`_, although
 this may impact performance. Contact me at tkchafin@uark.edu if you have any issues getting
 mrbait_ installed, or feel free to launch an ‘Issue’ on the GitHub page.
 
@@ -92,3 +92,24 @@ your home directory, where is will also install any additional packages you choo
 your conda environment. If you would like to manually manage versions of these programs, or
 use an existing installation, you can provide the paths to those binaries using the *--vsearch*
 and *--blastn* commands for mrbait_.
+
+Running mrbait_
+---------------
+Assuming you have completed the recommended conda_ install, mrbait_ and it’s `Dependencies`_
+should already be in your path and is now fully ready to go. You can verify successful
+installation, and view the help menu, by typing:
+mrbait -h
+
+Instructions for bait design are provided as arguments (see Section 5 for thorough usage
+instructions, and Section 8 for tutorials). For example, to generate baits of length
+80, tiled across target regions with an overlap of 40 bases, from a Multiple Alignment
+File (MAF) “example.maf”:
+.. code-block:: bash
+
+  mrbait -M example.maf -b 80 -s tile=40
+
+Or, to also filter for only alignments including 5 or more individuals, and 
+of length >500:
+.. code-block:: bash
+
+  mrbait -M example.maf -b 80 -s tile=40 -l 500 -c 5
