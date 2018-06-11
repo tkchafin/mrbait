@@ -90,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#general-bait-design-options">General Bait Design Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#target-region-options">Target Region Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bait-selection-options">Bait Selection Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-options">Output Options</a></li>
 </ul>
 </li>
 </ul>
@@ -320,6 +321,13 @@ A, G, T, C, and absent. [default=0]</td></tr>
 </div>
 <div class="section" id="target-region-options">
 <h3>Target Region Options<a class="headerlink" href="#target-region-options" title="Permalink to this headline">¶</a></h3>
+<p>These are options primarily used to control which <strong>target regions</strong>, or regions
+which could be enriched (e.g. conserved enough to design baits) will be used to
+design the final set of bait sequences. Targets will be either <em>passed</em> or <em>failed</em>
+depending on these criteria.</p>
+<p>For example, you can constrain targets to fail if they are below 200 bases in length, or
+above 5000 based in length by specifying <em>-F len=200,5000</em>. In this case, all targets
+with total lengths outside of this range will fail, and be excluded from bait design.</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
@@ -395,6 +403,12 @@ Can be specified any number of times to use additional filtering criteria. <br><
 </div>
 <div class="section" id="bait-selection-options">
 <h3>Bait Selection Options<a class="headerlink" href="#bait-selection-options" title="Permalink to this headline">¶</a></h3>
+<p>These options are used to specify how baits will be designed in passing target
+regions (<em>-s, –select_b</em>) and how designed baits will be curated to create
+the final set of sequences for synthesis (<em>-f, –filter_b</em>).</p>
+<p>The default behavior is to tile baits across all <em>passing</em> target regions, with
+an overlap of 50%. This corresponds to ~2X coverage across the target region. Only
+passing baits will be included in the final output FASTA file.</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
@@ -421,6 +435,39 @@ Can be specified any number of times to use additional filtering criteria.</p>
 <em>-F blast_i=[i,q]</em>:  Only retain BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage <br>
 <em>-F blast_i=[i,q]</em>:  Exclude BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage</p>
 </td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="output-options">
+<h3>Output Options<a class="headerlink" href="#output-options" title="Permalink to this headline">¶</a></h3>
+<p>Use these options to control the format of your output file, or to specify non-default
+output files.</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-x</span>, <span class="option">--expand</span></kbd></td>
+<td><strong>Bait format</strong>: Boolean. Use this flag if you want any ambiguities <br>
+in bait sequences to be expanded (e.g. N = A,G,C,T). IUPAC codes will be fully <br>
+expanded, and gap characters will be expanded as all nucleotides and as <br>
+absent. Bait sequences will be output as FASTA to $out_baits.fasta</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-t</span>, <span class="option">--print_tr</span></kbd></td>
+<td><strong>Print target regions</strong>: Boolean. Use this flag if you would <br>
+like target regions to be printed to a FASTA file. FASTA headers will reflect <br>
+locus number, target number within locus, and pass=T or pass=F indicating if the <br>
+target passed or failed filtering specified using the <em>-F,–filter_r</em> options, as|br|
+well as any targets which were excluded due to -S,–select_r criteria. Output file <br>
+will be named as $out_targets.fasta.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--strand</span></kbd></td>
+<td><strong>Output strand</strong>: Use this if you want to print baits as-designed, or as <br>
+reverse complement. Possible values: “+” [default], “-” (reverse-complement), <br>
+or “both”.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-o</span>, <span class="option">--out</span></kbd></td>
+<td><strong>Output prefix</strong>: Desired prefix for output files. Default is “out”.</td></tr>
 </tbody>
 </table>
 </div>

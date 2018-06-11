@@ -115,6 +115,15 @@ General Bait Design Options
 Target Region Options
 ~~~~~~~~~~~~~~~~~~~~~
 
+These are options primarily used to control which **target regions**, or regions
+which could be enriched (e.g. conserved enough to design baits) will be used to
+design the final set of bait sequences. Targets will be either *passed* or *failed*
+depending on these criteria.
+
+For example, you can constrain targets to fail if they are below 200 bases in length, or
+above 5000 based in length by specifying *-F len=200,5000*. In this case, all targets
+with total lengths outside of this range will fail, and be excluded from bait design.
+
 -R, --mult_reg  **Multiple targets per locus**: By default, mrbait_ only chooses one target |br|
   region (e.g. conserved region for which baits could be designed) per locus/ |br|
   alignment. When multiple are discovered, they are ranked according to the |br|
@@ -178,6 +187,14 @@ Target Region Options
 Bait Selection Options
 ~~~~~~~~~~~~~~~~~~~~~~
 
+These options are used to specify how baits will be designed in passing target
+regions (*-s, --select_b*) and how designed baits will be curated to create
+the final set of sequences for synthesis (*-f, --filter_b*).
+
+The default behavior is to tile baits across all *passing* target regions, with
+an overlap of 50%. This corresponds to ~2X coverage across the target region. Only
+passing baits will be included in the final output FASTA file.
+
 -s, --select_b  **Bait selection scheme**: Use this to specify the desired method |br|
   to design baits from passing target regions.
 
@@ -198,3 +215,24 @@ Bait Selection Options
   *-F pw=[i,q]*:  Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
   *-F blast_i=[i,q]*:  Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
   *-F blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage
+
+Output Options
+~~~~~~~~~~~~~~
+
+Use these options to control the format of your output file, or to specify non-default
+output files. 
+
+-x, --expand  **Bait format**: Boolean. Use this flag if you want any ambiguities |br|
+  in bait sequences to be expanded (e.g. N = A,G,C,T). IUPAC codes will be fully |br|
+  expanded, and gap characters will be expanded as all nucleotides and as |br|
+  absent. Bait sequences will be output as FASTA to $out_baits.fasta
+-t, --print_tr  **Print target regions**: Boolean. Use this flag if you would |br|
+  like target regions to be printed to a FASTA file. FASTA headers will reflect |br|
+  locus number, target number within locus, and pass=T or pass=F indicating if the |br|
+  target passed or failed filtering specified using the *-F,--filter_r* options, as|br|
+  well as any targets which were excluded due to -S,--select_r criteria. Output file |br|
+  will be named as $out_targets.fasta.
+--strand  **Output strand**: Use this if you want to print baits as-designed, or as |br|
+  reverse complement. Possible values: “+” [default], “-” (reverse-complement), |br|
+  or “both”.
+-o, --out  **Output prefix**: Desired prefix for output files. Default is “out”.
