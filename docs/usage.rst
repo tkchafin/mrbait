@@ -44,7 +44,7 @@ Input Options
 -M, --maf
    **MAF input**: Use this to provide the path to the multiple alignment MAF file
 -X, --xmfa
-   XMFA input**: As an alternative to the MAF file, you can provide the |br|
+   **XMFA input**: As an alternative to the MAF file, you can provide the |br|
    .xmfa file output by the aligner Mauve.
 -L, --loci
    **LOCI input**: Multiple alignments can also be provided using the |br|
@@ -64,12 +64,14 @@ Alignment filtering/ consensus options (use with -M, -X, -L)
   for MAF, XMFA, or LOCI inputs [default=1]
 -l, --len
   **Minimum length**: Minimum alignment length to attempt bait design [default=80]
--q, --tresh   **Bad base threshold**: Threshold proportion of gaps or N (ambiguous or |br|
+-q, --tresh
+  **Bad base threshold**: Threshold proportion of gaps or N (ambiguous or |br|
   poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
   would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
   or gap character in order for that character to be represented as the consensus |br|
   base. [default=0.1]
--Q, --max_ambig  **Max bad bases**: Maximum allowable proportion of gap/N characters |br|
+-Q, --max_ambig
+  **Max bad bases**: Maximum allowable proportion of gap/N characters |br|
   allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
   consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
   from consideration. [default=0.5]
@@ -116,3 +118,73 @@ General Bait Design Options
   allow a small number per bait sequence. These can be expanded in the final |br|
   output using the -x,--expand option, which will expand gap characters as |br|
   A, G, T, C, and absent. [default=0]
+
+	Target Region Options
+	~~~~~~~~~~~~~~~~~~~~~
+
+-R, --mult_reg
+  **Multiple targets per locus**: By default, mrbait_ only chooses one target |br|
+  region (e.g. conserved region for which baits could be designed) per locus/ |br|
+  alignment. When multiple are discovered, they are ranked according to the |br|
+  criterion selected with the *-S,--select_r* option. When *-R,--mult_reg* not |br|
+  in use, only a single target region (and corresponding baits) is chosen per |br|
+  alignment. [default=false]
+-m, --min_mult
+  **Minimum length for multiple targets**: Specify this to set a minimum alignment |br|
+  or locus length to allow multiple target regions to be selected. By default will |br|
+  be set to the value of *-l,--len* (thus, when *-R,--mult_reg* is used, all loci |br|
+  passing length filter will be allowed multiple targets).
+-D, --dist_r
+  **Distance between targets**: When *-R,--mult_reg* is in use, use this parameter |br|
+  to specify the minimum distance between targets. When targets are in conflict |br|
+  (e.g. they are less than *-D,--dist_r* bases apart), conflicts will be resolved |br|
+  using the criterion set with *-S,--select_r*. [default=100]
+-d, --flank_dist
+  **Flanking distance for target filtering**: Distance from boundaries of target |br|
+  region to parse for counting SNPs, ambiguities, gaps, etc when filtering |br|
+  target regions (see *-S,--select_r* and *-F,--filter_r*) [default=500]. |br|
+  Note that this value will tell mrbait_ to search ‘*d*’ bases to the left AND |br|
+  right of each target region.
+
+  Note that currently, the same *--flank_dist* value will be used for all filters.
+-S, --select_r
+  **Target selection criterion**: Method to resolve conflicts when targets are |br|
+  too close together (e.g. when *-R* and *-D*), or when only choosing one target |br|
+  per locus/alignment.
+
+  Usage:
+  *-S snp*: Select target with most SNPs within *d* bases
+  *-S bad*: Select target with least gaps/Ns within *d* bases
+  *-S cons*: Select target with least SNPs within *d* bases
+  *-S rand*: Randomly select a target [default]
+  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases
+-F, --filter_r
+  **Target filtering criteria**: Method(s) used to filter all target regions. |br|
+  Can be specified any number of times to use additional filtering criteria.
+  Usage:
+  *-F len=[x,y]*: Length between x (min) and y (max)
+  *-F gap=[x]*: Maximum of x indels in target region
+  *-F bad=[x]*: Maximum of x N characters in target region
+  *-F snp=[x,y]*: Between x (min) and y (max) SNPs w/in d
+  *-F mask=[x]*: Maximum of x N characters in target region
+  *-F gc=[x,y]*: G/C propotion between x (min) and y (max)
+  *-F rand=[x]*: Randomly retain x targets
+  *-F pw=[i,q]*: Pairwise alignment, removing when i percent |br|
+  identity over at least q proportion of the sequences
+  *-F blast_i=[i,q]*: Only retain BLAST hits with i percent |br|
+  identity over at least q query coverage
+  *-F blast_i=[i,q]*: Exclude BLAST hits with i percent |br|
+  identity over at least q query coverage
+  *-F gff=[type]*: Only retain targets within d bases of a |br|
+  GFF-annotated feature of type type. Only for use when *-A* |br|
+  and *-G* inputs provided. Use *-F gff=all* to target any type |br|
+  of annotated feature.
+  *-F gff_a=[alias]*: Only retain targets within d bases of a |br|
+  GFF-annotated feature of tagged with the Alias attribute matching |br|
+  alias. Only for use when *-A* and *-G* inputs provided.
+
+  Examples:
+  *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases
+  *-F gc=0.2,0.8 -F rand=100* to keep 100 random targets w/ 20-80% GC
+  *-F mask=0.1* to remove targets with >10% masked bases
+  *-d 1000 -F gff=exon* to keep targets within 100 bases of an exon
