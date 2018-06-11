@@ -17,8 +17,13 @@ Main Parameters
 ---------------
 General options
 ~~~~~~~~~~~~~~~
+
+.. |br| raw:: html
+
+    <br>
+
 -r, --resume
-   *Resume*: This flag is used to tell mrbait if you would like to resume work
+   *Resume*: This flag is used to tell mrbait if you would like to resume work |br|
    following a particular step. Use this option in conjunction with the --db flag to
    continue the pipeline if you would like to re-perform filtering steps without needing
    to re-load and parse alignments
