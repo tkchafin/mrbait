@@ -31,8 +31,8 @@ Official releases can be found `here <https://github.com/tkchafin/mrbait/release
 Having issues running or installing mrbait_? Contact me at tkchafin@uark.edu
 or post an Issue on the `GitHub page <https://github.com/tkchafin/mrbait/issues>`_.
 
-Citation: Chafin, et al. 2018. MrBait: Universal identification and design of
-targeted-enrichment capture probes. Bioinformatics. Submitted
+Citation: A manuscript describing mrbait and it's underlying methodology is
+currently in review. For now, please cite the GitHub repository. 
 
 Software and documentation provided under the GNU Public License v3.0 and distributed
 “as is” without warranty of any kind.
