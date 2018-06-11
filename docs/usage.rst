@@ -181,7 +181,7 @@ Bait Selection Options
 -s, --select_b  **Bait selection scheme**: Use this to specify the desired method |br|
   to design baits from passing target regions.
 
-Usage: |br|
+  Usage: |br|
   *-s tile=[x]*: Tile baits over whole region, with *x* overlap |br|
   *-s center=[n,x]*: *n* centered baits with *x* overlap |br|
   *-s flank=[n,x]*: *n* terminal baits (each end) with *x* overlap
