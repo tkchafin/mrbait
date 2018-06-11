@@ -84,6 +84,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input files</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#assembled-genomes">Assembled genomes</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#annotating-genomes-with-vcf">Annotating genomes with VCF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#annotating-genomes-with-gff">Annotating genomes with GFF</a></li>
 </ul>
 </li>
 </ul>
@@ -208,6 +209,43 @@ chr1.scaffold2       1 rs84825 A     T       .       PASS    .       GT:GP   0/1
 …
 </pre></div>
 </td></tr></table></div>
+<p>It is important to note that the VCF format can communicate much more information
+than <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> will utilize. The CHROM and POS columns will be parsed to locate the
+reference position for each SNP, and the REF and ALT columns to write a new consensus
+base at that position using IUPAC ambiguity codes (e.g. C/T = Y). More functionality
+will be added in future versions of <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>.</p>
+<p>It is highly recommended you add variant data if it is available, as it will be used
+both for finding adequately conserved regions for bait design, as well as for filtering
+target regions for those which capture flanking SNPs.</p>
+</div>
+<div class="section" id="annotating-genomes-with-gff">
+<h3>Annotating genomes with GFF<a class="headerlink" href="#annotating-genomes-with-gff" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> can also make use of genomic features provided using the Generic Feature Format (GFF),
+independently or in addition to any variant data provided via VCF. mrbait assumes that input
+GFF files follow the version 3 <cite>GFF specification &lt;https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md&gt;</cite>_:</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span>##gff-version 3
+chr1.scaffold1       .       gene    10      180     .       +       .       ID=gene0001;Alias=targets
+chr1.scaffold1       .       mRNA    20      180     .       +       .       ID=mrna0001;Parent=gene0001
+chr1.scaffold1       .       exon    10      128     .       +       .       ID=tfbs00001;Parent=gene0001
+…
+…
+</pre></div>
+</td></tr></table></div>
+<p>Columns should be separated by tabs and defined according to the GFF3 standard (e.g.
+column 1 contains the sequence ID). mrbait will use the sequence ID (column 1) to map
+coordinates in GFF columns 4 and 5 to the reference provided in your FASTA file, thus
+these identifiers must be identical. mrbait will also categorize features internally by
+the type (e.g. “exon”) given in column 3, and by any alias assigned in the attributes
+column (column 9). All other columns are ignored. You can use either type or alias to
+tell <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to target those features for bait design.</p>
+<p>If you are not targeting all of a single type (e.g. CDS, or exon), you can either pre-filter
+your GFF file prior to loading, or you can annotate features of interest using the Alias
+attribute.</p>
 </div>
 </div>
 </div>

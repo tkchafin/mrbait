@@ -50,3 +50,42 @@ data (e.g. obtained from population-level sequencing) using the `Variant Call Fo
    chr1.scaffold2	1 rs84825 A	T	.	PASS	.	GT:GP	0/1:.	0/1:0.03,0.97,0
    …
    …
+
+It is important to note that the VCF format can communicate much more information
+than mrbait_ will utilize. The CHROM and POS columns will be parsed to locate the
+reference position for each SNP, and the REF and ALT columns to write a new consensus
+base at that position using IUPAC ambiguity codes (e.g. C/T = Y). More functionality
+will be added in future versions of mrbait_.
+
+It is highly recommended you add variant data if it is available, as it will be used
+both for finding adequately conserved regions for bait design, as well as for filtering
+target regions for those which capture flanking SNPs.
+
+Annotating genomes with GFF
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+mrbait_ can also make use of genomic features provided using the Generic Feature Format (GFF),
+independently or in addition to any variant data provided via VCF. mrbait assumes that input
+GFF files follow the version 3 `GFF specification <https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md>`\_:
+
+.. code-block:: none
+   :linenos:
+
+   ##gff-version 3
+   chr1.scaffold1	.	gene	10	180	.	+	.	ID=gene0001;Alias=targets
+   chr1.scaffold1	.	mRNA	20	180	.	+	.	ID=mrna0001;Parent=gene0001
+   chr1.scaffold1	.	exon	10	128	.	+	.	ID=tfbs00001;Parent=gene0001
+   …
+   …
+
+Columns should be separated by tabs and defined according to the GFF3 standard (e.g.
+column 1 contains the sequence ID). mrbait will use the sequence ID (column 1) to map
+coordinates in GFF columns 4 and 5 to the reference provided in your FASTA file, thus
+these identifiers must be identical. mrbait will also categorize features internally by
+the type (e.g. “exon”) given in column 3, and by any alias assigned in the attributes
+column (column 9). All other columns are ignored. You can use either type or alias to
+tell mrbait_ to target those features for bait design.
+
+If you are not targeting all of a single type (e.g. CDS, or exon), you can either pre-filter
+your GFF file prior to loading, or you can annotate features of interest using the Alias
+attribute. 
