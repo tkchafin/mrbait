@@ -16,7 +16,7 @@ Unfortunately, this problem is NP-hard and can't be done efficiently... """
 #TODO: Test that nodes retained in NAIVE definitely dont have any edges!!!
 
 """RESULTS: Mine is slighlty faster and finds more nodes at smaller network sizes.
-But the approximate algorithm scales better.  
+But the approximate algorithm scales better.
 
 Approximate, Nodes=10, 100 reps
 Average number of nodes:  5.07
@@ -119,6 +119,16 @@ def naiveIndependentSet(nodes, num):
     print("Average number of nodes: ",avg)
     print("Average number of edges: ",eavg)
 
+#Function to plot a complete graph, coloring a list of 'chosen' or 'excluded' (subset) nodes
+def plotColorNodes(G, listnodes):
+	color_map = []
+	for node in G:
+		if node in listnodes:
+			color_map.append("red")
+		else:
+			color_map.append("black")
+	nx.draw(G, node_color = color_map, with_labels=True)
+	plt.show()
 
 #Tests of functions
 example_10 = [(1,2),(2,4),(1,3),(1,7),(3,2),(1,4),(5,6),(6,8),(3,7),(4,8),(9,10)]
@@ -134,25 +144,27 @@ example_100 = [(19,29),(28,48),(17,36),(16,72),(33,2),(1,47),(55,66),(62,87),(53
 (18,22),(20,4),(59,34),(1,45),(91,75),(19,44),(54,67),(66,68),(31,75),(45,18),(90,10)
 ]
 
+
 G10 = multiGraphFromList(example_10)
 G100 = multiGraphFromList(example_100)
 
 
-print("Approximate, Nodes=10, 100 reps")
-approximateIndependentSet(10,100)
-print("Approximate, Nodes=100, 100 reps")
-approximateIndependentSet(100,100)
-print("Approximate, Nodes=1000, 100 reps")
-approximateIndependentSet(1000,100)
-print("Approximate, Nodes=10000, 100 reps")
-approximateIndependentSet(10000,100)
-print("\n------\n")
 
-print("Naive, Nodes=10, 100 reps")
-naiveIndependentSet(10,100)
-print("Naive, Nodes=100, 100 reps")
-naiveIndependentSet(100,100)
-print("Naive, Nodes=1000, 100 reps")
-naiveIndependentSet(1000,100)
-print("Approximate, Nodes=10000, 100 reps")
-approximateIndependentSet(10000,100)
+# print("Approximate, Nodes=10, 100 reps")
+# approximateIndependentSet(10,100)
+# print("Approximate, Nodes=100, 100 reps")
+# approximateIndependentSet(100,100)
+# print("Approximate, Nodes=1000, 100 reps")
+# approximateIndependentSet(1000,100)
+# print("Approximate, Nodes=10000, 100 reps")
+# approximateIndependentSet(10000,100)
+# print("\n------\n")
+#
+# print("Naive, Nodes=10, 100 reps")
+# naiveIndependentSet(10,100)
+# print("Naive, Nodes=100, 100 reps")
+# naiveIndependentSet(100,100)
+# print("Naive, Nodes=1000, 100 reps")
+# naiveIndependentSet(1000,100)
+# print("Approximate, Nodes=10000, 100 reps")
+# approximateIndependentSet(10000,100)
