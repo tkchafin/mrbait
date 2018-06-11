@@ -40,45 +40,45 @@ General options
 Input Options
 ~~~~~~~~~~~~~
 
--M,--maf
+-M, --maf
    *MAF input*: Use this to provide the path to the multiple alignment MAF file
--X,--xmfa
+-X, --xmfa
    XMFA input*: As an alternative to the MAF file, you can provide the |br|
    .xmfa file output by the aligner Mauve.
--L,--loci
+-L, --loci
    *LOCI input*: Multiple alignments can also be provided using the |br|
    .loci file output by the RADseq assembly pipeline pyRAD.
--A,--assembly
+-A, --assembly
    *FASTA input*: Genome assembly provided as FASTA
--V,--vcf
+-V, --vcf
    *VCF input*: For use with --assembly: VCF file containing variant data
--G,--gff
+-G, --gff
    *GFF input*: For use with --assembly: GFF file containing feature data
 
 Alignment filtering/ consensus options (use with -M, -X, -L)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--c,--cov
+-c, --cov
   *Coverage*: Minimum number of individuals/sequences per alignment, |br|
   for MAF, XMFA, or LOCI inputs [default=1]
--l,--len
+-l, --len
   *Minimum length*: Minimum alignment length to attempt bait design [default=80]
--q,--tresh   *Bad base threshold*: Threshold proportion of gaps or N (ambiguous or |br|
+-q, --tresh   *Bad base threshold*: Threshold proportion of gaps or N (ambiguous or |br|
   poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
   would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
   or gap character in order for that character to be represented as the consensus |br|
   base. [default=0.1]
--Q,--max_ambig  *Max bad bases*: Maximum allowable proportion of gap/N characters |br|
+-Q, --max_ambig  *Max bad bases*: Maximum allowable proportion of gap/N characters |br|
   allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
   consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
   from consideration. [default=0.5]
--k,--mask  *Mask threshold*: Threshold proportion of masked characters per nucleotide |br|
+-k, --mask  *Mask threshold*: Threshold proportion of masked characters per nucleotide |br|
   column to mask the consensus base call. For use when case represents masking |br|
   information (where lowercase = masked), as when using the *-xsmall* option in |br|
   `RepeatMasker <http://www.repeatmasker.org/>`_ to flag low-complexity or repetitive sequences. |br|
   Case will be retained in the consensus on a per-base basis according to this threshold. |br|
   [default=0.1]
--K,--max_mask  *Max masked bases*: Maximum allowable proportion of masked characters |br|
+-K, --max_mask  *Max masked bases*: Maximum allowable proportion of masked characters |br|
   allowed in a consensus sequence before it will be discarded. *-K 0.5* means a |br|
   consensus sequence can be 50% masked (lowercase) before being dropped from consideration. |br|
   [default=0.5].

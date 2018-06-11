@@ -200,53 +200,78 @@ being called. [default=1]</td></tr>
 </div>
 <div class="section" id="input-options">
 <h3>Input Options<a class="headerlink" href="#input-options" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>-M,–maf</dt>
-<dd><em>MAF input</em>: Use this to provide the path to the multiple alignment MAF file</dd>
-<dt>-X,–xmfa</dt>
-<dd>XMFA input*: As an alternative to the MAF file, you can provide the <br>
-.xmfa file output by the aligner Mauve.</dd>
-<dt>-L,–loci</dt>
-<dd><em>LOCI input</em>: Multiple alignments can also be provided using the <br>
-.loci file output by the RADseq assembly pipeline pyRAD.</dd>
-<dt>-A,–assembly</dt>
-<dd><em>FASTA input</em>: Genome assembly provided as FASTA</dd>
-<dt>-V,–vcf</dt>
-<dd><em>VCF input</em>: For use with –assembly: VCF file containing variant data</dd>
-<dt>-G,–gff</dt>
-<dd><em>GFF input</em>: For use with –assembly: GFF file containing feature data</dd>
-</dl>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-M</span>, <span class="option">--maf</span></kbd></td>
+<td><em>MAF input</em>: Use this to provide the path to the multiple alignment MAF file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-X</span>, <span class="option">--xmfa</span></kbd></td>
+<td>XMFA input*: As an alternative to the MAF file, you can provide the <br>
+.xmfa file output by the aligner Mauve.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-L</span>, <span class="option">--loci</span></kbd></td>
+<td><em>LOCI input</em>: Multiple alignments can also be provided using the <br>
+.loci file output by the RADseq assembly pipeline pyRAD.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-A</span>, <span class="option">--assembly</span></kbd></td>
+<td><em>FASTA input</em>: Genome assembly provided as FASTA</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-V</span>, <span class="option">--vcf</span></kbd></td>
+<td><em>VCF input</em>: For use with –assembly: VCF file containing variant data</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-G</span>, <span class="option">--gff</span></kbd></td>
+<td><em>GFF input</em>: For use with –assembly: GFF file containing feature data</td></tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="alignment-filtering-consensus-options-use-with-m-x-l">
 <h3>Alignment filtering/ consensus options (use with -M, -X, -L)<a class="headerlink" href="#alignment-filtering-consensus-options-use-with-m-x-l" title="Permalink to this headline">¶</a></h3>
-<dl class="docutils">
-<dt>-c,–cov</dt>
-<dd><em>Coverage</em>: Minimum number of individuals/sequences per alignment, <br>
-for MAF, XMFA, or LOCI inputs [default=1]</dd>
-<dt>-l,–len</dt>
-<dd><em>Minimum length</em>: Minimum alignment length to attempt bait design [default=80]</dd>
-<dt>-q,–tresh   <em>Bad base threshold</em>: Threshold proportion of gaps or N (ambiguous or <br></dt>
-<dd>poor quality) characters to over-ride the consensus base. For example, <em>-q 0.2</em> <br>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-c</span>, <span class="option">--cov</span></kbd></td>
+<td><em>Coverage</em>: Minimum number of individuals/sequences per alignment, <br>
+for MAF, XMFA, or LOCI inputs [default=1]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-l</span>, <span class="option">--len</span></kbd></td>
+<td><em>Minimum length</em>: Minimum alignment length to attempt bait design [default=80]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-q</span>, <span class="option">--tresh</span></kbd></td>
+<td><em>Bad base threshold</em>: Threshold proportion of gaps or N (ambiguous or <br>
+poor quality) characters to over-ride the consensus base. For example, <em>-q 0.2</em> <br>
 would be interpreted as 20% of bases at a nucleotide position must be an “N” <br>
 or gap character in order for that character to be represented as the consensus <br>
-base. [default=0.1]</dd>
-<dt>-Q,–max_ambig  <em>Max bad bases</em>: Maximum allowable proportion of gap/N characters <br></dt>
-<dd>allowed in a consensus sequence before it will be discarded. <em>-Q 0.5</em> means a <br>
+base. [default=0.1]</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-Q</span>, <span class="option">--max_ambig</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td><em>Max bad bases</em>: Maximum allowable proportion of gap/N characters <br>
+allowed in a consensus sequence before it will be discarded. <em>-Q 0.5</em> means a <br>
 consensus sequence can be 50% N’s or gap characters (“-“) before being dropped <br>
-from consideration. [default=0.5]</dd>
-<dt>-k,–mask  <em>Mask threshold</em>: Threshold proportion of masked characters per nucleotide <br></dt>
-<dd>column to mask the consensus base call. For use when case represents masking <br>
+from consideration. [default=0.5]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-k</span>, <span class="option">--mask</span></kbd></td>
+<td><em>Mask threshold</em>: Threshold proportion of masked characters per nucleotide <br>
+column to mask the consensus base call. For use when case represents masking <br>
 information (where lowercase = masked), as when using the <em>-xsmall</em> option in <br>
 <a class="reference external" href="http://www.repeatmasker.org/">RepeatMasker</a> to flag low-complexity or repetitive sequences. <br>
 Case will be retained in the consensus on a per-base basis according to this threshold. <br>
-[default=0.1]</dd>
-<dt>-K,–max_mask  <em>Max masked bases</em>: Maximum allowable proportion of masked characters <br></dt>
-<dd><p class="first">allowed in a consensus sequence before it will be discarded. <em>-K 0.5</em> means a <br>
+[default=0.1]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-K</span>, <span class="option">--max_mask</span></kbd></td>
+<td><p class="first"><em>Max masked bases</em>: Maximum allowable proportion of masked characters <br>
+allowed in a consensus sequence before it will be discarded. <em>-K 0.5</em> means a <br>
 consensus sequence can be 50% masked (lowercase) before being dropped from consideration. <br>
 [default=0.5].</p>
 <p class="last">If lowercase bases do not contain masking information, set to <em>-K 1.0</em></p>
-</dd>
-</dl>
+</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
