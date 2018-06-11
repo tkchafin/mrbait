@@ -88,6 +88,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#multiple-genome-alignments">Multiple genome alignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reduced-representation-data">Reduced representation data</a></li>
 </ul>
 </li>
 </ul>
@@ -320,6 +321,44 @@ TTA-CCAAGC--GC…
 </td></tr></table></div>
 <p>Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
 by <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to represent separate, discontinuous loci.</p>
+</div>
+<div class="section" id="reduced-representation-data">
+<h2>Reduced representation data<a class="headerlink" href="#reduced-representation-data" title="Permalink to this headline">¶</a></h2>
+<p>Alignments from reduced-representation methods such as restriction-site associate
+DNA sequencing methods (RADseq) can be input using the MAF or XMFA formats, or using
+the “.loci” format output by the RADseq assembly pipeline <a class="reference external" href="https://github.com/dereneaton/pyrad">pyrad</a> or
+its successor <a class="reference external" href="https://github.com/dereneaton/ipyrad">ipyrad</a>. This format shows individual
+loci delimited by a line starting with “//” which features additional annotation of
+variants and parsimony-informative sites:</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;PopA001     GTGTGATAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+&gt;PopA002     GTGTGARAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+&gt;PopB001     GTGTGACAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+&gt;PopB002     GAGTGATAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+//            *      *                                        |1
+…
+…
+…
+</pre></div>
+</td></tr></table></div>
+<p>mrbait ignores annotation information (since it parses variants anyways to generate
+a consensus sequence), and only uses the “//” delimiter to distinguish between alignment
+blocks. Creating a .loci file from other formats can be accomplished relatively easily.
+For example, a series of separate alignments (each as .fasta), could be converted to the
+<strong>.loci</strong> format using the following <strong>bash</strong> command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> file in <span class="sb">`</span>ls example*.fasta<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
+  awk <span class="s1">&#39;BEGIN{ORS=&quot;&quot;}$1~/^\&gt;/{print $01&quot;\t&quot;;next}{print $0&quot;\n&quot;}&#39;</span> <span class="nv">$file</span>
+  &gt;&gt; example.loci<span class="p">;</span>
+  <span class="nb">echo</span> <span class="s2">&quot;//&quot;</span> &gt;&gt; example.loci<span class="p">;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
 </div>
 </div>
 

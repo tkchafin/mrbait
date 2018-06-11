@@ -146,4 +146,40 @@ block location within the genome, followed by the sequence:
    …
 
 Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
-by mrbait_ to represent separate, discontinuous loci. 
+by mrbait_ to represent separate, discontinuous loci.
+
+Reduced representation data
+---------------------------
+
+Alignments from reduced-representation methods such as restriction-site associate
+DNA sequencing methods (RADseq) can be input using the MAF or XMFA formats, or using
+the “.loci” format output by the RADseq assembly pipeline `pyrad <https://github.com/dereneaton/pyrad>`_ or
+its successor `ipyrad <https://github.com/dereneaton/ipyrad>`_. This format shows individual
+loci delimited by a line starting with “//” which features additional annotation of
+variants and parsimony-informative sites:
+
+.. code-block:: none
+   :linenos:
+
+   >PopA001	GTGTGATAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+   >PopA002 	GTGTGARAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+   >PopB001 	GTGTGACAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+   >PopB002 	GAGTGATAGTAGTGATGTATTTTATAATATATATTATCGGATAT……
+   //            *      *                                        |1
+   …
+   …
+   …
+
+mrbait ignores annotation information (since it parses variants anyways to generate
+a consensus sequence), and only uses the “//” delimiter to distinguish between alignment
+blocks. Creating a .loci file from other formats can be accomplished relatively easily.
+For example, a series of separate alignments (each as .fasta), could be converted to the
+**.loci** format using the following **bash** command:
+
+.. code-block:: bash
+
+   for file in `ls example*.fasta`; do
+     awk 'BEGIN{ORS=""}$1~/^\>/{print $01"\t";next}{print $0"\n"}' $file
+     >> example.loci;
+     echo "//" >> example.loci;
+   done
