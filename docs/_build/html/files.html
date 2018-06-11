@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; mrbait 1.1.2 documentation</title>
+  <title>Input files &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -27,7 +26,7 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 
   
@@ -81,7 +80,6 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
 </ul>
 
             
@@ -127,12 +125,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>Input files</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/files.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -144,11 +144,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="input-files">
+<span id="files"></span><h1>Input files<a class="headerlink" href="#input-files" title="Permalink to this headline">¶</a></h1>
+<p>This section describes the input file types accepted by MrBait.</p>
+<div class="section" id="assembled-genomes">
+<h2>Assembled genomes<a class="headerlink" href="#assembled-genomes" title="Permalink to this headline">¶</a></h2>
+<p>MrBait only accepts genome assemblies formatted as FASTA. These can represent
+contigs, scaffolds, or entire chromosomes. According to the FASTA specifications,
+a sequence should begin with a header line, or short description (indicated by the
+“&gt;” symbol), followed by a second line containing sequence data. For MrBait, it does
+not matter if the following lines are interleaved or on a single line, and any blank
+lines in the file will be ignored, as will any leading or trailing whitespace.</p>
+<p>An example FASTA-formatted sequence is given below.</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;chr1.scaffold1
+ATAGCTCGGCTACGTGATCGCGTGCTC-ATGCTAGCGCTNNNNNNNNATGATTGCTTTT
+TGTGTGTGCAAGCACTGCCGRGCTACGCGCTACTGCCRCCTAGTATGTGTGGCCGCTAC
+TAGTCCGCGCTAGCTtTtagatctcgtggcgccgcgcgcgtcgcacgatcgtacgcgcc
+&gt;chr1.scaffold2
+ATCGTGCTGCGGCGCTGCCTCAGC…
+…
+…
+…
+</pre></div>
+</td></tr></table></div>
+</div>
 </div>
 
 

@@ -43,6 +43,7 @@ Software and documentation provided under the GNU Public License v3.0 and distri
    introduction.rst
    pipeline.rst
    installation.rst
+   files.rst
 
 
 
