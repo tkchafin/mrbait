@@ -32,9 +32,9 @@ General options
    -r 2: Continue fter Step 2 (target discovery) |br|
    -r 3: Continue after Step 3 (target filtering) |br|
    -r 4: Continue after Step 4 (bait discovery) |br|
-   For example, -r 4 will tell mrbait to re-do bait filtering and output
+   For example, -r 4 will tell mrbait_ to re-do bait filtering and output
 
---db   *Database*: Use this with the --resume flag to specify a .sqlite|br|
+--db   *Database*: Use this with the --resume flag to specify a .sqlite |br|
    database file from which to start the pipeline.
 -T, --threads   *Threads*: Number of threads to use with processes that run |br|
    in parallel. This will also be passed to vsearch_ and/or blast_ if those are|br|
