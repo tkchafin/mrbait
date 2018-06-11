@@ -9,10 +9,10 @@ This section describes the input file types accepted by MrBait.
 
 Assembled genomes
 -----------------
-MrBait only accepts genome assemblies formatted as FASTA. These can represent
+mrbait_ only accepts genome assemblies formatted as FASTA. These can represent
 contigs, scaffolds, or entire chromosomes. According to the FASTA specifications,
 a sequence should begin with a header line, or short description (indicated by the
-“>” symbol), followed by a second line containing sequence data. For MrBait, it does
+“>” symbol), followed by a second line containing sequence data. It does
 not matter if the following lines are interleaved or on a single line, and any blank
 lines in the file will be ignored, as will any leading or trailing whitespace.
 
@@ -88,4 +88,62 @@ tell mrbait_ to target those features for bait design.
 
 If you are not targeting all of a single type (e.g. CDS, or exon), you can either pre-filter
 your GFF file prior to loading, or you can annotate features of interest using the Alias
-attribute. 
+attribute.
+
+Multiple genome alignments
+--------------------------
+
+mrbait_ reads two different input file types for multiple genome alignments. These can
+be provided using the Multiple Alignment Format (`MAF <https://genome.ucsc.edu/FAQ/FAQformat.html#format9.3>`_), or the eXtended Multi-FastA (`XMFA <https://asap.genetics.wisc.edu/software/mauve/mauve-user-guide/mauve-output-file-formats.php>`_) formats.
+
+The MAF format is output by several multiple alignment programs, including `MAFFT <https://mafft.cbrc.jp/alignment/software/>`_
+and `Mugsy <http://mugsy.sourceforge.net/>`_, and take the following general form:
+
+.. code-block:: none
+   :linenos:
+
+   ##maf version=1 scoring=tba.v8
+   # tba.v8 (((human chimp) baboon) (mouse rat))
+   # multiz.v7
+   # maf_project.v5 _tba_right.maf3 mouse _tba_C
+   # single_cov2.v4 single_cov2 /dev/stdin
+
+   a score=5062.0
+   s hg16.chr7    27699739 6 + 158545518 RAAAGAGATGCTAAGCCAATGAGTTGATGTCTCTCAATGTGTG
+   s panTro1.chr6 28862317 6 + 161576975 RAAAGAGATGCTAAGCCAATGAGTTGTTGTCTCTCAATGTGTG
+   s baboon         241163 6 +   4622798 TAAAGAGATGCTAAGCCAATGAGTTGTTGTCTCTRAATGTGTG
+   s mm4.chr6     53303881 6 + 151104725 TAAAGAGATGCTAAGCCAATGAGTTGTTGTCGCTCAATGTGTG
+   s rn3.chr4     81444246 6 + 187371129 taaggaGATGCTAAGCCAATGAGTTGTTGTCGCTCAATGTGTG
+
+   …
+   …
+   …
+
+Comment lines (starting with “#”) are ignored by mrbait_. Alignment blocks (considered
+by mrbait_ to each represent different loci) are started with “a”, followed by sequence
+lines starting with “s”. Source, strand, and coordinate positions are not informative for
+mrbait_, nor are lines starting with other letters (which can be used in the MAF
+format to communicate additional information about the preceding sequence, such as
+quality scores).
+
+The eXtended Multi-FastA (XMFA) format output by the multiple-genome aligner
+MAUVE (which outputs it as “.alignment”) is an extension of the standard FASTA format
+to allow alignment blocks from many different loci, with header lines representing
+identifiers for the aligned sequence, and start-end coordinates representing the alignment
+block location within the genome, followed by the sequence:
+
+.. code-block:: none
+   :linenos:
+
+   >1:1-230 +
+   ATAGC-NAATC--GC…
+   >2:210-440 -
+   ATTGGCCAATCCCC…
+   >3:3-230 +
+   TTA-CCAAGC--GC…
+   =
+   …
+   …
+
+Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
+by mrbait_ to represent separate, discontinuous loci. 
