@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Pipeline description &mdash; mrbait 1.1.2 documentation</title>
+  <title>Pipeline Description &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -27,7 +27,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -76,8 +78,10 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pipeline Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 </ul>
 
             
@@ -123,7 +127,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Pipeline description</li>
+      <li>Pipeline Description</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -143,17 +147,19 @@
            <div itemprop="articleBody">
             
   <div class="section" id="pipeline-description">
-<span id="pipeline"></span><h1>Pipeline description<a class="headerlink" href="#pipeline-description" title="Permalink to this headline">¶</a></h1>
-<p>The general process (summarized in Figure 1) is built on a relational database in
+<span id="pipeline"></span><h1>Pipeline Description<a class="headerlink" href="#pipeline-description" title="Permalink to this headline">¶</a></h1>
+<p>The general process (summarized in figure below) is built on a relational database in
 SQLite, populated, accessed, and parsed in Python. It takes a variety of input file
 formats, and is written modularly such that adding additional capabilities (e.g. input
 file formats, filtering schema) can be done without too much difficulty. The workflow is
 divided into 5 steps, as follows:</p>
-<p>Step 1          Alignments (provided as .xmfa, .loci, or .maf) or genomes (provided as .fasta, annotated with .vcf or .gff) will be used to build a consensus sequence of each locus.
-Step 2          A sliding window will be applied to each consensus to find candidate targets for which baits could be designed
-Step 3          Targets are then selected (if too close together, or only one allowed per locus), and filtered according to any number of specified filter (e.g. GC content, flanking SNPs, pairwise alignment)
-Step 4          Passing targets are then parsed to design a putative set of baits
-Step 5  Baits are then filtered according to selected criteria, and output as FASTA.</p>
+<ol class="arabic simple">
+<li>Alignments (provided as .xmfa, .loci, or .maf) or genomes (provided as .fasta, annotated with .vcf or .gff) will be used to build a consensus sequence of each locus.</li>
+<li>A sliding window will be applied to each consensus to find candidate targets for which baits could be designed</li>
+<li>Targets are then selected (if too close together, or only one allowed per locus), and filtered according to any number of specified filter (e.g. GC content, flanking SNPs, pairwise alignment)</li>
+<li>Passing targets are then parsed to design a putative set of baits</li>
+<li>Baits are then filtered according to selected criteria, and output as FASTA.</li>
+</ol>
 <img alt="_images/pipeline.png" src="_images/pipeline.png" />
 </div>
 
@@ -162,6 +168,15 @@ Step 5  Baits are then filtered according to selected criteria, and output as FA
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
