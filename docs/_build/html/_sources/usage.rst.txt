@@ -33,7 +33,7 @@ General options
 --db   *Database*: Use this with the --resume flag to specify a .sqlite |br|
    database file from which to start the pipeline.
 -T, --threads   *Threads*: Number of threads to use with processes that run |br|
-   in parallel. This will also be passed to vsearch_ and/or blast_ if those are|br|
+   in parallel. This will also be passed to vsearch_ and/or blast_ if those are |br|
    being called. [default=1]
 -h, --help   *Help*: Exit and display the help menu
 
