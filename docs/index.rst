@@ -21,7 +21,7 @@ Python parallelization and an SQL database back-end. In this documentation, you
 can learn about the overall process employed by mrbait (`Pipeline <pipeline>`_),
 how to install mrbait for use on a personal desktop or remote workstation or HPC
 (`Getting Started <installation>`_), see a full description of all runtime options
-(`Running mrbait <usage>`), and see walltime and memory benchmarking results (`Benchmarking <benchmarking>`)
+(`Running mrbait <usage>`_), and see walltime and memory benchmarking results (`Benchmarking <benchmarking>`_)
 
 mrbait_ code is open-source and freely available at on `GitHub <https://github.com/tkchafin/mrbait>`_
 
