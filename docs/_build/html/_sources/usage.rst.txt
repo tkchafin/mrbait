@@ -23,7 +23,7 @@ General options
    following a particular step. Use this option in conjunction with the |br|
    *--db* flag to continue the pipeline if you would like to re-perform |br|
    filtering steps without needing to re-load and parse alignments
-	 
+
    Usage: |br|
    -r 1: Continue pipeline after Step 1 (loading alignments) |br|
    -r 2: Continue fter Step 2 (target discovery) |br|
@@ -81,7 +81,7 @@ Alignment filtering/ consensus options (use with -M, -X, -L)
   [default=0.1]
 -K, --max_mask  *Max masked bases*: Maximum allowable proportion of masked characters |br|
   allowed in a consensus sequence before it will be discarded. *-K 0.5* means a |br|
-  consensus sequence can be 50% masked (lowercase) before being dropped from consideration. |br|
-  [default=0.5].
+  consensus sequence can be 50% masked (lowercase) before being |br|
+  dropped from consideration.[default=0.5].
 
   If lowercase bases do not contain masking information, set to *-K 1.0*
