@@ -15,3 +15,7 @@
 .. |br| raw:: html
 
     <br>
+
+.. |t| raw:: html
+
+    &#09;

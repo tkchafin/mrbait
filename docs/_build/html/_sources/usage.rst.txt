@@ -164,18 +164,18 @@ Target Region Options
   *-F gc=[x,y]*: G/C propotion between x (min) and y (max) |br|
   *-F rand=[x]*: Randomly retain x targets |br|
   *-F pw=[i,q]*: Pairwise alignment, removing when i percent |br|
-  identity over at least q proportion of the sequences |br|
+  |t| identity over at least q proportion of the sequences |br|
   *-F blast_i=[i,q]*: Only retain BLAST hits with i percent |br|
-  identity over at least q query coverage |br|
+  |t| identity over at least q query coverage |br|
   *-F blast_i=[i,q]*: Exclude BLAST hits with i percent |br|
-  identity over at least q query coverage |br|
+  |t| identity over at least q query coverage |br|
   *-F gff=[type]*: Only retain targets within d bases of a |br|
-  GFF-annotated feature of type type. Only for use when *-A* |br|
-  and *-G* inputs provided. Use *-F gff=all* to target any type |br|
-  of annotated feature. |br|
+  |t| GFF-annotated feature of type type. Only for use when *-A* |br|
+  |t| and *-G* inputs provided. Use *-F gff=all* to target any type |br|
+  |t| of annotated feature. |br|
   *-F gff_a=[alias]*: Only retain targets within d bases of a |br|
-  GFF-annotated feature of tagged with the Alias attribute matching |br|
-  alias. Only for use when *-A* and *-G* inputs provided. |br|
+  |t| GFF-annotated feature of tagged with the Alias attribute matching |br|
+  |t| alias. Only for use when *-A* and *-G* inputs provided. |br|
 
   Examples: |br|
   *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases |br|
