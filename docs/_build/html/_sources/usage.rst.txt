@@ -64,14 +64,12 @@ Alignment filtering/ consensus options (use with -M, -X, -L)
   for MAF, XMFA, or LOCI inputs [default=1]
 -l, --len
   **Minimum length**: Minimum alignment length to attempt bait design [default=80]
--q, --tresh
-  **Bad base threshold**: Threshold proportion of gaps or N (ambiguous or |br|
+-q, --tresh  **Bad base threshold**: Threshold proportion of gaps or N (ambiguous or |br|
   poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
   would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
   or gap character in order for that character to be represented as the consensus |br|
   base. [default=0.1]
--Q, --max_ambig
-  **Max bad bases**: Maximum allowable proportion of gap/N characters |br|
+-Q, --max_ambig  **Max bad bases**: Maximum allowable proportion of gap/N characters |br|
   allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
   consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
   from consideration. [default=0.5]
@@ -92,8 +90,7 @@ Alignment filtering/ consensus options (use with -M, -X, -L)
 General Bait Design Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--b, --bait
-  **Bait length**: This is the length of desired baits, and will be used for |br|
+-b, --bait  **Bait length**: This is the length of desired baits, and will be used for |br|
   bait design as well as the sliding window width for target region |br|
   discovery [default=80]
 -w, --win_shift  **Sliding window shift distance**: Shift distance for sliding window used |br|
@@ -101,18 +98,15 @@ General Bait Design Options
   alter this. If target discovery (step 2) is taking a very long time, adjusting |br|
   this may make it faster although it could result in more targets failing |br|
   filtering [default=1]
--v, --var_max
-  **Maximum SNPs per bait**: Maximum allowable variants allowed in a bait |br|
+-v, --var_max  **Maximum SNPs per bait**: Maximum allowable variants allowed in a bait |br|
   sequence. These can be expanded in the final output as each possible |br|
   non-ambiguous bait sequence for synthesis. Use this when there are not enough |br|
   conserved regions to capture enough loci for your design. [default=0]
--n, --numN
-  **Maximum Ns per bait**: Maximum allowable ambiguous (N) bases allowed |br|
+-n, --numN  **Maximum Ns per bait**: Maximum allowable ambiguous (N) bases allowed |br|
   per bait. This could be increased when there are too many poor quality bases |br|
   in your alignment to design a sufficient number of probes, although keep in mind |br|
   this will affect the specificity of your resulting probes. [default=0]
--g, --numG
-  **Maximum gaps per bait**: Maximum allowable gap characters allowed per bait. |br|
+-g, --numG  **Maximum gaps per bait**: Maximum allowable gap characters allowed per bait. |br|
   If dealing with alignments containing many indels, it might be desirable to |br|
   allow a small number per bait sequence. These can be expanded in the final |br|
   output using the -x,--expand option, which will expand gap characters as |br|
@@ -121,15 +115,13 @@ General Bait Design Options
 Target Region Options
 ~~~~~~~~~~~~~~~~~~~~~
 
--R, --mult_reg
-  **Multiple targets per locus**: By default, mrbait_ only chooses one target |br|
+-R, --mult_reg  **Multiple targets per locus**: By default, mrbait_ only chooses one target |br|
   region (e.g. conserved region for which baits could be designed) per locus/ |br|
   alignment. When multiple are discovered, they are ranked according to the |br|
   criterion selected with the *-S,--select_r* option. When *-R,--mult_reg* not |br|
   in use, only a single target region (and corresponding baits) is chosen per |br|
   alignment. [default=false]
--m, --min_mult
-  **Minimum length for multiple targets**: Specify this to set a minimum alignment |br|
+-m, --min_mult  **Minimum length for multiple targets**: Specify this to set a minimum alignment |br|
   or locus length to allow multiple target regions to be selected. By default will |br|
   be set to the value of *-l,--len* (thus, when *-R,--mult_reg* is used, all loci |br|
   passing length filter will be allowed multiple targets).
@@ -156,7 +148,8 @@ Target Region Options
   *-S bad*: Select target with least gaps/Ns within *d* bases |br|
   *-S cons*: Select target with least SNPs within *d* bases |br|
   *-S rand*: Randomly select a target [default] |br|
-  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases |br|
+
+  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases
 -F, --filter_r
   **Target filtering criteria**: Method(s) used to filter all target regions. |br|
   Can be specified any number of times to use additional filtering criteria. |br|
@@ -170,18 +163,18 @@ Target Region Options
   *-F gc=[x,y]*: G/C propotion between x (min) and y (max) |br|
   *-F rand=[x]*: Randomly retain x targets |br|
   *-F pw=[i,q]*: Pairwise alignment, removing when i percent |br|
-  identity over at least q proportion of the sequences |br|
+  \tidentity over at least q proportion of the sequences |br|
   *-F blast_i=[i,q]*: Only retain BLAST hits with i percent |br|
-  identity over at least q query coverage |br|
+  \tidentity over at least q query coverage |br|
   *-F blast_i=[i,q]*: Exclude BLAST hits with i percent |br|
-  identity over at least q query coverage |br|
+  \tidentity over at least q query coverage |br|
   *-F gff=[type]*: Only retain targets within d bases of a |br|
-  GFF-annotated feature of type type. Only for use when *-A* |br|
-  and *-G* inputs provided. Use *-F gff=all* to target any type |br|
-  of annotated feature. |br|
+  \tGFF-annotated feature of type type. Only for use when *-A* |br|
+  \tand *-G* inputs provided. Use *-F gff=all* to target any type |br|
+  \tof annotated feature. |br|
   *-F gff_a=[alias]*: Only retain targets within d bases of a |br|
-  GFF-annotated feature of tagged with the Alias attribute matching |br|
-  alias. Only for use when *-A* and *-G* inputs provided. |br|
+  \tGFF-annotated feature of tagged with the Alias attribute matching |br|
+  \talias. Only for use when *-A* and *-G* inputs provided. |br|
 
   Examples: |br|
   *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases |br|

@@ -358,12 +358,12 @@ right of each target region.</p>
 <td><p class="first"><strong>Target selection criterion</strong>: Method to resolve conflicts when targets are <br>
 too close together (e.g. when <em>-R</em> and <em>-D</em>), or when only choosing one target <br>
 per locus/alignment.</p>
-<p class="last">Usage:
+<p>Usage:
 <em>-S snp</em>: Select target with most SNPs within <em>d</em> bases <br>
 <em>-S bad</em>: Select target with least gaps/Ns within <em>d</em> bases <br>
 <em>-S cons</em>: Select target with least SNPs within <em>d</em> bases <br>
-<em>-S rand</em>: Randomly select a target [default] <br>
-Example: <em>-d 100 -S snp</em> to choose region with most SNPs within 100 flanking bases <br></p>
+<em>-S rand</em>: Randomly select a target [default] <br></p>
+<p class="last">Example: <em>-d 100 -S snp</em> to choose region with most SNPs within 100 flanking bases</p>
 </td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-F</span>, <span class="option">--filter_r</span></kbd></td>
@@ -378,18 +378,18 @@ Can be specified any number of times to use additional filtering criteria. <br><
 <em>-F gc=[x,y]</em>: G/C propotion between x (min) and y (max) <br>
 <em>-F rand=[x]</em>: Randomly retain x targets <br>
 <em>-F pw=[i,q]</em>: Pairwise alignment, removing when i percent <br>
-identity over at least q proportion of the sequences <br>
+tidentity over at least q proportion of the sequences <br>
 <em>-F blast_i=[i,q]</em>: Only retain BLAST hits with i percent <br>
-identity over at least q query coverage <br>
+tidentity over at least q query coverage <br>
 <em>-F blast_i=[i,q]</em>: Exclude BLAST hits with i percent <br>
-identity over at least q query coverage <br>
+tidentity over at least q query coverage <br>
 <em>-F gff=[type]</em>: Only retain targets within d bases of a <br>
-GFF-annotated feature of type type. Only for use when <em>-A</em> <br>
-and <em>-G</em> inputs provided. Use <em>-F gff=all</em> to target any type <br>
-of annotated feature. <br>
+tGFF-annotated feature of type type. Only for use when <em>-A</em> <br>
+tand <em>-G</em> inputs provided. Use <em>-F gff=all</em> to target any type <br>
+tof annotated feature. <br>
 <em>-F gff_a=[alias]</em>: Only retain targets within d bases of a <br>
-GFF-annotated feature of tagged with the Alias attribute matching <br>
-alias. Only for use when <em>-A</em> and <em>-G</em> inputs provided. <br></p>
+tGFF-annotated feature of tagged with the Alias attribute matching <br>
+talias. Only for use when <em>-A</em> and <em>-G</em> inputs provided. <br></p>
 <p class="last">Examples: <br>
 <em>-F snp=1,10 -d 100</em> to sample when 1-10 SNPs within 100 bases <br>
 <em>-F gc=0.2,0.8 -F rand=100</em> to keep 100 random targets w/ 20-80% GC <br>
