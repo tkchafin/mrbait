@@ -197,19 +197,18 @@ the same commands. After installation, be sure to test that conda is installed b
 <strong>conda info</strong>, which will print information about your installation. Note, you may first need
 to reload your bash environment by typing <strong>source ~/.bashrc</strong> or <strong>source ~/.bash_profile</strong> on Mac.
 Assuming success, the installation process is then very straightforward:</p>
-<dl class="docutils">
-<dt>..code-block:: bash</dt>
-<dd><p class="first">#This command tells conda that the code and dependencies for mrbait can
-#be found in ‘channels’ bioconda, conda-forge, and tylerkchafin.
-conda install mrbait -c tylerkchafin -c bioconda -c conda-forge</p>
-<p class="last">#If you would like to instead install the latest development version, you can
-#clone the github repository and
-#install MrBait like so (assuming you have git installed):
-git clone <a class="reference external" href="https://github.com/tkchafin/mrbait.git">https://github.com/tkchafin/mrbait.git</a>
-cd mrbait
-python ./setup.py install</p>
-</dd>
-</dl>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#This command tells conda that the code and dependencies for mrbait can</span>
+<span class="c1">#be found in ‘channels’ bioconda, conda-forge, and tylerkchafin.</span>
+conda install mrbait -c tylerkchafin -c bioconda -c conda-forge
+
+<span class="c1">#If you would like to instead install the latest development version, you can</span>
+<span class="c1">#clone the github repository and</span>
+<span class="c1">#install MrBait like so (assuming you have git installed):</span>
+git clone https://github.com/tkchafin/mrbait.git
+<span class="nb">cd</span> mrbait
+python ./setup.py install
+</pre></div>
+</div>
 <p>You will then need to manually install both <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> and <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">blast</a>, only if you install
 directly from the GitHub source using the setup.py installation. These will be installed
 for you if you used <a class="reference external" href="http://docs.continuum.io/conda/">conda</a>.</p>

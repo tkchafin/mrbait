@@ -58,7 +58,8 @@ the same commands. After installation, be sure to test that conda is installed b
 to reload your bash environment by typing **source ~/.bashrc** or **source ~/.bash_profile** on Mac.
 Assuming success, the installation process is then very straightforward:
 
-..code-block:: bash
+.. code-block:: bash
+
    #This command tells conda that the code and dependencies for mrbait can
    #be found in ‘channels’ bioconda, conda-forge, and tylerkchafin.
    conda install mrbait -c tylerkchafin -c bioconda -c conda-forge
