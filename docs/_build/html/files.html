@@ -27,7 +27,8 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Getting Started" href="installation.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -76,10 +77,17 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Input files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#assembled-genomes">Assembled genomes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#annotating-genomes-with-vcf">Annotating genomes with VCF</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -175,6 +183,32 @@ ATCGTGCTGCGGCGCTGCCTCAGC…
 …
 </pre></div>
 </td></tr></table></div>
+<div class="section" id="annotating-genomes-with-vcf">
+<h3>Annotating genomes with VCF<a class="headerlink" href="#annotating-genomes-with-vcf" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> also supports supplementing genomic sequences with coordinate-reference SNP
+data (e.g. obtained from population-level sequencing) using the <a class="reference external" href="http://samtools.github.io/hts-specs/">Variant Call Format</a>:</p>
+<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td><td class="code"><div class="highlight"><pre><span></span>##fileformat=VCFv4.2
+##FORMAT=&lt;ID=GT,Number=1,Type=Integer,Description=&quot;Genotype&quot;&gt;
+##FORMAT=&lt;ID=GP,Number=G,Type=Float,Description=&quot;Genotype Probabilities&quot;&gt;
+##FORMAT=&lt;ID=PL,Number=G,Type=Float,Description=&quot;Phred-scaled Genotype Likelihoods&quot;&gt;
+#CHROM       POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  SAMP001 SAMP002
+chr1.scaffold1       48      rs11449 G       A       .       PASS    .       GT      0/0     0/1
+chr1.scaffold1       47      rs11449 T       A       .       PASS    .       GT      0/0     0/1
+chr1.scaffold2       1 rs84825 A     T       .       PASS    .       GT:GP   0/1:.   0/1:0.03,0.97,0
+…
+…
+</pre></div>
+</td></tr></table></div>
+</div>
 </div>
 </div>
 
@@ -183,6 +217,13 @@ ATCGTGCTGCGGCGCTGCCTCAGC…
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="installation.html" class="btn btn-neutral" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

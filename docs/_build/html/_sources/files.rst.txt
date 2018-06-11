@@ -30,3 +30,23 @@ An example FASTA-formatted sequence is given below.
    …
    …
    …
+
+Annotating genomes with VCF
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+mrbait_ also supports supplementing genomic sequences with coordinate-reference SNP
+data (e.g. obtained from population-level sequencing) using the `Variant Call Format <http://samtools.github.io/hts-specs/>`_:
+
+.. code-block:: none
+   :linenos:
+
+   ##fileformat=VCFv4.2
+   ##FORMAT=<ID=GT,Number=1,Type=Integer,Description="Genotype">
+   ##FORMAT=<ID=GP,Number=G,Type=Float,Description="Genotype Probabilities">
+   ##FORMAT=<ID=PL,Number=G,Type=Float,Description="Phred-scaled Genotype Likelihoods">
+   #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMP001	SAMP002
+   chr1.scaffold1	48	rs11449	G	A	.	PASS	.	GT	0/0	0/1
+   chr1.scaffold1	47	rs11449	T	A	.	PASS	.	GT	0/0	0/1
+   chr1.scaffold2	1 rs84825 A	T	.	PASS	.	GT:GP	0/1:.	0/1:0.03,0.97,0
+   …
+   …
