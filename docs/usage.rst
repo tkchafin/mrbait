@@ -96,8 +96,7 @@ General Bait Design Options
   **Bait length**: This is the length of desired baits, and will be used for |br|
   bait design as well as the sliding window width for target region |br|
   discovery [default=80]
--w, --win_shift
-  **Sliding window shift distance**: Shift distance for sliding window used |br|
+-w, --win_shift  **Sliding window shift distance**: Shift distance for sliding window used |br|
   to discover target regions. Generally, there should not be a reason to |br|
   alter this. If target discovery (step 2) is taking a very long time, adjusting |br|
   this may make it faster although it could result in more targets failing |br|
