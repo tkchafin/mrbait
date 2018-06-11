@@ -31,3 +31,25 @@ is implemented so that commits to the database are queued. However, the decrease
 in runtime due to parallelization far outweighs this:
 
 .. image:: images/runtime.png
+
+Figure 3: Runtime scaling for Step 1 (most time-intensive step) with varying number of threads
+
+The relationship of runtime to number of threads is similar for step 2 (target discovery),
+as is the general scheme of preventing database conflicts caused by concurrent database
+updates. These steps (1 and 2) are by far the most time consuming, although pairwise
+alignment or BLAST searching in steps 3 or 5 can take considerable time depending on
+dataset size.
+
+Runtime (in seconds) and peak memory usage (total) for varying numbers of threads, with a ~50k loci RADseq dataset.:
+
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+| Threads | Step 1(s) | Step 2(s) | Step 3(s) | Step 4(s) | Step 5(s) | Total (s) | Peak mem (MB) | Step 1 mem (MB) |
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+| 1       | 1182      | 129       | 1         | 25        | 3         | 1342      | 120           | 80              |
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+| 2       | 591       | 69        | 1         | 25        | 3         | 690       | 260           | 100             |
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+| 3       | 399       | 49        | 1         | 25        | 3         | 478       | 275           | 110             |
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+| 4       | 320       | 41        | 1         | 25        | 3         | 392       | 300           | 125             |
++---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+

@@ -312,7 +312,7 @@ red nodes may be indirectly connected by black ‘failed’ nodes (i.e. by multi
 no direct edges remain in the graph after removing failed nodes.
 
 Filtering using blast_
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 The NCBI-BLAST+ package (https://blast.ncbi.nlm.nih.gov/Blast.cgi) can also be called
 using a similar scheme of setting a threshold of *i* sequence identity of hits, and *q*
 query coverage. Currently, mrbait supports blastn filtering using these cutoff values

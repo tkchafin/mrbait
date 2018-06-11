@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Output Files" href="output.html" />
     <link rel="prev" title="Input files" href="files.html" /> 
 
   
@@ -96,11 +97,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#filtering-using-vsearch">Filtering using vsearch</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#vsearch-options">vsearch Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#graph-based-conflict-resolution">Graph-based conflict resolution</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#filtering-using-blast">Filtering using blast</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#filtering-using-blast">Filtering using blast</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
 </ul>
 
             
@@ -565,8 +568,9 @@ sequences which would be deleted (e.g. baits which fail the ‘pw’ filter). Al
 red nodes may be indirectly connected by black ‘failed’ nodes (i.e. by multiple edges),
 no direct edges remain in the graph after removing failed nodes.</p>
 </div>
+</div>
 <div class="section" id="filtering-using-blast">
-<h3>Filtering using <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">blast</a><a class="headerlink" href="#filtering-using-blast" title="Permalink to this headline">¶</a></h3>
+<h2>Filtering using <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">blast</a><a class="headerlink" href="#filtering-using-blast" title="Permalink to this headline">¶</a></h2>
 <p>The NCBI-BLAST+ package (<a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">https://blast.ncbi.nlm.nih.gov/Blast.cgi</a>) can also be called
 using a similar scheme of setting a threshold of <em>i</em> sequence identity of hits, and <em>q</em>
 query coverage. Currently, mrbait supports blastn filtering using these cutoff values
@@ -642,7 +646,6 @@ nearly identical alignments to a very closely related genome.</td></tr>
 </table>
 </div>
 </div>
-</div>
 
 
            </div>
@@ -651,6 +654,8 @@ nearly identical alignments to a very closely related genome.</td></tr>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="output.html" class="btn btn-neutral float-right" title="Output Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="files.html" class="btn btn-neutral" title="Input files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

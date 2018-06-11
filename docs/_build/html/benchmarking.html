@@ -175,6 +175,78 @@ to the SQLite database, this cannot be performed in parallel, so a database lock
 is implemented so that commits to the database are queued. However, the decrease
 in runtime due to parallelization far outweighs this:</p>
 <img alt="_images/runtime.png" src="_images/runtime.png" />
+<p>Figure 3: Runtime scaling for Step 1 (most time-intensive step) with varying number of threads</p>
+<p>The relationship of runtime to number of threads is similar for step 2 (target discovery),
+as is the general scheme of preventing database conflicts caused by concurrent database
+updates. These steps (1 and 2) are by far the most time consuming, although pairwise
+alignment or BLAST searching in steps 3 or 5 can take considerable time depending on
+dataset size.</p>
+<p>Runtime (in seconds) and peak memory usage (total) for varying numbers of threads, with a ~50k loci RADseq dataset.:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="8%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="14%" />
+<col width="16%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Threads</td>
+<td>Step 1(s)</td>
+<td>Step 2(s)</td>
+<td>Step 3(s)</td>
+<td>Step 4(s)</td>
+<td>Step 5(s)</td>
+<td>Total (s)</td>
+<td>Peak mem (MB)</td>
+<td>Step 1 mem (MB)</td>
+</tr>
+<tr class="row-even"><td>1</td>
+<td>1182</td>
+<td>129</td>
+<td>1</td>
+<td>25</td>
+<td>3</td>
+<td>1342</td>
+<td>120</td>
+<td>80</td>
+</tr>
+<tr class="row-odd"><td>2</td>
+<td>591</td>
+<td>69</td>
+<td>1</td>
+<td>25</td>
+<td>3</td>
+<td>690</td>
+<td>260</td>
+<td>100</td>
+</tr>
+<tr class="row-even"><td>3</td>
+<td>399</td>
+<td>49</td>
+<td>1</td>
+<td>25</td>
+<td>3</td>
+<td>478</td>
+<td>275</td>
+<td>110</td>
+</tr>
+<tr class="row-odd"><td>4</td>
+<td>320</td>
+<td>41</td>
+<td>1</td>
+<td>25</td>
+<td>3</td>
+<td>392</td>
+<td>300</td>
+<td>125</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
