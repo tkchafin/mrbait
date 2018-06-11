@@ -93,6 +93,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#output-options">Output Options</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#filtering-using-vsearch">Filtering using vsearch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#vsearch-options">vsearch Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#graph-based-conflict-resolution">Graph-based conflict resolution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filtering-using-blast">Filtering using blast</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -468,6 +474,170 @@ or “both”.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-o</span>, <span class="option">--out</span></kbd></td>
 <td><strong>Output prefix</strong>: Desired prefix for output files. Default is “out”.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="filtering-using-vsearch">
+<h2>Filtering using <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a><a class="headerlink" href="#filtering-using-vsearch" title="Permalink to this headline">¶</a></h2>
+<p>Using the –filter_r or –filter_b ‘pw’ (for pairwise-align) options call an external open-source
+package <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>. Internally, this is accomplished using the “<em>allpairs_global</em>” function in
+<a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>, which performs all-vs-all global alignments of target or bait sequences.
+<a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> then parses the output of <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> to find pairs of sequences with greater
+than <em>i</em> percent identity over at least <em>q</em> percent of the query sequence.
+Sequences are first sorted by length, meaning the <em>q</em> proportion should be measured
+by the shorter of the two sequences in each pairwise alignment (although when called
+with the <em>–filter_b</em> command, all pairs are of equal length). Because all sequences
+will be compared in a pairwise fashion, keep in mind that this step could take
+considerable time, although VSEARCH is exceptionally efficient and does take advantage
+of multiple cores for parallel computation (passed using the –threads argument).</p>
+<p>If you did NOT install <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> using the <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> installation instructions for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>,
+you may need to point <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to the <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> executable. You can specify this path, as
+well asspecify how mrbait parses the results of vsearch using the following parameters:</p>
+<div class="section" id="vsearch-options">
+<h3><a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> Options<a class="headerlink" href="#vsearch-options" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--vsearch</span></kbd></td>
+<td><strong>VSEARCH binary</strong>: Path to <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> binary. If installed via <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> <br>
+install, the bioconda recipe will be used, and placed into the bin/ folder for <br>
+your <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> installation. <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>, by default, assumes that the <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> executable <br>
+is locatable in your $PATH as “vsearch”. If this is not the case, provide an <br>
+alternate path using this flag.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--vthreads</span></kbd></td>
+<td><strong>VSEARCH threads</strong>: Number of threads to use for <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>. By default, <br>
+this is assumed to be the same value as the <em>–threads</em> argument passed to <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a></td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--noGraph</span></kbd></td>
+<td><strong>No conflict graph</strong>: By default, mrbait will try to recover as many <br>
+sequences as possible from the pairwise alignment results by using a graph <br>
+structure (see below) to remove only enough sequences to resolve all conflicts</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--noWeightGraph</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td><strong>Unweighted conflict resolution</strong>: By default, mrbait weights all <br>
+nodes by the number of SNPs that the corresponding target or bait captures. <br>
+Use this option to turn this off, and instead use the built-in maximal_independent_set <br>
+function from the <a class="reference external" href="https://networkx.github.io/">networkx</a> package.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--weightByMin</span></kbd></td>
+<td><strong>Weight by minimum ambiguity</strong>: Instead of trying to keep sequences <br>
+with the most flanking SNPs, this option tries to keep sequences with the fewest <br>
+gap or N characters in flanking sequences.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--weightMax</span></kbd></td>
+<td><strong>Maximum size to attempt weighting</strong>: Maximum graph size to attempt <br>
+weighted algorithm for finding maximal independent set. Graphs larger than this <br>
+size will use the maximal_independent_set function from the <a class="reference external" href="https://networkx.github.io/">networkx</a> package, <br>
+which is slightly faster.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="graph-based-conflict-resolution">
+<h3>Graph-based conflict resolution<a class="headerlink" href="#graph-based-conflict-resolution" title="Permalink to this headline">¶</a></h3>
+<p>After <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> is complete, mrbait will parse the output and represent all ‘conflicting’
+sequences (e.g. those which aligned with i or greater identity and q or greater query
+coverage) as a graph structure, with nodes as the primary key (ID) for the SQLite
+entry corresponding to each sequence, and edges unweighted and representing ‘conflicts’
+from the pairwise alignment. By default, mrbait uses this graph structure to attempt to
+rescue as many sequences as possible which failed the pairwise alignment filter by using
+an algorithm to find the most sequences which can be “kept” while removing all edges (conflicts)
+from the graph (e.g. see Figure 2 below).</p>
+<p>This is accomplished by searching through all edges, removing the node (target or bait)
+which captures the least flanking SNPs in the original alignments, or if this value is
+equal by removing the node with the most neighbors (=conflicting sequences). If both
+quantities are equal, one is chosen at random. Options are provided to turn off this
+behavior altogether, or to weight nodes according to how many gap/N characters flank
+them, or to alternatively use the maximal_independent_set function from the <a class="reference external" href="https://networkx.github.io/">networkx</a>
+package. Unfortunately, finding the maximal independent set of a graph (i.e. the
+maximum number of nodes to retain while removing all edges) is an extremely hard problem,
+and cannot be done in a particularly efficient manner. Thus, with very large sets of target
+sequences, this can take quite a while if there is a lot of highly matching alignments
+among them.</p>
+<img alt="_images/graph.png" src="_images/graph.png" />
+<p>Figure 2: Example maximal independent set (plotted using the matplotlib for Python!)
+where nodes in red are those which have been kept by the algorithm. Black nodes represent
+sequences which would be deleted (e.g. baits which fail the ‘pw’ filter). Although
+red nodes may be indirectly connected by black ‘failed’ nodes (i.e. by multiple edges),
+no direct edges remain in the graph after removing failed nodes.</p>
+</div>
+<div class="section" id="filtering-using-blast">
+<h3>Filtering using <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">blast</a><a class="headerlink" href="#filtering-using-blast" title="Permalink to this headline">¶</a></h3>
+<p>The NCBI-BLAST+ package (<a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">https://blast.ncbi.nlm.nih.gov/Blast.cgi</a>) can also be called
+using a similar scheme of setting a threshold of <em>i</em> sequence identity of hits, and <em>q</em>
+query coverage. Currently, mrbait supports blastn filtering using these cutoff values
+to either exclude (<em>blast_x</em>) or include (<em>blast_i</em>) sequences based on presence of hits.</p>
+<p>Usage of the ‘<em>blast_x</em>’ option for either target (<em>–filter_r</em>) or bait (<em>–filter_b</em>)
+filtering would most generally be used to prevent non-target matches to potential
+contaminant DNA, given a representative genome for the putative non-target organism
+(for example a common bacterial contaminant). If such a reference genome is lacking,
+you can also increase specificity of chosen targets or baits using the ‘<em>blast_i</em>’
+option, which only retains queries with hits to a specified genome.</p>
+<p>When using either ‘<em>blast_x</em>’ or ‘<em>blast_i</em>’ options for filtering, a database file must
+be specified either as a pre-built BLAST-formatted database using the <em>–blastdb</em> flag,
+or alternatively as a FASTA file using <em>–fastadb</em>. In the latter case, mrbait will
+call the NCBI MakeBlastDB executable. When using the <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> install, this is included
+with all other BLAST+ binaries (including the blastn executable also required by
+mrbait for BLAST filtering). If not using the conda installation instructions,
+these are both assumed to be accessible in your $PATH as ‘<em>blastn</em>’ and ‘<em>makeblastdb</em>’.</p>
+<p>Please note that with particularly large sets of query sequences, this process may
+take a while, although it does take advantage of multithreading if passed via the
+<em>–threads</em> argument.</p>
+<p>BLAST options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">--blastn</span></kbd></td>
+<td><strong>BLASTN binary</strong>: Path to blastn binary. If installed via <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> <br>
+install, the bioconda recipe will be used, and placed into the bin/ folder <br>
+for your <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> installation. <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>, by default, assumes that the <br>
+blastn executable is locatable in your $PATH as “blastn”. If this is not <br>
+the case, provide an alternate path using this flag.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--makedb</span></kbd></td>
+<td><strong>MakeBlastDB binary</strong>: Path to makeblastdb binary. If installed via <br>
+<a class="reference external" href="http://docs.continuum.io/conda/">conda</a> install, the bioconda recipe will be used, and placed into the bin/ <br>
+folder for your conda installation. Mrbait, by default, assumes that the <br>
+makeblastdb executable is locatable in your $PATH as “makeblastdb”. If this <br>
+is not the case, provide an alternate path using this flag.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--blastdb</span></kbd></td>
+<td><strong>Path to BLAST database</strong>: Full path to formatted database to search against</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--fastadb</span></kbd></td>
+<td><strong>Path to FASTA database</strong>: If database is provided as a FASTA file, <br>
+and requires building using the makeblastdb command, provide that path here.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--e_value</span></kbd></td>
+<td><strong>E-value threshold</strong>: Minimum e-value cutoff to report BLAST hits <br>
+[default=0.000001]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--gapopen</span></kbd></td>
+<td><strong>Gap opening penalty</strong>: Penalty for opening gaps when performing <br>
+alignment [default=5]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--gapextend</span></kbd></td>
+<td><strong>Gap extension penalty</strong>: Penalty for extending gaps when <br>
+performing alignment [default=2]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--word_size</span></kbd></td>
+<td><strong>Word size</strong>: Word size [default=11]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--nodust</span></kbd></td>
+<td><strong>Turn off dusting</strong>: Use this flag to turn off the low-complexity <br>
+filter using by blastn. Depending on what your goals are for BLAST filtering, <br>
+this may be necessary. Boolean.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--megablast</span></kbd></td>
+<td><strong>Use megablast</strong>: Use this flag to switch to the <em>megablast</em> <br>
+algorithm. It is recommended you use this if you are trying to exclusively find <br>
+nearly identical alignments to a very closely related genome.</td></tr>
 </tbody>
 </table>
 </div>

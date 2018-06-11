@@ -220,7 +220,7 @@ Output Options
 ~~~~~~~~~~~~~~
 
 Use these options to control the format of your output file, or to specify non-default
-output files. 
+output files.
 
 -x, --expand  **Bait format**: Boolean. Use this flag if you want any ambiguities |br|
   in bait sequences to be expanded (e.g. N = A,G,C,T). IUPAC codes will be fully |br|
@@ -236,3 +236,132 @@ output files.
   reverse complement. Possible values: “+” [default], “-” (reverse-complement), |br|
   or “both”.
 -o, --out  **Output prefix**: Desired prefix for output files. Default is “out”.
+
+Filtering using vsearch_
+------------------------
+Using the --filter_r or --filter_b ‘pw’ (for pairwise-align) options call an external open-source
+package vsearch_. Internally, this is accomplished using the “*allpairs_global*” function in
+vsearch_, which performs all-vs-all global alignments of target or bait sequences.
+mrbait_ then parses the output of vsearch_ to find pairs of sequences with greater
+than *i* percent identity over at least *q* percent of the query sequence.
+Sequences are first sorted by length, meaning the *q* proportion should be measured
+by the shorter of the two sequences in each pairwise alignment (although when called
+with the *--filter_b* command, all pairs are of equal length). Because all sequences
+will be compared in a pairwise fashion, keep in mind that this step could take
+considerable time, although VSEARCH is exceptionally efficient and does take advantage
+of multiple cores for parallel computation (passed using the --threads argument).
+
+If you did NOT install vsearch_ using the conda_ installation instructions for mrbait_,
+you may need to point mrbait_ to the vsearch_ executable. You can specify this path, as
+well asspecify how mrbait parses the results of vsearch using the following parameters:
+
+vsearch_ Options
+~~~~~~~~~~~~~~~~
+--vsearch  **VSEARCH binary**: Path to vsearch_ binary. If installed via conda_ |br|
+  install, the bioconda recipe will be used, and placed into the bin/ folder for |br|
+  your conda_ installation. mrbait_, by default, assumes that the vsearch_ executable |br|
+  is locatable in your $PATH as “vsearch”. If this is not the case, provide an |br|
+  alternate path using this flag.
+--vthreads  **VSEARCH threads**: Number of threads to use for vsearch_. By default, |br|
+  this is assumed to be the same value as the *--threads* argument passed to mrbait_
+--noGraph  **No conflict graph**: By default, mrbait will try to recover as many |br|
+  sequences as possible from the pairwise alignment results by using a graph |br|
+  structure (see below) to remove only enough sequences to resolve all conflicts
+--noWeightGraph  **Unweighted conflict resolution**: By default, mrbait weights all |br|
+  nodes by the number of SNPs that the corresponding target or bait captures. |br|
+  Use this option to turn this off, and instead use the built-in maximal_independent_set |br|
+  function from the networkx_ package.
+--weightByMin  **Weight by minimum ambiguity**: Instead of trying to keep sequences |br|
+  with the most flanking SNPs, this option tries to keep sequences with the fewest |br|
+  gap or N characters in flanking sequences.
+--weightMax  **Maximum size to attempt weighting**: Maximum graph size to attempt |br|
+  weighted algorithm for finding maximal independent set. Graphs larger than this |br|
+  size will use the maximal_independent_set function from the networkx_ package, |br|
+  which is slightly faster.
+
+Graph-based conflict resolution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After vsearch_ is complete, mrbait will parse the output and represent all ‘conflicting’
+sequences (e.g. those which aligned with i or greater identity and q or greater query
+coverage) as a graph structure, with nodes as the primary key (ID) for the SQLite
+entry corresponding to each sequence, and edges unweighted and representing ‘conflicts’
+from the pairwise alignment. By default, mrbait uses this graph structure to attempt to
+rescue as many sequences as possible which failed the pairwise alignment filter by using
+an algorithm to find the most sequences which can be “kept” while removing all edges (conflicts)
+from the graph (e.g. see Figure 2 below).
+
+This is accomplished by searching through all edges, removing the node (target or bait)
+which captures the least flanking SNPs in the original alignments, or if this value is
+equal by removing the node with the most neighbors (=conflicting sequences). If both
+quantities are equal, one is chosen at random. Options are provided to turn off this
+behavior altogether, or to weight nodes according to how many gap/N characters flank
+them, or to alternatively use the maximal_independent_set function from the networkx_
+package. Unfortunately, finding the maximal independent set of a graph (i.e. the
+maximum number of nodes to retain while removing all edges) is an extremely hard problem,
+and cannot be done in a particularly efficient manner. Thus, with very large sets of target
+sequences, this can take quite a while if there is a lot of highly matching alignments
+among them.
+
+.. image:: images/graph.png
+
+Figure 2: Example maximal independent set (plotted using the matplotlib for Python!)
+where nodes in red are those which have been kept by the algorithm. Black nodes represent
+sequences which would be deleted (e.g. baits which fail the ‘pw’ filter). Although
+red nodes may be indirectly connected by black ‘failed’ nodes (i.e. by multiple edges),
+no direct edges remain in the graph after removing failed nodes.
+
+Filtering using blast_
+~~~~~~~~~~~~~~~~~~~~~~
+The NCBI-BLAST+ package (https://blast.ncbi.nlm.nih.gov/Blast.cgi) can also be called
+using a similar scheme of setting a threshold of *i* sequence identity of hits, and *q*
+query coverage. Currently, mrbait supports blastn filtering using these cutoff values
+to either exclude (*blast_x*) or include (*blast_i*) sequences based on presence of hits.
+
+Usage of the ‘*blast_x*’ option for either target (*--filter_r*) or bait (*--filter_b*)
+filtering would most generally be used to prevent non-target matches to potential
+contaminant DNA, given a representative genome for the putative non-target organism
+(for example a common bacterial contaminant). If such a reference genome is lacking,
+you can also increase specificity of chosen targets or baits using the ‘*blast_i*’
+option, which only retains queries with hits to a specified genome.
+
+When using either ‘*blast_x*’ or ‘*blast_i*’ options for filtering, a database file must
+be specified either as a pre-built BLAST-formatted database using the *--blastdb* flag,
+or alternatively as a FASTA file using *--fastadb*. In the latter case, mrbait will
+call the NCBI MakeBlastDB executable. When using the conda_ install, this is included
+with all other BLAST+ binaries (including the blastn executable also required by
+mrbait for BLAST filtering). If not using the conda installation instructions,
+these are both assumed to be accessible in your $PATH as ‘*blastn*’ and ‘*makeblastdb*’.
+
+Please note that with particularly large sets of query sequences, this process may
+take a while, although it does take advantage of multithreading if passed via the
+*--threads* argument.
+
+BLAST options:
+
+--blastn  **BLASTN binary**: Path to blastn binary. If installed via conda_ |br|
+  install, the bioconda recipe will be used, and placed into the bin/ folder |br|
+  for your conda_ installation. mrbait_, by default, assumes that the |br|
+  blastn executable is locatable in your $PATH as “blastn”. If this is not |br|
+  the case, provide an alternate path using this flag.
+--makedb  **MakeBlastDB binary**: Path to makeblastdb binary. If installed via |br|
+  conda_ install, the bioconda recipe will be used, and placed into the bin/ |br|
+  folder for your conda installation. Mrbait, by default, assumes that the |br|
+  makeblastdb executable is locatable in your $PATH as “makeblastdb”. If this |br|
+  is not the case, provide an alternate path using this flag.
+--blastdb  **Path to BLAST database**: Full path to formatted database to search against
+--fastadb  **Path to FASTA database**: If database is provided as a FASTA file, |br|
+  and requires building using the makeblastdb command, provide that path here.
+--e_value  **E-value threshold**: Minimum e-value cutoff to report BLAST hits |br|
+  [default=0.000001]
+--gapopen  **Gap opening penalty**: Penalty for opening gaps when performing |br|
+  alignment [default=5]
+--gapextend  **Gap extension penalty**: Penalty for extending gaps when |br|
+  performing alignment [default=2]
+--word_size  **Word size**: Word size [default=11]
+--nodust  **Turn off dusting**: Use this flag to turn off the low-complexity |br|
+  filter using by blastn. Depending on what your goals are for BLAST filtering, |br|
+  this may be necessary. Boolean.
+--megablast  **Use megablast**: Use this flag to switch to the *megablast* |br|
+  algorithm. It is recommended you use this if you are trying to exclusively find |br|
+  nearly identical alignments to a very closely related genome.
