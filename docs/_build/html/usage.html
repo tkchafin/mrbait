@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#input-options">Input Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#alignment-filtering-consensus-options-use-with-m-x-l">Alignment filtering/ consensus options (use with -M, -X, -L)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#general-bait-design-options">General Bait Design Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-region-options">Target Region Options</a></li>
 </ul>
 </li>
 </ul>
@@ -308,14 +309,20 @@ in your alignment to design a sufficient number of probes, although keep in mind
 this will affect the specificity of your resulting probes. [default=0]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-g</span>, <span class="option">--numG</span></kbd></td>
-<td><p class="first"><strong>Maximum gaps per bait</strong>: Maximum allowable gap characters allowed per bait. <br>
+<td><strong>Maximum gaps per bait</strong>: Maximum allowable gap characters allowed per bait. <br>
 If dealing with alignments containing many indels, it might be desirable to <br>
 allow a small number per bait sequence. These can be expanded in the final <br>
 output using the -x,–expand option, which will expand gap characters as <br>
-A, G, T, C, and absent. [default=0]</p>
-<blockquote class="last">
-<div></div></blockquote>
-</td></tr>
+A, G, T, C, and absent. [default=0]</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="target-region-options">
+<h3>Target Region Options<a class="headerlink" href="#target-region-options" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
 <tr><td class="option-group">
 <kbd><span class="option">-R</span>, <span class="option">--mult_reg</span></kbd></td>
 <td><strong>Multiple targets per locus</strong>: By default, <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> only chooses one target <br>

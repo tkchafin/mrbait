@@ -118,8 +118,8 @@ General Bait Design Options
   output using the -x,--expand option, which will expand gap characters as |br|
   A, G, T, C, and absent. [default=0]
 
-	Target Region Options
-	~~~~~~~~~~~~~~~~~~~~~
+Target Region Options
+~~~~~~~~~~~~~~~~~~~~~
 
 -R, --mult_reg
   **Multiple targets per locus**: By default, mrbait_ only chooses one target |br|
