@@ -22,7 +22,8 @@ General options
    *Resume*: This flag is used to tell mrbait if you would like to resume work |br|
    following a particular step. Use this option in conjunction with the |br|
    *--db* flag to continue the pipeline if you would like to re-perform |br|
-   filtering steps without needing to re-load and parse alignments|br||br|
+   filtering steps without needing to re-load and parse alignments
+	 
    Usage: |br|
    -r 1: Continue pipeline after Step 1 (loading alignments) |br|
    -r 2: Continue fter Step 2 (target discovery) |br|
