@@ -23,12 +23,12 @@ General options
 
    to re-load and parse alignments
 
-   Usage:
-   -r 1: Continue pipeline after Step 1 (loading alignments)
-   -r 2: Continue fter Step 2 (target discovery)
-   -r 3: Continue after Step 3 (target filtering)
-   -r 4: Continue after Step 4 (bait discovery)
-   For example, -r 4 will tell mrbait to re-do bait filtering and output
+   Usage: \
+   -r 1: Continue pipeline after Step 1 (loading alignments) \
+   -r 2: Continue fter Step 2 (target discovery) \
+   -r 3: Continue after Step 3 (target filtering) \
+   -r 4: Continue after Step 4 (bait discovery) \
+   For example, -r 4 will tell mrbait to re-do bait filtering and output \
 
 --db   *Database*: Use this with the --resume flag to specify a .sqlite databasefile
    from which to start the pipeline.
