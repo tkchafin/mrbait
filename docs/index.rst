@@ -20,7 +20,8 @@ efficient iterative design (e.g. to explore parameter settings) using native
 Python parallelization and an SQL database back-end. In this documentation, you
 can learn about the overall process employed by mrbait (`Pipeline <pipeline>`_),
 how to install mrbait for use on a personal desktop or remote workstation or HPC
-(`Getting Started <installation>`_), or
+(`Getting Started <installation>`_), see a full description of all runtime options
+(`Running mrbait <usage>`), and see walltime and memory benchmarking results (`Benchmarking <benchmarking>`)
 
 mrbait_ code is open-source and freely available at on `GitHub <https://github.com/tkchafin/mrbait>`_
 
@@ -32,7 +33,7 @@ Having issues running or installing mrbait_? Contact me at tkchafin@uark.edu
 or post an Issue on the `GitHub page <https://github.com/tkchafin/mrbait/issues>`_.
 
 Citation: A manuscript describing mrbait and it's underlying methodology is
-currently in review. For now, please cite the GitHub repository. 
+currently in review. For now, please cite the GitHub repository.
 
 Software and documentation provided under the GNU Public License v3.0 and distributed
 “as is” without warranty of any kind.
