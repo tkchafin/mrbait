@@ -17,19 +17,20 @@ Main Parameters
 ---------------
 General options
 ~~~~~~~~~~~~~~~
--r, --resume   *Resume*: This flag is used to tell mrbait if you would like to resume work \
-   following a particular step. Use this option in conjunction with the --db flag to \
-   continue the pipeline if you would like to re-perform filtering steps without needing \
+-r, --resume
+   *Resume*: This flag is used to tell mrbait if you would like to resume work
+   following a particular step. Use this option in conjunction with the --db flag to
+   continue the pipeline if you would like to re-perform filtering steps without needing
    to re-load and parse alignments
 
-   Usage: \
-   -r 1: Continue pipeline after Step 1 (loading alignments) \
-   -r 2: Continue fter Step 2 (target discovery) \
-   -r 3: Continue after Step 3 (target filtering) \
-   -r 4: Continue after Step 4 (bait discovery) \
-   For example, -r 4 will tell mrbait to re-do bait filtering and output \
+   Usage:
+   -r 1: Continue pipeline after Step 1 (loading alignments)
+   -r 2: Continue fter Step 2 (target discovery)
+   -r 3: Continue after Step 3 (target filtering)
+   -r 4: Continue after Step 4 (bait discovery)
+   For example, -r 4 will tell mrbait to re-do bait filtering and output
 
---db   *Database*: Use this with the --resume flag to specify a .sqlite  \
+--db   *Database*: Use this with the --resume flag to specify a .sqlite
    database file from which to start the pipeline.
 -T, --threads   *Threads*: Number of threads to use with processes that run in parallel.This will also be passed to VSEARCH and/or BLAST if those are being called. [default=1]
 -h, --help   *Help*: Exit and display the help menu
