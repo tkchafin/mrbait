@@ -10,4 +10,4 @@
 .. _SQLite3: https://www.sqlite.org/index.html
 .. _vsearch: https://github.com/torognes/vsearch
 .. _networkx: https://networkx.github.io/
-.. _BLAST+: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+.. _blast: https://blast.ncbi.nlm.nih.gov/Blast.cgi

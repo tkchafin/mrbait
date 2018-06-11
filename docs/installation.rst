@@ -37,7 +37,7 @@ networkx_
 
 mrbait can optionally use the following programs during bait development:
 
-BLAST+_
+blast_
 vsearch_
 
 For these utilities, please cite the following:
@@ -59,19 +59,19 @@ to reload your bash environment by typing **source ~/.bashrc** or **source ~/.ba
 Assuming success, the installation process is then very straightforward:
 
 ..code-block:: bash
-   ##This command tells conda that the code and dependencies for mrbait can be found
-   ##in ‘channels’ bioconda, conda-forge, and tylerkchafin.
+   #This command tells conda that the code and dependencies for mrbait can
+   #be found in ‘channels’ bioconda, conda-forge, and tylerkchafin.
    conda install mrbait -c tylerkchafin -c bioconda -c conda-forge
 
-   ##If you would like to instead install the latest development version, you can
-   ##clone the github repository and
-   ##install MrBait like so (assuming you have git installed):
+   #If you would like to instead install the latest development version, you can
+   #clone the github repository and
+   #install MrBait like so (assuming you have git installed):
    git clone https://github.com/tkchafin/mrbait.git
    cd mrbait
    python ./setup.py install
 
 
-You will then need to manually install both vsearch_ and BLAST+_, only if you install
+You will then need to manually install both vsearch_ and blast_, only if you install
 directly from the GitHub source using the setup.py installation. These will be installed
 for you if you used conda_.
 
