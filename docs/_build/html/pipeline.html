@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; mrbait 1.1.2 documentation</title>
+  <title>Pipeline description &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -27,7 +26,7 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" /> 
 
   
@@ -79,8 +78,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline description</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 </ul>
 
             
@@ -126,12 +123,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>Pipeline description</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/pipeline.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -143,11 +142,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="pipeline-description">
+<span id="pipeline"></span><h1>Pipeline description<a class="headerlink" href="#pipeline-description" title="Permalink to this headline">¶</a></h1>
+<p>The general process (summarized in Figure 1) is built on a relational database in
+SQLite, populated, accessed, and parsed in Python. It takes a variety of input file
+formats, and is written modularly such that adding additional capabilities (e.g. input
+file formats, filtering schema) can be done without too much difficulty. The workflow is
+divided into 5 steps, as follows:</p>
+<p>Step 1          Alignments (provided as .xmfa, .loci, or .maf) or genomes (provided as .fasta, annotated with .vcf or .gff) will be used to build a consensus sequence of each locus.
+Step 2          A sliding window will be applied to each consensus to find candidate targets for which baits could be designed
+Step 3          Targets are then selected (if too close together, or only one allowed per locus), and filtered according to any number of specified filter (e.g. GC content, flanking SNPs, pairwise alignment)
+Step 4          Passing targets are then parsed to design a putative set of baits
+Step 5  Baits are then filtered according to selected criteria, and output as FASTA.</p>
+<img alt="_images/pipeline.png" src="_images/pipeline.png" />
 </div>
 
 

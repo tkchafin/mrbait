@@ -33,6 +33,8 @@ Software and documentation provided under the GNU Public License v3.0 and distri
    :maxdepth: 2
 
    introduction.rst
+   pipeline.rst
+   installation.rst
 
 
 
