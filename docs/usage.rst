@@ -58,28 +58,29 @@ Input Options
 Alignment filtering/ consensus options (use with -M, -X, -L)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--c,--cov   *Coverage*: Minimum number of individuals/sequences per alignment, |br|
-   for MAF, XMFA, or LOCI inputs [default=1]
+-c,--cov
+  *Coverage*: Minimum number of individuals/sequences per alignment, |br|
+  for MAF, XMFA, or LOCI inputs [default=1]
 -l,--len
-   *Minimum length*: Minimum alignment length to attempt bait design [default=80]
+  *Minimum length*: Minimum alignment length to attempt bait design [default=80]
 -q,--tresh   *Bad base threshold*: Threshold proportion of gaps or N (ambiguous or |br|
-   poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
-	 would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
-	 or gap character in order for that character to be represented as the consensus |br|
-	 base. [default=0.1]
--Q,--max_ambig   *Max bad bases*: Maximum allowable proportion of gap/N characters |br|
-   allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
-	 consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
-	 from consideration. [default=0.5]
--k,--mask   *Mask threshold*: Threshold proportion of masked characters per nucleotide |br|
-   column to mask the consensus base call. For use when case represents masking |br|
-	 information (where lowercase = masked), as when using the *-xsmall* option in |br|
-	 `RepeatMasker <http://www.repeatmasker.org/>`_ to flag low-complexity or repetitive sequences. |br|
-	 Case will be retained in the consensus on a per-base basis according to this threshold. |br|
-	 [default=0.1]
--K,--max_mask   *Max masked bases*: Maximum allowable proportion of masked characters |br|
-   allowed in a consensus sequence before it will be discarded. *-K 0.5* means a |br|
-	 consensus sequence can be 50% masked (lowercase) before being dropped from consideration. |br|
-	 [default=0.5].
+  poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
+  would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
+  or gap character in order for that character to be represented as the consensus |br|
+  base. [default=0.1]
+-Q,--max_ambig  *Max bad bases*: Maximum allowable proportion of gap/N characters |br|
+  allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
+  consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
+  from consideration. [default=0.5]
+-k,--mask  *Mask threshold*: Threshold proportion of masked characters per nucleotide |br|
+  column to mask the consensus base call. For use when case represents masking |br|
+  information (where lowercase = masked), as when using the *-xsmall* option in |br|
+  `RepeatMasker <http://www.repeatmasker.org/>`_ to flag low-complexity or repetitive sequences. |br|
+  Case will be retained in the consensus on a per-base basis according to this threshold. |br|
+  [default=0.1]
+-K,--max_mask  *Max masked bases*: Maximum allowable proportion of masked characters |br|
+  allowed in a consensus sequence before it will be discarded. *-K 0.5* means a |br|
+  consensus sequence can be 50% masked (lowercase) before being dropped from consideration. |br|
+  [default=0.5].
 
-   If lowercase bases do not contain masking information, set to *-K 1.0*
+  If lowercase bases do not contain masking information, set to *-K 1.0*
