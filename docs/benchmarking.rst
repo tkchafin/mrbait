@@ -53,3 +53,21 @@ Runtime (in seconds) and peak memory usage (total) for varying numbers of thread
 +---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
 | 4       | 320       | 41        | 1         | 25        | 3         | 392       | 300           | 125             |
 +---------+-----------+-----------+-----------+-----------+-----------+-----------+---------------+-----------------+
+
+Memory Usage
+------------
+Large alignments are processed piecemeal, with only a single alignment loaded at a time,
+thus even large files can be processed without excessive memory requirements. The internal
+data structure of mrbait relies on a file-based database (SQLite), making it very efficient
+in terms of memory usage. Because of this, it should run on any normal (and reasonably
+modern) desktop computer.  Peak memory usage tends to be during step 2 (target discovery),
+as at this step all consensus loci are scattered across threads- note that this also
+means a slight increase in peak memory requirements as number of threads increases. See
+Figure 4 for an example of how memory scales throughout the pipeline steps.
+
+.. image:: images/mem.png
+
+Figure 4: Memory usage throughout the pipeline (recorded for a 50k loci RADseq dataset).
+Total memory usage (black) shows a peak of ~300Mb during step 2. Per-thread memory usage (blue)
+cumulatively impacts total memory usage but drops to zero after step 2, as following steps do
+not utilize parallel computation

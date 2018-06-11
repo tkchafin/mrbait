@@ -47,6 +47,7 @@ Software and documentation provided under the GNU Public License v3.0 and distri
    usage.rst
    output.rst
    benchmarking.rst
+   acknowledgements.rst
 
 
 

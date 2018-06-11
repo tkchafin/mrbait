@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarking and Hardware Requirements</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#runtime-scaling">Runtime scaling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#memory-usage">Memory Usage</a></li>
 </ul>
 </li>
 </ul>
@@ -247,6 +248,22 @@ dataset size.</p>
 </tr>
 </tbody>
 </table>
+</div>
+<div class="section" id="memory-usage">
+<h2>Memory Usage<a class="headerlink" href="#memory-usage" title="Permalink to this headline">¶</a></h2>
+<p>Large alignments are processed piecemeal, with only a single alignment loaded at a time,
+thus even large files can be processed without excessive memory requirements. The internal
+data structure of mrbait relies on a file-based database (SQLite), making it very efficient
+in terms of memory usage. Because of this, it should run on any normal (and reasonably
+modern) desktop computer.  Peak memory usage tends to be during step 2 (target discovery),
+as at this step all consensus loci are scattered across threads- note that this also
+means a slight increase in peak memory requirements as number of threads increases. See
+Figure 4 for an example of how memory scales throughout the pipeline steps.</p>
+<img alt="_images/mem.png" src="_images/mem.png" />
+<p>Figure 4: Memory usage throughout the pipeline (recorded for a 50k loci RADseq dataset).
+Total memory usage (black) shows a peak of ~300Mb during step 2. Per-thread memory usage (blue)
+cumulatively impacts total memory usage but drops to zero after step 2, as following steps do
+not utilize parallel computation</p>
 </div>
 </div>
 
