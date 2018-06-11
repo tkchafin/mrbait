@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
@@ -9,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; mrbait 1.1.2 documentation</title>
+  <title>Usage options &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -27,8 +26,9 @@
 
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Input files" href="files.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -77,12 +77,18 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-parameters">Main Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-options">General options</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -128,12 +134,14 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Index</li>
+      <li>Usage options</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
+            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
+          
         
       </li>
     
@@ -145,11 +153,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="usage-options">
+<span id="usage"></span><h1>Usage options<a class="headerlink" href="#usage-options" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> reads all options and inputs using command-line arguments provided
+after the program name. For a quick look at all options from the command line,
+call the help menu by typing <strong>mrbait -h</strong> from the terminal.</p>
+<p>Note that options requiring a floating point number (e.g. <em>-q</em>) allow inputs
+from 0.0 to 1.0, and options requiring an integer (e.g. <em>-c</em>) allow inputs ranging
+from 1 to infinity.</p>
+<div class="section" id="main-parameters">
+<h2>Main Parameters<a class="headerlink" href="#main-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="general-options">
+<h3>General options<a class="headerlink" href="#general-options" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-r</span>, <span class="option">--resume</span></kbd></td>
+<td>Resume: This flag is used to tell mrbait if you would like to resume work following a particular step. Use this option in conjunction with the –db flag to continue the pipeline if you would like to re-perform filtering steps without needing to re-load and parse alignments
+Usage:
+-r 1: Continue pipeline after Step 1 (loading alignments)
+-r 2: Continue fter Step 2 (target discovery)
+-r 3: Continue after Step 3 (target filtering)
+-r 4: Continue after Step 4 (bait discovery)
+For example, -r 4 will tell mrbait to re-do bait filtering and output</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--db</span></kbd></td>
+<td>Database: Use this with the –resume flag to specify a .sqlite database file from which to start the pipeline.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-T</span>, <span class="option">--threads</span></kbd></td>
+<td>Threads: Number of threads to use with processes that run in parallel. This will also be passed to VSEARCH and/or BLAST if those are being called. [default=1]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
+<td>Help: Exit and display the help menu</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 
 
@@ -157,6 +198,13 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="files.html" class="btn btn-neutral" title="Input files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

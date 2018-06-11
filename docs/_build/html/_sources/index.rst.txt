@@ -38,12 +38,13 @@ Software and documentation provided under the GNU Public License v3.0 and distri
 “as is” without warranty of any kind.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    introduction.rst
    pipeline.rst
    installation.rst
    files.rst
+   usage.rst
 
 
 
