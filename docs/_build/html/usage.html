@@ -87,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#general-options">General options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#input-options">Input Options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#alignment-filtering-consensus-options-use-with-m-x-l">Alignment filtering/ consensus options (use with -M, -X, -L)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#general-bait-design-options">General Bait Design Options</a></li>
 </ul>
 </li>
 </ul>
@@ -173,9 +174,9 @@ from 1 to infinity.</p>
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd><span class="option">-r</span>, <span class="option">--resume</span></kbd></td>
-<td><p class="first"><em>Resume</em>: This flag is used to tell mrbait if you would like to resume work <br>
+<td><p class="first"><strong>Resume</strong>: This flag is used to tell mrbait if you would like to resume work <br>
 following a particular step. Use this option in conjunction with the <br>
-<em>–db</em> flag to continue the pipeline if you would like to re-perform <br>
+<strong>–db</strong> flag to continue the pipeline if you would like to re-perform <br>
 filtering steps without needing to re-load and parse alignments</p>
 <p class="last">Usage: <br>
 -r 1: Continue pipeline after Step 1 (loading alignments) <br>
@@ -186,16 +187,16 @@ For example, -r 4 will tell <a class="reference external" href="https://github.c
 </td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--db</span></kbd></td>
-<td><em>Database</em>: Use this with the –resume flag to specify a .sqlite <br>
+<td><strong>Database</strong>: Use this with the –resume flag to specify a .sqlite <br>
 database file from which to start the pipeline.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-T</span>, <span class="option">--threads</span></kbd></td>
-<td><em>Threads</em>: Number of threads to use with processes that run <br>
+<td><strong>Threads</strong>: Number of threads to use with processes that run <br>
 in parallel. This will also be passed to <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> and/or <a class="reference external" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">blast</a> if those are <br>
 being called. [default=1]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
-<td><em>Help</em>: Exit and display the help menu</td></tr>
+<td><strong>Help</strong>: Exit and display the help menu</td></tr>
 </tbody>
 </table>
 </div>
@@ -207,24 +208,24 @@ being called. [default=1]</td></tr>
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd><span class="option">-M</span>, <span class="option">--maf</span></kbd></td>
-<td><em>MAF input</em>: Use this to provide the path to the multiple alignment MAF file</td></tr>
+<td><strong>MAF input</strong>: Use this to provide the path to the multiple alignment MAF file</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-X</span>, <span class="option">--xmfa</span></kbd></td>
-<td>XMFA input*: As an alternative to the MAF file, you can provide the <br>
+<td>XMFA input**: As an alternative to the MAF file, you can provide the <br>
 .xmfa file output by the aligner Mauve.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-L</span>, <span class="option">--loci</span></kbd></td>
-<td><em>LOCI input</em>: Multiple alignments can also be provided using the <br>
+<td><strong>LOCI input</strong>: Multiple alignments can also be provided using the <br>
 .loci file output by the RADseq assembly pipeline pyRAD.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-A</span>, <span class="option">--assembly</span></kbd></td>
-<td><em>FASTA input</em>: Genome assembly provided as FASTA</td></tr>
+<td><strong>FASTA input</strong>: Genome assembly provided as FASTA</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-V</span>, <span class="option">--vcf</span></kbd></td>
-<td><em>VCF input</em>: For use with –assembly: VCF file containing variant data</td></tr>
+<td><strong>VCF input</strong>: For use with –assembly: VCF file containing variant data</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-G</span>, <span class="option">--gff</span></kbd></td>
-<td><em>GFF input</em>: For use with –assembly: GFF file containing feature data</td></tr>
+<td><strong>GFF input</strong>: For use with –assembly: GFF file containing feature data</td></tr>
 </tbody>
 </table>
 </div>
@@ -236,14 +237,14 @@ being called. [default=1]</td></tr>
 <tbody valign="top">
 <tr><td class="option-group">
 <kbd><span class="option">-c</span>, <span class="option">--cov</span></kbd></td>
-<td><em>Coverage</em>: Minimum number of individuals/sequences per alignment, <br>
+<td><strong>Coverage</strong>: Minimum number of individuals/sequences per alignment, <br>
 for MAF, XMFA, or LOCI inputs [default=1]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-l</span>, <span class="option">--len</span></kbd></td>
-<td><em>Minimum length</em>: Minimum alignment length to attempt bait design [default=80]</td></tr>
+<td><strong>Minimum length</strong>: Minimum alignment length to attempt bait design [default=80]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-q</span>, <span class="option">--tresh</span></kbd></td>
-<td><em>Bad base threshold</em>: Threshold proportion of gaps or N (ambiguous or <br>
+<td><strong>Bad base threshold</strong>: Threshold proportion of gaps or N (ambiguous or <br>
 poor quality) characters to over-ride the consensus base. For example, <em>-q 0.2</em> <br>
 would be interpreted as 20% of bases at a nucleotide position must be an “N” <br>
 or gap character in order for that character to be represented as the consensus <br>
@@ -251,13 +252,13 @@ base. [default=0.1]</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-Q</span>, <span class="option">--max_ambig</span></kbd></td>
 </tr>
-<tr><td>&#160;</td><td><em>Max bad bases</em>: Maximum allowable proportion of gap/N characters <br>
+<tr><td>&#160;</td><td><strong>Max bad bases</strong>: Maximum allowable proportion of gap/N characters <br>
 allowed in a consensus sequence before it will be discarded. <em>-Q 0.5</em> means a <br>
 consensus sequence can be 50% N’s or gap characters (“-“) before being dropped <br>
 from consideration. [default=0.5]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-k</span>, <span class="option">--mask</span></kbd></td>
-<td><em>Mask threshold</em>: Threshold proportion of masked characters per nucleotide <br>
+<td><strong>Mask threshold</strong>: Threshold proportion of masked characters per nucleotide <br>
 column to mask the consensus base call. For use when case represents masking <br>
 information (where lowercase = masked), as when using the <em>-xsmall</em> option in <br>
 <a class="reference external" href="http://www.repeatmasker.org/">RepeatMasker</a> to flag low-complexity or repetitive sequences. <br>
@@ -265,12 +266,53 @@ Case will be retained in the consensus on a per-base basis according to this thr
 [default=0.1]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-K</span>, <span class="option">--max_mask</span></kbd></td>
-<td><p class="first"><em>Max masked bases</em>: Maximum allowable proportion of masked characters <br>
+<td><p class="first"><strong>Max masked bases</strong>: Maximum allowable proportion of masked characters <br>
 allowed in a consensus sequence before it will be discarded. <em>-K 0.5</em> means a <br>
 consensus sequence can be 50% masked (lowercase) before being <br>
 dropped from consideration.[default=0.5].</p>
 <p class="last">If lowercase bases do not contain masking information, set to <em>-K 1.0</em></p>
 </td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="general-bait-design-options">
+<h3>General Bait Design Options<a class="headerlink" href="#general-bait-design-options" title="Permalink to this headline">¶</a></h3>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-b</span>, <span class="option">--bait</span></kbd></td>
+<td><strong>Bait length</strong>: This is the length of desired baits, and will be used for <br>
+bait design as well as the sliding window width for target region <br>
+discovery [default=80]</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-w</span>, <span class="option">--win_shift</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td><strong>Sliding window shift distance</strong>: Shift distance for sliding window used <br>
+to discover target regions. Generally, there should not be a reason to <br>
+alter this. If target discovery (step 2) is taking a very long time, adjusting <br>
+this may make it faster although it could result in more targets failing <br>
+filtering [default=1]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-v</span>, <span class="option">--var_max</span></kbd></td>
+<td><strong>Maximum SNPs per bait</strong>: Maximum allowable variants allowed in a bait <br>
+sequence. These can be expanded in the final output as each possible <br>
+non-ambiguous bait sequence for synthesis. Use this when there are not enough <br>
+conserved regions to capture enough loci for your design. [default=0]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-n</span>, <span class="option">--numN</span></kbd></td>
+<td><strong>Maximum Ns per bait</strong>: Maximum allowable ambiguous (N) bases allowed <br>
+per bait. This could be increased when there are too many poor quality bases <br>
+in your alignment to design a sufficient number of probes, although keep in mind <br>
+this will affect the specificity of your resulting probes. [default=0]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-g</span>, <span class="option">--numG</span></kbd></td>
+<td><strong>Maximum gaps per bait</strong>: Maximum allowable gap characters allowed per bait. <br>
+If dealing with alignments containing many indels, it might be desirable to <br>
+allow a small number per bait sequence. These can be expanded in the final <br>
+output using the -x,–expand option, which will expand gap characters as <br>
+A, G, T, C, and absent. [default=0]</td></tr>
 </tbody>
 </table>
 </div>

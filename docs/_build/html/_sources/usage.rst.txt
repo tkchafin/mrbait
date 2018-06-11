@@ -19,9 +19,9 @@ General options
 ~~~~~~~~~~~~~~~
 
 -r, --resume
-   *Resume*: This flag is used to tell mrbait if you would like to resume work |br|
+   **Resume**: This flag is used to tell mrbait if you would like to resume work |br|
    following a particular step. Use this option in conjunction with the |br|
-   *--db* flag to continue the pipeline if you would like to re-perform |br|
+   **--db** flag to continue the pipeline if you would like to re-perform |br|
    filtering steps without needing to re-load and parse alignments
 
    Usage: |br|
@@ -31,57 +31,88 @@ General options
    -r 4: Continue after Step 4 (bait discovery) |br|
    For example, -r 4 will tell mrbait_ to re-do bait filtering and output
 
---db   *Database*: Use this with the --resume flag to specify a .sqlite |br|
+--db   **Database**: Use this with the --resume flag to specify a .sqlite |br|
    database file from which to start the pipeline.
--T, --threads   *Threads*: Number of threads to use with processes that run |br|
+-T, --threads   **Threads**: Number of threads to use with processes that run |br|
    in parallel. This will also be passed to vsearch_ and/or blast_ if those are |br|
    being called. [default=1]
--h, --help   *Help*: Exit and display the help menu
+-h, --help   **Help**: Exit and display the help menu
 
 Input Options
 ~~~~~~~~~~~~~
 
 -M, --maf
-   *MAF input*: Use this to provide the path to the multiple alignment MAF file
+   **MAF input**: Use this to provide the path to the multiple alignment MAF file
 -X, --xmfa
-   XMFA input*: As an alternative to the MAF file, you can provide the |br|
+   XMFA input**: As an alternative to the MAF file, you can provide the |br|
    .xmfa file output by the aligner Mauve.
 -L, --loci
-   *LOCI input*: Multiple alignments can also be provided using the |br|
+   **LOCI input**: Multiple alignments can also be provided using the |br|
    .loci file output by the RADseq assembly pipeline pyRAD.
 -A, --assembly
-   *FASTA input*: Genome assembly provided as FASTA
+   **FASTA input**: Genome assembly provided as FASTA
 -V, --vcf
-   *VCF input*: For use with --assembly: VCF file containing variant data
+   **VCF input**: For use with --assembly: VCF file containing variant data
 -G, --gff
-   *GFF input*: For use with --assembly: GFF file containing feature data
+   **GFF input**: For use with --assembly: GFF file containing feature data
 
 Alignment filtering/ consensus options (use with -M, -X, -L)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -c, --cov
-  *Coverage*: Minimum number of individuals/sequences per alignment, |br|
+  **Coverage**: Minimum number of individuals/sequences per alignment, |br|
   for MAF, XMFA, or LOCI inputs [default=1]
 -l, --len
-  *Minimum length*: Minimum alignment length to attempt bait design [default=80]
--q, --tresh   *Bad base threshold*: Threshold proportion of gaps or N (ambiguous or |br|
+  **Minimum length**: Minimum alignment length to attempt bait design [default=80]
+-q, --tresh   **Bad base threshold**: Threshold proportion of gaps or N (ambiguous or |br|
   poor quality) characters to over-ride the consensus base. For example, *-q 0.2* |br|
   would be interpreted as 20% of bases at a nucleotide position must be an “N” |br|
   or gap character in order for that character to be represented as the consensus |br|
   base. [default=0.1]
--Q, --max_ambig  *Max bad bases*: Maximum allowable proportion of gap/N characters |br|
+-Q, --max_ambig  **Max bad bases**: Maximum allowable proportion of gap/N characters |br|
   allowed in a consensus sequence before it will be discarded. *-Q 0.5* means a |br|
   consensus sequence can be 50% N’s or gap characters (“-“) before being dropped |br|
   from consideration. [default=0.5]
--k, --mask  *Mask threshold*: Threshold proportion of masked characters per nucleotide |br|
+-k, --mask  **Mask threshold**: Threshold proportion of masked characters per nucleotide |br|
   column to mask the consensus base call. For use when case represents masking |br|
   information (where lowercase = masked), as when using the *-xsmall* option in |br|
   `RepeatMasker <http://www.repeatmasker.org/>`_ to flag low-complexity or repetitive sequences. |br|
   Case will be retained in the consensus on a per-base basis according to this threshold. |br|
   [default=0.1]
--K, --max_mask  *Max masked bases*: Maximum allowable proportion of masked characters |br|
+-K, --max_mask  **Max masked bases**: Maximum allowable proportion of masked characters |br|
   allowed in a consensus sequence before it will be discarded. *-K 0.5* means a |br|
   consensus sequence can be 50% masked (lowercase) before being |br|
   dropped from consideration.[default=0.5].
 
   If lowercase bases do not contain masking information, set to *-K 1.0*
+
+
+General Bait Design Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+-b, --bait
+  **Bait length**: This is the length of desired baits, and will be used for |br|
+  bait design as well as the sliding window width for target region |br|
+  discovery [default=80]
+-w, --win_shift
+  **Sliding window shift distance**: Shift distance for sliding window used |br|
+  to discover target regions. Generally, there should not be a reason to |br|
+  alter this. If target discovery (step 2) is taking a very long time, adjusting |br|
+  this may make it faster although it could result in more targets failing |br|
+  filtering [default=1]
+-v, --var_max
+  **Maximum SNPs per bait**: Maximum allowable variants allowed in a bait |br|
+  sequence. These can be expanded in the final output as each possible |br|
+  non-ambiguous bait sequence for synthesis. Use this when there are not enough |br|
+  conserved regions to capture enough loci for your design. [default=0]
+-n, --numN
+  **Maximum Ns per bait**: Maximum allowable ambiguous (N) bases allowed |br|
+  per bait. This could be increased when there are too many poor quality bases |br|
+  in your alignment to design a sufficient number of probes, although keep in mind |br|
+  this will affect the specificity of your resulting probes. [default=0]
+-g, --numG
+  **Maximum gaps per bait**: Maximum allowable gap characters allowed per bait. |br|
+  If dealing with alignments containing many indels, it might be desirable to |br|
+  allow a small number per bait sequence. These can be expanded in the final |br|
+  output using the -x,--expand option, which will expand gap characters as |br|
+  A, G, T, C, and absent. [default=0]
