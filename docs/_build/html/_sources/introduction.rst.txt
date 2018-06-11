@@ -1,4 +1,9 @@
+.. _introduction:
+
 .. include:: global.rst
+
+Introduction
+============
 
 A variety of genome reduction methods have been implemented to reduce costs of
 applying next-generation sequencing methods to non-model organisms, or projects

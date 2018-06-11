@@ -31,7 +31,7 @@ Software and documentation provided under the GNU Public License v3.0 and distri
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
    introduction.rst
 
 
