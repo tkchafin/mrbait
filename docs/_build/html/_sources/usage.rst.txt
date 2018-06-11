@@ -40,3 +40,14 @@ General options
    in parallel. This will also be passed to vsearch_ and/or blast_ if those are|br|
    being called. [default=1]
 -h, --help   *Help*: Exit and display the help menu
+
+Input Options
+~~~~~~~~~~~~~
+
+-M,--maf   *MAF input*: Use this to provide the path to the multiple alignment MAF file
+-X,--xmfa   *XMFA input*: As an alternative to the MAF file, you can provide the |br| .xmfa file output by the aligner Mauve.
+-L,--loci   *LOCI input*: Multiple alignments can also be provided using the |br|
+.loci file output by the RADseq assembly pipeline pyRAD.
+-A,--assembly   *FASTA input*: Genome assembly provided as FASTA
+-V,--vcf   *VCF input*: For use with --assembly: VCF file containing variant data
+-G,--gff   *GFF input*: For use with --assembly: GFF file containing feature data
