@@ -35,7 +35,9 @@ General options
    -r 4: Continue after Step 4 (bait discovery)|br|
    For example, -r 4 will tell mrbait to re-do bait filtering and output
 
---db   *Database*: Use this with the --resume flag to specify a .sqlite
+--db   *Database*: Use this with the --resume flag to specify a .sqlite|br|
    database file from which to start the pipeline.
--T, --threads   *Threads*: Number of threads to use with processes that run in parallel.This will also be passed to VSEARCH and/or BLAST if those are being called. [default=1]
+-T, --threads   *Threads*: Number of threads to use with processes that run |br|
+   in parallel. This will also be passed to vsearch_ and/or blast_ if those are|br|
+   being called. [default=1]
 -h, --help   *Help*: Exit and display the help menu
