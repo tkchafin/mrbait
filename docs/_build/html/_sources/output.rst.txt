@@ -13,6 +13,7 @@ in the header indicating if these targets passed or failed target selection and 
 By default, baits are reported with any ambiguity sequences included (e.g. as a
 consensus sequence) like so:
 
+
 .. code-block:: none
    :linenos:
 
@@ -24,7 +25,8 @@ consensus sequence) like so:
    …
    …
 
- If using the *-x/--expand* option, ambiguities will be reported as all combinations, like so:
+
+If using the *-x/--expand* option, ambiguities will be reported as all combinations, like so:
 
 .. code-block:: none
    :linenos:
@@ -39,8 +41,9 @@ consensus sequence) like so:
    …
    …
 
- Baits can also be printed as reverse complement. For example, if the *--expand* option was
- specified, in addition to *--strand both*:
+
+Baits can also be printed as reverse complement. For example, if the *--expand* option was
+specified, in addition to *--strand both*:
 
 .. code-block:: none
    :linenos:

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Output Files &mdash; mrbait 1.1.2 documentation</title>
+  <title>Benchmarking and Hardware Requirements &mdash; mrbait 1.1.2 documentation</title>
   
 
   
@@ -28,8 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Benchmarking and Hardware Requirements" href="benchmarking.html" />
-    <link rel="prev" title="Usage options" href="usage.html" /> 
+    <link rel="prev" title="Output Files" href="output.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -84,8 +83,11 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Output Files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarking and Hardware Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#runtime-scaling">Runtime scaling</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -131,13 +133,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Output Files</li>
+      <li>Benchmarking and Hardware Requirements</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/output.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/benchmarking.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -150,86 +152,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="output-files">
-<span id="output"></span><h1>Output Files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h1>
-<p>Final output of baits will be formatted as FASTA and named $out_baits.fasta
-(where $out is defined using the -o/–out flag). When the <em>-t/–print_tr</em> option is in
-use, targets will also be output as $out_targets.fasta, with an additional field
-in the header indicating if these targets passed or failed target selection and filtering.</p>
-<p>By default, baits are reported with any ambiguity sequences included (e.g. as a
-consensus sequence) like so:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;Locus1_Target4_Bait1
-ATGTAATRAGGTATATG……
-&gt;Locus1_Target4_Bait2
-TATGAATGTCGCGCGAT……
-…
-…
-…
+  <div class="section" id="benchmarking-and-hardware-requirements">
+<span id="benchmarking"></span><h1>Benchmarking and Hardware Requirements<a class="headerlink" href="#benchmarking-and-hardware-requirements" title="Permalink to this headline">¶</a></h1>
+<p>Use of an HPC or powerful workstation is not necessary, although could speed things
+up. Testing was performed on a 2014 iMac with a 4-core Intel i7 processor and
+32GB of memory, although only a small fraction of this memory was needed.</p>
+<div class="section" id="runtime-scaling">
+<h2>Runtime scaling<a class="headerlink" href="#runtime-scaling" title="Permalink to this headline">¶</a></h2>
+<p>With a ddRAD dataset sequencing on HiSeq 2500 paired-end with 150bp reads, including
+48 individuals and generating 51,931 alignments, the following command was run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -L wtd_run1.loci -T <span class="m">4</span> -c <span class="m">12</span> -l <span class="m">150</span> -b <span class="m">60</span> -K <span class="m">1</span>.0 -d <span class="m">200</span> -F <span class="nv">snp</span><span class="o">=</span><span class="m">1</span>,10 -s <span class="nv">tile</span><span class="o">=</span><span class="m">30</span>
 </pre></div>
-</td></tr></table></div>
-<p>If using the <em>-x/–expand</em> option, ambiguities will be reported as all combinations, like so:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;Locus2_Target4_Bait1.1
-ATGTAATAAGGTATATG……
-&gt;Locus2_Target4_Bait1.1
-ATGTAATGAGGTATATG……
-&gt;Locus1_Target4_Bait2.1
-TATGAATGTCGCGCGAT……
-…
-…
-…
-</pre></div>
-</td></tr></table></div>
-<p>Baits can also be printed as reverse complement. For example, if the <em>–expand</em> option was
-specified, in addition to <em>–strand both</em>:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14</pre></div></td><td class="code"><div class="highlight"><pre><span></span>&gt;Locus2_Target4_Bait1.1
-ATGTAATAAGGTATATG……
-&gt;Locus2_Target4_Bait1.1_revcomp
-TACATTATTCCATATAC……
-&gt;Locus2_Target4_Bait1.1
-ATGTAATGAGGTATATG……
-&gt;Locus2_Target4_Bait1.1_revcomp
-TACATTACTCCATATAC ……
-&gt;Locus1_Target4_Bait2.1
-TATGAATGTCGCGCGAT……
-&gt;Locus1_Target4_Bait2.1_revcomp
-ATACTTACAGCGCGCTA……
-…
-…
-</pre></div>
-</td></tr></table></div>
-<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> will also produce a .sqlite file (e.g. $out.sqlite) which can be used with
-the <em>–resume</em> flag to restart the pipeline at different stages- for example to
-re-perform bait filtering with different options. This stores the complete database,
-including all consensus loci parsed from the alignment input files, all targets, and
-all bait sequences (including those which failed filtering) and can be used independently
-with your own SQLite queries.</p>
+</div>
+<p>A total of 46,219 alignments passed filtering, of which 44,808 included a
+conserved region long enough for target design. 27,102 targets passed filtering
+(which was performed based on number of flanking SNPs) and were used to design
+43,342 baits.  Total runtime across 4 threads was 392 seconds.</p>
+<p>Parallel processing is implemented where practical, primarily in steps
+1 and 2. For step 1 (alignment parsing), it splits alignment files into groups,
+to be parsed by each daughter process. During parsing, when an entry must be added
+to the SQLite database, this cannot be performed in parallel, so a database lock
+is implemented so that commits to the database are queued. However, the decrease
+in runtime due to parallelization far outweighs this:</p>
+<img alt="_images/runtime.png" src="_images/runtime.png" />
+</div>
 </div>
 
 
@@ -240,10 +186,8 @@ with your own SQLite queries.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="benchmarking.html" class="btn btn-neutral float-right" title="Benchmarking and Hardware Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="usage.html" class="btn btn-neutral" title="Usage options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral" title="Output Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
