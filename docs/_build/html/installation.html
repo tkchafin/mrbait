@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Input files" href="files.html" />
     <link rel="prev" title="Pipeline Description" href="pipeline.html" /> 
 
   
@@ -87,6 +88,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#running-mrbait">Running mrbait</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
 </ul>
 
             
@@ -237,15 +239,15 @@ mrbait -h</p>
 <p>Instructions for bait design are provided as arguments (see Section 5 for thorough usage
 instructions, and Section 8 for tutorials). For example, to generate baits of length
 80, tiled across target regions with an overlap of 40 bases, from a Multiple Alignment
-File (MAF) “example.maf”:
-.. code-block:: bash</p>
-<blockquote>
-<div>mrbait -M example.maf -b 80 -s tile=40</div></blockquote>
+File (MAF) “example.maf”:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span><span class="m">40</span>
+</pre></div>
+</div>
 <p>Or, to also filter for only alignments including 5 or more individuals, and
-of length &gt;500:
-.. code-block:: bash</p>
-<blockquote>
-<div>mrbait -M example.maf -b 80 -s tile=40 -l 500 -c 5</div></blockquote>
+of length &gt;500:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span><span class="m">40</span> -l <span class="m">500</span> -c <span class="m">5</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -256,6 +258,8 @@ of length &gt;500:
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="files.html" class="btn btn-neutral float-right" title="Input files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="pipeline.html" class="btn btn-neutral" title="Pipeline Description" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

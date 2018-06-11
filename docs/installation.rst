@@ -104,12 +104,14 @@ Instructions for bait design are provided as arguments (see Section 5 for thorou
 instructions, and Section 8 for tutorials). For example, to generate baits of length
 80, tiled across target regions with an overlap of 40 bases, from a Multiple Alignment
 File (MAF) “example.maf”:
+
 .. code-block:: bash
 
   mrbait -M example.maf -b 80 -s tile=40
 
-Or, to also filter for only alignments including 5 or more individuals, and 
+Or, to also filter for only alignments including 5 or more individuals, and
 of length >500:
+
 .. code-block:: bash
 
   mrbait -M example.maf -b 80 -s tile=40 -l 500 -c 5
