@@ -18,18 +18,18 @@ approaches, such as those targeting ultraconserved elements, RAD-capture methods
 or those targeting exons or other genomic elements. mrbait also enables fast and
 efficient iterative design (e.g. to explore parameter settings) using native
 Python parallelization and an SQL database back-end. In this documentation, you
-can learn about the overall process employed by mrbait (:ref: `Pipeline <pipeline>`),
+can learn about the overall process employed by mrbait `Pipeline <pipeline>`,
 how to install mrbait for use on a personal desktop or remote workstation or HPC
-(:ref: `Getting Started <installation>`), or
+`Getting Started <installation>`, or
 
-mrbait_ code is open-source and freely available at on (:ref: `GitHub <https://github.com/tkchafin/mrbait>`)
+mrbait_ code is open-source and freely available at on `GitHub <https://github.com/tkchafin/mrbait>`
 
-Official releases can be found (:ref: `here <https://github.com/tkchafin/mrbait/releases>`)
+Official releases can be found `here <https://github.com/tkchafin/mrbait/releases>`
 
 
 
 Having issues running or installing mrbait_? Contact me at tkchafin@uark.edu
-or post an Issue on the (:ref: `GitHub page <https://github.com/tkchafin/mrbait/issues>`).
+or post an Issue on the `GitHub page <https://github.com/tkchafin/mrbait/issues>`.
 
 Citation: Chafin, et al. 2018. MrBait: Universal identification and design of
 targeted-enrichment capture probes. Bioinformatics. Submitted
