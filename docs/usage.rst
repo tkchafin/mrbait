@@ -177,3 +177,24 @@ Target Region Options
 
 Bait Selection Options
 ~~~~~~~~~~~~~~~~~~~~~~
+
+-s, --select_b  **Bait selection scheme**: Use this to specify the desired method |br|
+  to design baits from passing target regions.
+
+Usage: |br|
+  *-s tile=[x]*: Tile baits over whole region, with *x* overlap |br|
+  *-s center=[n,x]*: *n* centered baits with *x* overlap |br|
+  *-s flank=[n,x]*: *n* terminal baits (each end) with *x* overlap
+  Default behavior is to tile baits across all targets with 50% overlap
+
+-f, --filter_b
+  **Bait filtering criteria**: Method(s) used to filter baits. |br|
+  Can be specified any number of times to use additional filtering criteria.
+
+  Usage: |br|
+  *-F mask=[x]*: Maximum of *x* N characters in target region
+  *-F gc=[x,y]*: G/C propotion between *x* (min) and *y* (max)
+  *-F rand=[x]*: Randomly retain *x* targets
+  *-F pw=[i,q]*: Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
+  *-F blast_i=[i,q]*: Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
+  *-F blast_i=[i,q]*: Exclude BLAST hits with *i* percent identity over at least *q* query coverage
