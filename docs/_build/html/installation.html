@@ -189,14 +189,46 @@ source tool for metagenomics. PeerJ. 4:e2584. Doi: 10.7717/peerj.2584</p>
 </div>
 <div class="section" id="id1">
 <h2>Installation<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>By far the easiest way to acquire and install MrBait is via <a class="reference external" href="http://docs.continuum.io/conda/">conda</a>, a command line interface
-for managing and installing packages. Download and install Anaconda for Python 3.6 here:
+<p>By far the easiest way to acquire and install <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> is via <a class="reference external" href="http://docs.continuum.io/conda/">conda</a>, a command line interface
+for managing and installing packages. Download and install <a class="reference external" href="http://docs.continuum.io/anaconda/install.html">anaconda</a> for Python 3.6 here:
 <a class="reference external" href="https://www.anaconda.com/download/">https://www.anaconda.com/download/</a>. If you are wanting a minimal environment, or a faster
 install, you can also use the Miniconda distribution (<a class="reference external" href="https://conda.io/miniconda.html">https://conda.io/miniconda.html</a>) with
 the same commands. After installation, be sure to test that conda is installed by typing
 <strong>conda info</strong>, which will print information about your installation. Note, you may first need
 to reload your bash environment by typing <strong>source ~/.bashrc</strong> or <strong>source ~/.bash_profile</strong> on Mac.
 Assuming success, the installation process is then very straightforward:</p>
+<dl class="docutils">
+<dt>..code-block::bash</dt>
+<dd><dl class="first docutils">
+<dt>##This command tells conda that the code and dependencies for mrbait can be found</dt>
+<dd>##in ‘channels’ bioconda, conda-forge, and tylerkchafin.</dd>
+</dl>
+<p>conda install mrbait -c tylerkchafin -c bioconda -c conda-forge</p>
+<p class="last">##If you would like to instead install the latest development version, you can
+##clone the github repository and
+##install MrBait like so (assuming you have git installed):
+git clone <a class="reference external" href="https://github.com/tkchafin/mrbait.git">https://github.com/tkchafin/mrbait.git</a>
+cd mrbait
+python ./setup.py install</p>
+</dd>
+</dl>
+<p>You will then need to manually install both <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> and BLAST+_, only if you install
+directly from the GitHub source using the setup.py installation. These will be installed
+for you if you used <a class="reference external" href="http://docs.continuum.io/conda/">conda</a>.</p>
+<p><strong>Windows users</strong>: MrBait is installable using the built-in Linux subsystem for Windows 10.
+I have only tested using the Ubuntu OS subsystem configuration but assume that other Linux
+distros would work equally well. If you prefer, you can also use a Linux installation on a
+virtual machine, or installed portably on a (:ref: <cite>USB-attached drive &lt;https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0&gt;</cite>), although
+this may impact performance. Contact me at <a class="reference external" href="mailto:tkchafin&#37;&#52;&#48;uark&#46;edu">tkchafin<span>&#64;</span>uark<span>&#46;</span>edu</a> if you have any issues getting
+<a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> installed, or feel free to launch an ‘Issue’ on the GitHub page.</p>
+<p><strong>HPC users</strong>: One of the reasons I recommend using conda to manage your Python environment,
+is that it keeps your packages separate from the system environment, which you often will not
+have permissions to modify. Anaconda will instead install your own local flavor of Python in
+your home directory, where is will also install any additional packages you choose to add.</p>
+<p><strong>BLAST and VSEARCH</strong>: conda will also install both BLAST and VSEARCH and place them within
+your conda environment. If you would like to manually manage versions of these programs, or
+use an existing installation, you can provide the paths to those binaries using the <em>–vsearch</em>
+and <em>–blastn</em> commands for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>.</p>
 </div>
 </div>
 

@@ -49,11 +49,45 @@ source tool for metagenomics. PeerJ. 4:e2584. Doi: 10.7717/peerj.2584
 
 Installation
 ------------
-By far the easiest way to acquire and install MrBait is via conda_, a command line interface
-for managing and installing packages. Download and install Anaconda for Python 3.6 here:
+By far the easiest way to acquire and install mrbait_ is via conda_, a command line interface
+for managing and installing packages. Download and install anaconda_ for Python 3.6 here:
 https://www.anaconda.com/download/. If you are wanting a minimal environment, or a faster
 install, you can also use the Miniconda distribution (https://conda.io/miniconda.html) with
 the same commands. After installation, be sure to test that conda is installed by typing
 **conda info**, which will print information about your installation. Note, you may first need
 to reload your bash environment by typing **source ~/.bashrc** or **source ~/.bash_profile** on Mac.
 Assuming success, the installation process is then very straightforward:
+
+..code-block::bash
+   ##This command tells conda that the code and dependencies for mrbait can be found
+	 ##in ‘channels’ bioconda, conda-forge, and tylerkchafin.
+   conda install mrbait -c tylerkchafin -c bioconda -c conda-forge
+
+   ##If you would like to instead install the latest development version, you can
+   ##clone the github repository and
+   ##install MrBait like so (assuming you have git installed):
+   git clone https://github.com/tkchafin/mrbait.git
+   cd mrbait
+   python ./setup.py install
+
+
+You will then need to manually install both vsearch_ and BLAST+_, only if you install
+directly from the GitHub source using the setup.py installation. These will be installed
+for you if you used conda_.
+
+**Windows users**: MrBait is installable using the built-in Linux subsystem for Windows 10.
+I have only tested using the Ubuntu OS subsystem configuration but assume that other Linux
+distros would work equally well. If you prefer, you can also use a Linux installation on a
+virtual machine, or installed portably on a (:ref: `USB-attached drive <https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-ubuntu#0>`), although
+this may impact performance. Contact me at tkchafin@uark.edu if you have any issues getting
+mrbait_ installed, or feel free to launch an ‘Issue’ on the GitHub page.
+
+**HPC users**: One of the reasons I recommend using conda to manage your Python environment,
+is that it keeps your packages separate from the system environment, which you often will not
+have permissions to modify. Anaconda will instead install your own local flavor of Python in
+your home directory, where is will also install any additional packages you choose to add.
+
+**BLAST and VSEARCH**: conda will also install both BLAST and VSEARCH and place them within
+your conda environment. If you would like to manually manage versions of these programs, or
+use an existing installation, you can provide the paths to those binaries using the *--vsearch*
+and *--blastn* commands for mrbait_.
