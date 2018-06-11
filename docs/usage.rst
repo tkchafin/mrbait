@@ -149,7 +149,8 @@ Target Region Options
   *-S cons*: Select target with least SNPs within *d* bases |br|
   *-S rand*: Randomly select a target [default] |br|
 
-  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases
+  Example: *-d 100 -S snp* to choose region with most SNPs within |br|
+  100 flanking bases
 -F, --filter_r
   **Target filtering criteria**: Method(s) used to filter all target regions. |br|
   Can be specified any number of times to use additional filtering criteria. |br|
@@ -163,21 +164,24 @@ Target Region Options
   *-F gc=[x,y]*: G/C propotion between x (min) and y (max) |br|
   *-F rand=[x]*: Randomly retain x targets |br|
   *-F pw=[i,q]*: Pairwise alignment, removing when i percent |br|
-  \tidentity over at least q proportion of the sequences |br|
+  identity over at least q proportion of the sequences |br|
   *-F blast_i=[i,q]*: Only retain BLAST hits with i percent |br|
-  \tidentity over at least q query coverage |br|
+  identity over at least q query coverage |br|
   *-F blast_i=[i,q]*: Exclude BLAST hits with i percent |br|
-  \tidentity over at least q query coverage |br|
+  identity over at least q query coverage |br|
   *-F gff=[type]*: Only retain targets within d bases of a |br|
-  \tGFF-annotated feature of type type. Only for use when *-A* |br|
-  \tand *-G* inputs provided. Use *-F gff=all* to target any type |br|
-  \tof annotated feature. |br|
+  GFF-annotated feature of type type. Only for use when *-A* |br|
+  and *-G* inputs provided. Use *-F gff=all* to target any type |br|
+  of annotated feature. |br|
   *-F gff_a=[alias]*: Only retain targets within d bases of a |br|
-  \tGFF-annotated feature of tagged with the Alias attribute matching |br|
-  \talias. Only for use when *-A* and *-G* inputs provided. |br|
+  GFF-annotated feature of tagged with the Alias attribute matching |br|
+  alias. Only for use when *-A* and *-G* inputs provided. |br|
 
   Examples: |br|
   *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases |br|
   *-F gc=0.2,0.8 -F rand=100* to keep 100 random targets w/ 20-80% GC |br|
   *-F mask=0.1* to remove targets with >10% masked bases |br|
   *-d 1000 -F gff=exon* to keep targets within 100 bases of an exon |br|
+
+Bait Selection Options
+~~~~~~~~~~~~~~~~~~~~~~
