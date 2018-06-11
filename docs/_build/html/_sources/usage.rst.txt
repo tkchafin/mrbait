@@ -152,38 +152,39 @@ Target Region Options
   per locus/alignment.
 
   Usage:
-  *-S snp*: Select target with most SNPs within *d* bases
-  *-S bad*: Select target with least gaps/Ns within *d* bases
-  *-S cons*: Select target with least SNPs within *d* bases
-  *-S rand*: Randomly select a target [default]
-  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases
+  *-S snp*: Select target with most SNPs within *d* bases |br|
+  *-S bad*: Select target with least gaps/Ns within *d* bases |br|
+  *-S cons*: Select target with least SNPs within *d* bases |br|
+  *-S rand*: Randomly select a target [default] |br|
+  Example: *-d 100 -S snp* to choose region with most SNPs within 100 flanking bases |br|
 -F, --filter_r
   **Target filtering criteria**: Method(s) used to filter all target regions. |br|
-  Can be specified any number of times to use additional filtering criteria.
-  Usage:
-  *-F len=[x,y]*: Length between x (min) and y (max)
-  *-F gap=[x]*: Maximum of x indels in target region
-  *-F bad=[x]*: Maximum of x N characters in target region
-  *-F snp=[x,y]*: Between x (min) and y (max) SNPs w/in d
-  *-F mask=[x]*: Maximum of x N characters in target region
-  *-F gc=[x,y]*: G/C propotion between x (min) and y (max)
-  *-F rand=[x]*: Randomly retain x targets
+  Can be specified any number of times to use additional filtering criteria. |br|
+
+  Usage: |br|
+  *-F len=[x,y]*: Length between x (min) and y (max) |br|
+  *-F gap=[x]*: Maximum of x indels in target region |br|
+  *-F bad=[x]*: Maximum of x N characters in target region |br|
+  *-F snp=[x,y]*: Between x (min) and y (max) SNPs w/in d |br|
+  *-F mask=[x]*: Maximum of x N characters in target region |br|
+  *-F gc=[x,y]*: G/C propotion between x (min) and y (max) |br|
+  *-F rand=[x]*: Randomly retain x targets |br|
   *-F pw=[i,q]*: Pairwise alignment, removing when i percent |br|
-  identity over at least q proportion of the sequences
+  identity over at least q proportion of the sequences |br|
   *-F blast_i=[i,q]*: Only retain BLAST hits with i percent |br|
-  identity over at least q query coverage
+  identity over at least q query coverage |br|
   *-F blast_i=[i,q]*: Exclude BLAST hits with i percent |br|
-  identity over at least q query coverage
+  identity over at least q query coverage |br|
   *-F gff=[type]*: Only retain targets within d bases of a |br|
   GFF-annotated feature of type type. Only for use when *-A* |br|
   and *-G* inputs provided. Use *-F gff=all* to target any type |br|
-  of annotated feature.
+  of annotated feature. |br|
   *-F gff_a=[alias]*: Only retain targets within d bases of a |br|
   GFF-annotated feature of tagged with the Alias attribute matching |br|
-  alias. Only for use when *-A* and *-G* inputs provided.
+  alias. Only for use when *-A* and *-G* inputs provided. |br|
 
-  Examples:
-  *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases
-  *-F gc=0.2,0.8 -F rand=100* to keep 100 random targets w/ 20-80% GC
-  *-F mask=0.1* to remove targets with >10% masked bases
-  *-d 1000 -F gff=exon* to keep targets within 100 bases of an exon
+  Examples: |br|
+  *-F snp=1,10 -d 100* to sample when 1-10 SNPs within 100 bases |br|
+  *-F gc=0.2,0.8 -F rand=100* to keep 100 random targets w/ 20-80% GC |br|
+  *-F mask=0.1* to remove targets with >10% masked bases |br|
+  *-d 1000 -F gff=exon* to keep targets within 100 bases of an exon |br|

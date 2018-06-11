@@ -359,42 +359,42 @@ right of each target region.</p>
 too close together (e.g. when <em>-R</em> and <em>-D</em>), or when only choosing one target <br>
 per locus/alignment.</p>
 <p class="last">Usage:
-<em>-S snp</em>: Select target with most SNPs within <em>d</em> bases
-<em>-S bad</em>: Select target with least gaps/Ns within <em>d</em> bases
-<em>-S cons</em>: Select target with least SNPs within <em>d</em> bases
-<em>-S rand</em>: Randomly select a target [default]
-Example: <em>-d 100 -S snp</em> to choose region with most SNPs within 100 flanking bases</p>
+<em>-S snp</em>: Select target with most SNPs within <em>d</em> bases <br>
+<em>-S bad</em>: Select target with least gaps/Ns within <em>d</em> bases <br>
+<em>-S cons</em>: Select target with least SNPs within <em>d</em> bases <br>
+<em>-S rand</em>: Randomly select a target [default] <br>
+Example: <em>-d 100 -S snp</em> to choose region with most SNPs within 100 flanking bases <br></p>
 </td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-F</span>, <span class="option">--filter_r</span></kbd></td>
 <td><p class="first"><strong>Target filtering criteria</strong>: Method(s) used to filter all target regions. <br>
-Can be specified any number of times to use additional filtering criteria.
-Usage:
-<em>-F len=[x,y]</em>: Length between x (min) and y (max)
-<em>-F gap=[x]</em>: Maximum of x indels in target region
-<em>-F bad=[x]</em>: Maximum of x N characters in target region
-<em>-F snp=[x,y]</em>: Between x (min) and y (max) SNPs w/in d
-<em>-F mask=[x]</em>: Maximum of x N characters in target region
-<em>-F gc=[x,y]</em>: G/C propotion between x (min) and y (max)
-<em>-F rand=[x]</em>: Randomly retain x targets
+Can be specified any number of times to use additional filtering criteria. <br></p>
+<p>Usage: <br>
+<em>-F len=[x,y]</em>: Length between x (min) and y (max) <br>
+<em>-F gap=[x]</em>: Maximum of x indels in target region <br>
+<em>-F bad=[x]</em>: Maximum of x N characters in target region <br>
+<em>-F snp=[x,y]</em>: Between x (min) and y (max) SNPs w/in d <br>
+<em>-F mask=[x]</em>: Maximum of x N characters in target region <br>
+<em>-F gc=[x,y]</em>: G/C propotion between x (min) and y (max) <br>
+<em>-F rand=[x]</em>: Randomly retain x targets <br>
 <em>-F pw=[i,q]</em>: Pairwise alignment, removing when i percent <br>
-identity over at least q proportion of the sequences
+identity over at least q proportion of the sequences <br>
 <em>-F blast_i=[i,q]</em>: Only retain BLAST hits with i percent <br>
-identity over at least q query coverage
+identity over at least q query coverage <br>
 <em>-F blast_i=[i,q]</em>: Exclude BLAST hits with i percent <br>
-identity over at least q query coverage
+identity over at least q query coverage <br>
 <em>-F gff=[type]</em>: Only retain targets within d bases of a <br>
 GFF-annotated feature of type type. Only for use when <em>-A</em> <br>
 and <em>-G</em> inputs provided. Use <em>-F gff=all</em> to target any type <br>
-of annotated feature.
+of annotated feature. <br>
 <em>-F gff_a=[alias]</em>: Only retain targets within d bases of a <br>
 GFF-annotated feature of tagged with the Alias attribute matching <br>
-alias. Only for use when <em>-A</em> and <em>-G</em> inputs provided.</p>
-<p class="last">Examples:
-<em>-F snp=1,10 -d 100</em> to sample when 1-10 SNPs within 100 bases
-<em>-F gc=0.2,0.8 -F rand=100</em> to keep 100 random targets w/ 20-80% GC
-<em>-F mask=0.1</em> to remove targets with &gt;10% masked bases
-<em>-d 1000 -F gff=exon</em> to keep targets within 100 bases of an exon</p>
+alias. Only for use when <em>-A</em> and <em>-G</em> inputs provided. <br></p>
+<p class="last">Examples: <br>
+<em>-F snp=1,10 -d 100</em> to sample when 1-10 SNPs within 100 bases <br>
+<em>-F gc=0.2,0.8 -F rand=100</em> to keep 100 random targets w/ 20-80% GC <br>
+<em>-F mask=0.1</em> to remove targets with &gt;10% masked bases <br>
+<em>-d 1000 -F gff=exon</em> to keep targets within 100 bases of an exon <br></p>
 </td></tr>
 </tbody>
 </table>
