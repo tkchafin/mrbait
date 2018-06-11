@@ -50,7 +50,7 @@ source tool for metagenomics. PeerJ. 4:e2584. Doi: 10.7717/peerj.2584
 
 Installation
 ------------
-By far the easiest way to acquire and install MrBait is via _conda, a command line interface
+By far the easiest way to acquire and install MrBait is via conda_, a command line interface
 for managing and installing packages. Download and install Anaconda for Python 3.6 here:
 https://www.anaconda.com/download/. If you are wanting a minimal environment, or a faster
 install, you can also use the Miniconda distribution (https://conda.io/miniconda.html) with
