@@ -15,7 +15,12 @@ sequence data and designing probes to enrich them.
 The motivation behind mrbait is ease and flexibility of use. As such, mrbait
 allows a variety of input types and facilitates a diverse array of bait design
 approaches, such as those targeting ultraconserved elements, RAD-capture methods,
-or those targeting exons or other genomic elements. mrbait also
+or those targeting exons or other genomic elements. mrbait also enables fast and
+efficient iterative design (e.g. to explore parameter settings) using native
+Python parallelization and an SQL database back-end. In this documentation, you
+can learn about the overall process employed by mrbait (:ref: `Pipeline <pipeline>`),
+how to install mrbait for use on a personal desktop or remote workstation or HPC
+(:ref: `Getting Started <installation>`), or
 
 mrbait code is open-source and freely available at:
 https://github.com/tkchafin/mrbait
