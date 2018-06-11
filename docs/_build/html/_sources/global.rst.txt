@@ -11,3 +11,7 @@
 .. _vsearch: https://github.com/torognes/vsearch
 .. _networkx: https://networkx.github.io/
 .. _blast: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+
+.. |br| raw:: html
+
+    <br>
