@@ -18,10 +18,10 @@ approaches, such as those targeting ultraconserved elements, RAD-capture methods
 or those targeting exons or other genomic elements. mrbait also enables fast and
 efficient iterative design (e.g. to explore parameter settings) using native
 Python parallelization and an SQL database back-end. In this documentation, you
-can learn about the overall process employed by mrbait (`:ref:Pipeline<pipeline>`),
+can learn about the overall process employed by mrbait (:ref:`Pipeline overview <pipeline>`),
 how to install mrbait for use on a personal desktop or remote workstation or HPC
-(`Getting Started <installation.rst>`_), see a full description of all runtime options
-(`Running mrbait <_usage>`_), and see walltime and memory benchmarking results (`Benchmarking <benchmarking.rst>`_)
+(:ref:`Getting Started <installation.rst>`), see a full description of all runtime options
+(:ref:`Running mrbait <_usage>`_), and see walltime and memory benchmarking results (:ref:`Benchmarking <benchmarking.rst>`_)
 
 mrbait_ code is open-source and freely available at on `GitHub <https://github.com/tkchafin/mrbait>`_
 
