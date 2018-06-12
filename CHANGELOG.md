@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
-v1.1.2
+v1.1.3 https://github.com/tkchafin/mrbait/releases/tag/v1.1.3
+- Moved docs to mrbait.readthedocs.io
+- Bugfix with consensus calling when gap/N content high
+- Bugfix for XMFA reading 
+- XMFA fie chunking and parallel parsing fixed and added
+- Minor bug fix in argument parsing
+
+v1.1.2 https://github.com/tkchafin/mrbait/releases/tag/v1.1.2
 - Changed numbering of baits and targets in FASTA output
 - Added now functional --print_tr option 
 - Other minor edits in response to reviewer criticisms
