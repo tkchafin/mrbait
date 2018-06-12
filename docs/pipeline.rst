@@ -16,6 +16,6 @@ divided into 5 steps, as follows:
 3.	Targets are then selected (if too close together, or only one allowed per locus), and filtered according to any number of specified filter (e.g. GC content, flanking SNPs, pairwise alignment)
 4.	Passing targets are then parsed to design a putative set of baits
 5.	Baits are then filtered according to selected criteria, and output as FASTA.
-
+6.	The pipeline can be resumed and any steps iteratively re-visited by providing the SQLite database file (resulting in a significant reduction in runtime for successive runs)
 
 .. image:: images/pipeline.png
