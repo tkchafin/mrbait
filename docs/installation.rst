@@ -32,16 +32,23 @@ method of acquiring Python and all other dependencies is via the Anaconda distri
 as outlined in Section 3.3. A full list of dependencies is given below.
 
 Python_ >= 3.6
+
 SQLite3_
+
 BioPython_
+
 Pandas_ >=0.22
+
 numpy_
+
 pyVCF_
+
 networkx_
 
 mrbait can optionally use the following programs during bait development:
 
 blast_
+
 vsearch_
 
 For these utilities, please cite the following:
