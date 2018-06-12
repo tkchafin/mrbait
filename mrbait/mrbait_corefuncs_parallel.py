@@ -62,7 +62,7 @@ def loadXMFA_parallel(conn, params):
 
 	#reset_lock()
 	#Remove chunkfiles
-	#aln_file_tools.removeChunks(params.workdir)
+	aln_file_tools.removeChunks(params.workdir)
 
 #worker function version of loadMAF
 def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
