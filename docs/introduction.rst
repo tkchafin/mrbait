@@ -39,7 +39,6 @@ Official releases can be found `here <https://github.com/tkchafin/mrbait/release
 .. toctree::
    :maxdepth: 3
 
-   introduction.rst
    pipeline.rst
    installation.rst
    files.rst
