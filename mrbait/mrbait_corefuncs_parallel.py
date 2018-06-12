@@ -34,6 +34,58 @@ https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-proce
 
 """
 
+#Function to load a XMFA file into database
+def loadXMFA_parallel(conn, params):
+
+	t = int(params.threads)
+	numLoci = aln_file_tools.countXMFA(params.xmfa)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
+
+	#file chunker call
+	file_list = aln_file_tools.xmfa_chunker(params.xmfa, t, params.workdir)
+
+	#print("Files are:",file_list)
+	#Initialize multiprocessing pool
+	#if 'lock' not in globals():
+	lock = multiprocessing.Lock()
+	try:
+		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+			func = partial(loadXMFA_worker, params.db, params.cov, params.minlen, params.thresh, params.mask)
+			results = pool.map(func, file_list)
+	except Exception as e:
+		pool.close()
+	pool.close()
+	pool.join()
+
+	#reset_lock()
+	#Remove chunkfiles
+	#aln_file_tools.removeChunks(params.workdir)
+
+#worker function version of loadMAF
+def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
+	try:
+	   	connection = sqlite3.connect(db)
+	   	#Parse MAF file and create database
+	   	for aln in AlignIO.parse(chunk, "mauve"):
+	   		#NOTE: Add error handling, return error code
+	   		cov = len(aln)
+	   		alen = aln.get_alignment_length()
+
+	   		if cov < params_cov or alen < params_minlen:
+	   			continue
+	   		#Add each locus to database
+	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+	   		lock.acquire()
+	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+	   		lock.release()
+	   	connection.close()
+	except Exception as e:
+	   raise Exception(e.message)
+
+
 #Function to load LOCI file in parallel
 def loadLOCI_parallel(conn, params):
 	"""

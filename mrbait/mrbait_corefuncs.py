@@ -39,16 +39,14 @@ def loadXMFA(conn, params):
 	num = 1
 	for aln in AlignIO.parse(params.xmfa, "mauve"):
 		#NOTE: Add error handling, return error code
-		print(aln)
-		#cov = len(aln)
-		#alen = aln.get_alignment_length()
+		#print(aln)
+		cov = len(aln)
+		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		#locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
-		#print(locus.conSequence)
-		sys.exit()
-		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
-		#locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+		
+		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
 
 

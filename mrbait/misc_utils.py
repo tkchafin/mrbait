@@ -5,6 +5,7 @@ import os
 import os.path
 import pandas as pd
 import re
+import operator
 
 #Function to calculate overlap of two 1D line segments
 #Found on StackOverflow
@@ -12,6 +13,9 @@ import re
 def calcOverlap(min1, max1, min2, max2):
 	return max(0, min(max1, max2) - max(min1, min2))
 
+#Function to return KEY in DICT with largest VALUE
+def getMaxKey(d):
+	return(max(d.items(), key=operator.itemgetter(1))[0])
 
 #Function to check if a file path is valid
 def fileCheck(f):

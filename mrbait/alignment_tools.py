@@ -35,7 +35,7 @@ class variablePosition():
 
 #Less shitty consensus function than BioPython has..
 #From an AlignIO alignment object
-def make_consensus(alignment, threshold=0.1, mask=0.1):
+def make_consensus(alignment, threshold, mask):
 	aln_depth = len(alignment)
 	#If only one sequence in alignment, return that seq as consensus
 	if aln_depth == 1:
@@ -61,6 +61,9 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 				#print(nuc, end='', flush=True)
 		nucs= []
 		add = 0
+		#print(nuc_count)
+		bad_count = 0
+		bad_counts = dict()
 		for key_raw in nuc_count:
 			key = key_raw
 			if ismask: #If masked above threshold, set to lower case
@@ -76,6 +79,8 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 				temp = key
 				if key == "n":
 					temp = "N"
+				bad_count += nuc_count[temp]
+				bad_counts[temp] = nuc_count[temp]
 				if float((nuc_count[temp])/aln_depth) >= threshold:
 					#print("Found ", nuc_count[key], key, "'s in alignment")
 					#print((nuc_count[key])/aln_depth)
@@ -85,8 +90,15 @@ def make_consensus(alignment, threshold=0.1, mask=0.1):
 			else:
 				nucs.append(str(key))
 		if add == 0:
-			temp = utils.listToSortUniqueString(nucs)
-			consensus+=reverse_iupac_case(temp)
+			if bad_count >= col_len:
+				#print("All bad!")
+				nuc = utils.getMaxKey(bad_counts)
+				#print(nuc)
+				consensus+=nuc
+			else:
+				temp = utils.listToSortUniqueString(nucs)
+				#print(nucs,":",temp)
+				consensus+=reverse_iupac_case(temp)
 	return(consensus)
 
 #Function to get a list of variablePositions

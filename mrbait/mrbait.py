@@ -72,6 +72,7 @@ def main():
 			#Pre-filters: Length, alignment depth
 			print("\t\tFiltering loci...",end="")
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
+			#print(m.getLoci(conn))
 			print(" Done!\n")
 			passedLoci = m.getNumPassedLoci(conn)
 			if passedLoci <= 0:
@@ -213,10 +214,11 @@ def loadAlignments(conn, params):
 			print("\t\tLoading XMFA file:",params.xmfa)
 			if int(params.threads)>1:
 				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
-				#pcore.loadXMFA_parallel(conn, params)
+				pcore.loadXMFA_parallel(conn, params)
 			else:
 				pass
 				core.loadXMFA(conn, params)
+
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
 			if int(params.threads) > 1:

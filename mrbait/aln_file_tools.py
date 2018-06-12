@@ -267,3 +267,77 @@ def maf_chunker(infile, chunks, wd):
 			# 	chunks = max_chunks
 			# 	out_object.write(line.strip())
 	return(files)
+
+#Function to split xmfa file into n chunks
+def xmfa_chunker(infile, chunks, wd):
+
+	chunks = int(chunks)
+	loci_count = countXMFA(infile)
+	if loci_count < chunks:
+		chunks = loci_count
+	chunk_size = loci_count // chunks
+	removeChunks(wd)
+
+	files = list()
+	#write .loci file into chunk files
+	with open(infile) as file_object:
+		max_chunks = chunks
+		chunks = 1
+		loci_number = 1
+
+		chunk_file = wd + "/." + str(chunks) + ".chunk"
+		out_object = open(chunk_file, "w")
+		files.append(chunk_file)
+
+		header = ""
+		hset = 0
+		for l in file_object:
+			line = l.strip()
+			if not line:
+				continue
+			#First, get header information
+			if hset == 0:
+				if line[0] == ">":
+					loci_number = 1
+					hset=1
+					out_object.write(header)
+					out = line + "\n"
+					out_object.write(out)
+				elif line[0] =="#":
+					header +=str(line+"\n")
+			else:
+				if chunks < max_chunks:
+					if loci_number <= chunk_size:
+						#If its the header for a sequence, start seq
+						if line[0] == ">":
+							out = line + "\n"
+							out_object.write(out)
+						#If end of alignment, deposit it
+						elif line[0] == "=":
+							loci_number = loci_number + 1
+							out = line + "\n"
+							out_object.write(out)
+						#otherwise its a sequence!
+						else:
+							out = line + "\n"
+							out_object.write(out)
+					else:
+						loci_number = 1
+						chunks = chunks + 1
+						out_object.close()
+						chunk_file = wd + "/." + str(chunks) + ".chunk"
+						out_object = open(chunk_file, "w")
+						out_object.write(header)
+						files.append(chunk_file)
+						out = line + "\n"
+						out_object.write(out)
+				else:
+					#If last chunk, keep writing to final chunk file
+					out = line + "\n"
+					out_object.write(out)
+		out_object.close()
+		file_object.close()
+			# else:
+			# 	chunks = max_chunks
+			# 	out_object.write(line.strip())
+	return(files)
