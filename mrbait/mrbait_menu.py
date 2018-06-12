@@ -71,7 +71,8 @@ Input options:
 
 	-M,--maf	: Input multiple alignment MAF file
 	-L,--loci	: For RAD-data, as the \".loci\" output of pyRAD
-	-A,--assembly	: Input whole genome assembly as FASTA""")
+	-A,--assembly	: Input whole genome assembly as FASTA
+	-X,--xmfa	: Input whole genome alignments as XMFA""")
 	print("""
 Assembly input options (for use only with -A <genome.fasta>):
 
@@ -192,7 +193,7 @@ BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 	print("""
 Output options:
 
-	-X,--expand	: In output bait table, expand all ambiguities
+	-x,--expand	: In output bait table, expand all ambiguities
 		--Gaps are expanded as [ACGT] and absent
 		--\"N\"s are expanded as [ACGT]
 	--strand	: Output strand. Options: "+", "-", "both"
@@ -214,7 +215,7 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:Xo:Pk:K:d:r:T:t', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:xo:Pk:K:d:r:T:tX:', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=", "max_ambig="
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
@@ -224,7 +225,7 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db=", "print_tr"])
+			"resume=","db=", "print_tr", "xmfa="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -238,6 +239,7 @@ class parseArgs():
 		self.vcf=None
 		self.loci=None
 		self.assembly=None
+		self.xmfa=None
 
 		#Locus filtering params
 		self.cov=1
@@ -331,6 +333,8 @@ class parseArgs():
 			opt = opt.replace("-","")
 			if opt in ('M', 'maf'):
 				self.alignment = arg
+			elif opt in ('X', 'xmfa'):
+				self.xmfa=arg
 			elif opt in ('h', 'help'):
 				pass
 			#Input params
@@ -497,7 +501,7 @@ class parseArgs():
 				self.nodust = "TRUE"
 
 			#output options
-			elif opt in ('X', 'expand'):
+			elif opt in ('x', 'expand'):
 				self.expand = 1
 			elif opt == "strand":
 				assert arg in ("+", "-", "both"), "Invalid option" + arg + "for <--strand>"
@@ -557,7 +561,7 @@ class parseArgs():
 			#print("filter_b: Suboption %s has parameters: %s %s" %(subopt.o1,subopt.o2,subopt.o3))
 
 		#Assertions and conditional changes to params
-		if (self.alignment is None) and (self.loci is None) and (self.assembly is None):
+		if (self.alignment is None) and (self.loci is None) and (self.assembly is None) and (self.xmfa is None):
 			display_help("Input not specified!")
 			sys.exit(0)
 

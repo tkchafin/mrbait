@@ -123,6 +123,19 @@ def countMAF(loci):
 			count+=1
 	return(count)
 
+#function to count number of loci in FASTA file (by headers)
+def countXMFA(loci):
+	fh  = open(str(loci), 'r')
+	count=0
+	for l in fh:
+		line = l.strip()
+		if not line:
+			continue
+		if line.startswith("="):
+			count+=1
+	return(count)
+
+
 #Function split .loci file into n chunks
 def loci_chunker(infile, chunks, wd):
 

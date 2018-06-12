@@ -93,6 +93,10 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
             
@@ -322,7 +326,11 @@ TTA-CCAAGC--GC…
 </pre></div>
 </td></tr></table></div>
 <p>Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
-by <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to represent separate, discontinuous loci.</p>
+by <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to represent separate, discontinuous loci. Note that because
+no individual ‘alignment block’ in the .xmfa file is guaranteed to contain the same
+genome representatives, no reference coordinates are saved by mrbait. This means
+that additional annotation via GFF or VCF cannot be added to whole-genome alignments
+provided in .xmfa format.</p>
 </div>
 <div class="section" id="reduced-representation-data">
 <h2>Reduced representation data<a class="headerlink" href="#reduced-representation-data" title="Permalink to this headline">¶</a></h2>

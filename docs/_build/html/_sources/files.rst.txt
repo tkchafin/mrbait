@@ -146,7 +146,11 @@ block location within the genome, followed by the sequence:
    …
 
 Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
-by mrbait_ to represent separate, discontinuous loci.
+by mrbait_ to represent separate, discontinuous loci. Note that because
+no individual 'alignment block' in the .xmfa file is guaranteed to contain the same
+genome representatives, no reference coordinates are saved by mrbait. This means
+that additional annotation via GFF or VCF cannot be added to whole-genome alignments
+provided in .xmfa format. 
 
 Reduced representation data
 ---------------------------

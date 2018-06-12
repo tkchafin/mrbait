@@ -194,7 +194,7 @@ def main():
 def loadAlignments(conn, params):
 	#load alignment to database
 	print("\t\tStep 1 parameters:")
-	if params.alignment or params.loci:
+	if params.alignment or params.loci or params.xmfa:
 		print("\t\t\tMinimum alignment depth (-c):", params.cov)
 		print("\t\t\tMinimum alignment length (-l):", params.minlen)
 		print("\t\t\tThreshold to call \"N\" or gap consensus base (-q):",params.thresh)
@@ -209,6 +209,14 @@ def loadAlignments(conn, params):
 				pcore.loadMAF_parallel(conn, params)
 			else:
 				core.loadMAF(conn, params)
+		elif params.xmfa:
+			print("\t\tLoading XMFA file:",params.xmfa)
+			if int(params.threads)>1:
+				print("\t\t\tLoading alignments using",str(params.threads),"parallel processes.")
+				#pcore.loadXMFA_parallel(conn, params)
+			else:
+				pass
+				core.loadXMFA(conn, params)
 		elif params.loci:
 			print("\t\tLoading LOCI file:",params.loci)
 			if int(params.threads) > 1:

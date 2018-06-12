@@ -27,6 +27,30 @@ import numpy as np
 
 ############################# FUNCTIONS ################################
 
+#Function to load a XMFA file into database
+def loadXMFA(conn, params):
+	numLoci = aln_file_tools.countXMFA(params.xmfa)
+	if numLoci < 10000:
+		print("\t\t\tReading",numLoci,"alignments.")
+	else:
+		print("\t\t\tReading",numLoci,"alignments... This may take a while.")
+	#Parse XMFA file and create database
+
+	num = 1
+	for aln in AlignIO.parse(params.xmfa, "mauve"):
+		#NOTE: Add error handling, return error code
+		print(aln)
+		#cov = len(aln)
+		#alen = aln.get_alignment_length()
+
+		#Add each locus to database
+		#locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+		#print(locus.conSequence)
+		sys.exit()
+		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
+		#locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
+		num+=1
+
 
 #Function to load a MAF file into database
 def loadMAF(conn, params):
