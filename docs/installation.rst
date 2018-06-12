@@ -22,6 +22,7 @@ Functioning releases can be found at:
 https://github.com/tkchafin/mrbait/releases
 
 Source code: https://github.com/tkchafin/mrbait
+
 conda package: https://anaconda.org/tylerkchafin/mrbait
 
 
