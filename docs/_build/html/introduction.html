@@ -79,11 +79,25 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html">Input files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html">Usage options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
 </ul>
 
             
@@ -150,6 +164,8 @@
             
   <div class="section" id="id1">
 <h1>Introduction<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> is a software pipeline for identifying regions of interest in DNA
+sequence data and designing probes to enrich them.</p>
 <p>A variety of genome reduction methods have been implemented to reduce costs of
 applying next-generation sequencing methods to non-model organisms, or projects
 with large numbers of samples (e.g. those focusing on the population scale). These
@@ -172,6 +188,88 @@ which could be universally applied to differing bait enrichment strategies (e.g.
 targeting ultra-conserved regions vs. functional elements), and facilitate diverse
 quality control methods to mitigate non-target capture (contamination, etc),
 target-target hybridization, ambiguous mapping, and enrichment of repetitive DNA.</p>
+<p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> code is open-source and freely available at on <a class="reference external" href="https://github.com/tkchafin/mrbait">GitHub</a></p>
+<p>Official releases can be found <a class="reference external" href="https://github.com/tkchafin/mrbait/releases">here</a></p>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#availability">Availability</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#id1">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#running-mrbait">Running mrbait</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="files.html">Input files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="files.html#assembled-genomes">Assembled genomes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="files.html#multiple-genome-alignments">Multiple genome alignments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="files.html#reduced-representation-data">Reduced representation data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html">Usage options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#main-parameters">Main Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#filtering-using-vsearch">Filtering using vsearch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#filtering-using-blast">Filtering using blast</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="benchmarking.html#runtime-scaling">Runtime scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="benchmarking.html#memory-usage">Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#availability">Availability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#id1">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#running-mrbait">Running mrbait</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="files.html#assembled-genomes">Assembled genomes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="files.html#annotating-genomes-with-vcf">Annotating genomes with VCF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="files.html#annotating-genomes-with-gff">Annotating genomes with GFF</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#multiple-genome-alignments">Multiple genome alignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html#reduced-representation-data">Reduced representation data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#main-parameters">Main Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#general-options">General options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#input-options">Input Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#alignment-filtering-consensus-options-use-with-m-x-l">Alignment filtering/ consensus options (use with -M, -X, -L)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#general-bait-design-options">General Bait Design Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#target-region-options">Target Region Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#bait-selection-options">Bait Selection Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#output-options">Output Options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#filtering-using-vsearch">Filtering using vsearch</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#vsearch-options">vsearch Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage.html#graph-based-conflict-resolution">Graph-based conflict resolution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#filtering-using-blast">Filtering using blast</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html#runtime-scaling">Runtime scaling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html#memory-usage">Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+</div>
 </div>
 
 

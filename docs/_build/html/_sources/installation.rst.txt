@@ -21,6 +21,10 @@ Availability
 Functioning releases can be found at:
 https://github.com/tkchafin/mrbait/releases
 
+Source code: https://github.com/tkchafin/mrbait
+conda package: https://anaconda.org/tylerkchafin/mrbait
+
+
 Dependencies
 ------------
 mrbait_ is written for Python3, and requires Python version >= 3.6.0. The recommended

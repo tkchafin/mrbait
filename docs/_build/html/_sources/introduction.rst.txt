@@ -2,8 +2,11 @@
 
 .. include:: global.rst
 
+
 Introduction
 ============
+mrbait_ is a software pipeline for identifying regions of interest in DNA
+sequence data and designing probes to enrich them.
 
 A variety of genome reduction methods have been implemented to reduce costs of
 applying next-generation sequencing methods to non-model organisms, or projects
@@ -28,3 +31,20 @@ which could be universally applied to differing bait enrichment strategies (e.g.
 targeting ultra-conserved regions vs. functional elements), and facilitate diverse
 quality control methods to mitigate non-target capture (contamination, etc),
 target-target hybridization, ambiguous mapping, and enrichment of repetitive DNA.
+
+mrbait_ code is open-source and freely available at on `GitHub <https://github.com/tkchafin/mrbait>`_
+
+Official releases can be found `here <https://github.com/tkchafin/mrbait/releases>`_
+
+.. toctree::
+   :maxdepth: 3
+
+   introduction.rst
+   pipeline.rst
+   installation.rst
+   files.rst
+   usage.rst
+   output.rst
+   benchmarking.rst
+   acknowledgements.rst
+   references.rst
