@@ -232,6 +232,7 @@ output files.
   target passed or failed filtering specified using the *-F,--filter_r* options, as|br|
   well as any targets which were excluded due to -S,--select_r criteria. Output file |br|
   will be named as $out_targets.fasta.
+--print_loc  **Print locus cataog**: Boolean. Prints consensus loci, formatted as in *--print_tr*
 --strand  **Output strand**: Use this if you want to print baits as-designed, or as |br|
   reverse complement. Possible values: “+” [default], “-” (reverse-complement), |br|
   or “both”.
