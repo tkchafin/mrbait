@@ -21,7 +21,7 @@ v1.1.2 https://github.com/tkchafin/mrbait/releases/tag/v1.1.2
 - Other minor edits in response to reviewer criticisms
 
 v1.1.0 https://github.com/tkchafin/mrbait/releases/tag/v1.1.0
-- Now installabe via conda
+- Now installable via conda
 - Changes to directory structure
 - Non-compatible with v1.0.0
 
