@@ -1059,7 +1059,7 @@ def printLoci(conn, params):
 		p = "T"
 		if r["pass"]==0:
 			p="F"
-		header = ">Locus" + str(r.locid) + "_Pass=" + str(p) + "\n"
+		header = ">Locus" + str(r.id) + "_Pass=" + str(p) + "\n"
 		seq = r.consensus + "\n"
 		file_object.write(header)
 		file_object.write(seq)
