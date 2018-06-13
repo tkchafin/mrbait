@@ -79,6 +79,9 @@ def main():
 				sys.exit("\nProgram killed: No loci passed filtering.\n")
 			else:
 				print("\t\t### Results: %s loci passed filtering! ###"%passedLoci)
+			if params.print_loc:
+				print("\t\tPrinting locus catalog to file...")
+				core.printLoci(conn, params)
 			step = 2
 			printTime(start,2)
 		elif step == 2:

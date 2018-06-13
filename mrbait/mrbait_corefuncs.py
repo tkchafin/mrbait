@@ -45,7 +45,7 @@ def loadXMFA(conn, params):
 
 		#Add each locus to database
 		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
-		
+
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
 
@@ -1021,7 +1021,7 @@ def printBaits(conn, params):
 				file_object.write(seq)
 	file_object.close()
 
-#Function to print baits in final output
+#Function to print targets in final output
 def printTargets(conn, params):
 	df = m.getRegions(conn)
 
@@ -1042,6 +1042,25 @@ def printTargets(conn, params):
 			p="F"
 		header = ">Locus" + str(r.locid) + "_Target" + str(rel_num[r.locid]) + "_Pass=" + str(p) + "\n"
 		seq = r.sequence + "\n"
+		file_object.write(header)
+		file_object.write(seq)
+
+	file_object.close()
+
+#Function to print loci in final output
+def printLoci(conn, params):
+	df = m.getLoci(conn)
+
+	out = params.workdir + "/" + params.out + "_catalog.fasta"
+	file_object = open(out, "w")
+
+	for i, r in df.iterrows():
+		#build FASTA header
+		p = "T"
+		if r["pass"]==0:
+			p="F"
+		header = ">Locus" + str(r.locid) + "_Pass=" + str(p) + "\n"
+		seq = r.consensus + "\n"
 		file_object.write(header)
 		file_object.write(seq)
 

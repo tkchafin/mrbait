@@ -199,6 +199,7 @@ Output options:
 	--strand	: Output strand. Options: "+", "-", "both"
 		--"-" print antiparallel (reverse complement)
 	-t,--print_tr	: Boolean. Print target regions to FASTA file
+	--print_loc	: Boolean. Print consensus locus catalog to FASTA file
 	-o,--out	: Prefix for output files""")
 
 	print()
@@ -225,7 +226,7 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db=", "print_tr", "xmfa="])
+			"resume=","db=", "print_tr", "xmfa=", "print_loc"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -304,6 +305,7 @@ class parseArgs():
 		self.strand = "+"
 		self.out = ""
 		self.print_tr=False
+		self.print_loc=False
 		self.workdir = ""
 		self.threads = 1
 
@@ -513,6 +515,8 @@ class parseArgs():
 				self.out = arg
 			elif opt in ('t', 'print_tr'):
 				self.print_tr = True
+			elif opt in ('print_loc'):
+				self.print_loc = True
 			elif opt == "db":
 				self.db = str(arg)
 			elif opt in ('T', 'threads'):
