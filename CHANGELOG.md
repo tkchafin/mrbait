@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 Development
+- Added --vcfALT option (changes behavior for building consensus from VCF)
+- Fixed bug in VCF parsing when reference is N or gap
 - Added --print_loc option
 - Fixed issue where XMFA hidden 'chunk' files were not deleted
 
