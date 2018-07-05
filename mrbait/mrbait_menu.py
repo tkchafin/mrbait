@@ -38,6 +38,7 @@ def printHeader():
 
 	Source code: https://github.com/tkchafin/mrbait
 	Documentation: https://mrbait.readthedocs.io/
+	Conda package: https://anaconda.org/tylerkchafin/mrbait
 
 	=======================================================================
 	""")
