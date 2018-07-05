@@ -61,6 +61,11 @@ It is highly recommended you add variant data if it is available, as it will be 
 both for finding adequately conserved regions for bait design, as well as for filtering
 target regions for those which capture flanking SNPs.
 
+NOTE: When using VCF, the REF column is ignored. Instead, the reference allele will be
+taken from the FASTA reference provided. For cases when the reference allele is an N or
+gap (-), you can choose to either retain the N/gap allele, OR attempt to override it
+using the ALT alleles provided in the VCF for that position (*--vcfALT*)
+
 Annotating genomes with GFF
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -150,7 +155,7 @@ by mrbait_ to represent separate, discontinuous loci. Note that because
 no individual 'alignment block' in the .xmfa file is guaranteed to contain the same
 genome representatives, no reference coordinates are saved by mrbait. This means
 that additional annotation via GFF or VCF cannot be added to whole-genome alignments
-provided in .xmfa format. 
+provided in .xmfa format.
 
 Reduced representation data
 ---------------------------

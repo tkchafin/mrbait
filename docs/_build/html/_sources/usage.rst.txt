@@ -55,6 +55,10 @@ Input Options
    **VCF input**: For use with --assembly: VCF file containing variant data
 -G, --gff
    **GFF input**: For use with --assembly: GFF file containing feature data
+--vcfALT
+    **REF calling with VCF**: For use with --assembly and --vcf: This option  |br|
+    tells mrbait to attempt to override N/gap characters in the reference sequence  |br|
+		using values from the ALT column in the VCF file. [default=off; boolean]
 
 Alignment filtering/ consensus options (use with -M, -X, -L)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

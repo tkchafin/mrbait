@@ -79,26 +79,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="introduction.html">Introduction</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html">Getting Started</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Input files</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#assembled-genomes">Assembled genomes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#annotating-genomes-with-vcf">Annotating genomes with VCF</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#annotating-genomes-with-gff">Annotating genomes with GFF</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="#multiple-genome-alignments">Multiple genome alignments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reduced-representation-data">Reduced representation data</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="usage.html">Usage options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="output.html">Output Files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="references.html">References</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input files</a><ul>
@@ -246,6 +227,10 @@ will be added in future versions of <a class="reference external" href="https://
 <p>It is highly recommended you add variant data if it is available, as it will be used
 both for finding adequately conserved regions for bait design, as well as for filtering
 target regions for those which capture flanking SNPs.</p>
+<p>NOTE: When using VCF, the REF column is ignored. Instead, the reference allele will be
+taken from the FASTA reference provided. For cases when the reference allele is an N or
+gap (-), you can choose to either retain the N/gap allele, OR attempt to override it
+using the ALT alleles provided in the VCF for that position (<em>–vcfALT</em>)</p>
 </div>
 <div class="section" id="annotating-genomes-with-gff">
 <h3>Annotating genomes with GFF<a class="headerlink" href="#annotating-genomes-with-gff" title="Permalink to this headline">¶</a></h3>
