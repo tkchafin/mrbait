@@ -4,7 +4,11 @@
 
 Python program for universal design of targeted-enrichment probes from multiple input datatypes. Can be used to generate probe sets for ultraconserved elements, anchored enrichment, RAD-capture, etc. 
 
-Please see full up-to-date documentation at: https://mrbait.readthedocs.io
+Citation: Chafin TK, Douglas MR, Douglas ME. 2018. MrBait: Universalidentification and design of targeted-enrichment capture probes. Bioinformatics. https://doi.org/10.1093/bioinformatics/bty548
+
+Documentation: https://mrbait.readthedocs.io/
+
+Conda package: https://anaconda.org/tylerkchafin/mrbait
 
 ## Installation
 I currently supports native installation on Linux and Mac OS. MrBait is not natively supported on Windows, however will run using the Linux subsystem for Windows 10 (see: https://docs.microsoft.com/en-us/windows/wsl/install-win10). MrBait was tested using the Ubuntu Windows-10 subsystem. 
