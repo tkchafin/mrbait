@@ -375,10 +375,30 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 			#print("Start is ", start, " and stop is ",stop) #debug print
 			if counts['*'] <= var and counts['N'] <= n and counts['-'] <= g:
 				stop = window_seq[2]
+				#if this window passes BUT is the last window, evaluate it
+				if stop == len(seq[2]):
+					print("last window")
+					if (stop - start) >= params.blen:
+						target = (seq[2])[start:stop]
+						tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+						n_mask = utils.n_lower_chars(target)
+						n_gc = s.gc_counts(target)
+						#Check that there aren't too many SNPs
+						#if tr_counts["*"] <= params.vmax_r:
+						#print("	Target region: ", target)
+						#Submit target region to database
+						#print("process: grabbing lock")'
+						flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
+						lock.acquire()
+						m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
+						#print("process: releasing lock")
+						lock.release()
+						#set start of next window to end of current TR
+						generator.setI(stop)
 			else:
 				#If window fails, check if previous bait region passes to submit to DB
 				#print (stop-start)
-				if (stop - start) > blen:
+				if (stop - start) >= blen:
 					target = (seq[2])[start:stop]
 					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 					n_mask = utils.n_lower_chars(target)
@@ -398,6 +418,7 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 
 				#If bait fails, set start to start point of next window
 				start = generator.getI()+shift
+
 	connection.close()
 
 

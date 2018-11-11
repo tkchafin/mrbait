@@ -201,6 +201,7 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 		#print(seq)
 		start = 0
 		stop = 0
+		#print(params.win_width)
 		#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
 		generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
 		for window_seq in generator():
@@ -209,13 +210,35 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 			counts = s.seqCounterSimple(seq_norm)
 
 			#If window passes filters, extend current bait region
-			#print("Start is ", start, " and stop is ",stop) #debug print
+			#print("candidate:",window_seq[0])
+			#IF window passes, move end point and go to next window
 			if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
+				#print("continue")
 				stop = window_seq[2]
+				#print("New stop:",stop," sequence end:",len(seq[2]))
+
+				#if this window passes BUT is the last window, evaluate it
+				if stop == len(seq[2]):
+					#print("last window")
+					if (stop - start) >= params.blen:
+						target = (seq[2])[start:stop]
+						tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+						n_mask = utils.n_lower_chars(target)
+						n_gc = s.gc_counts(target)
+						#Check that there aren't too many SNPs
+						#if tr_counts["*"] <= params.vmax_r:
+						#print("	Target region: ", target)
+						#Submit target region to database
+						flank_counts = s.getFlankCounts(seq[2], start, stop, params.flank_dist)
+						m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
+						generator.setI(stop)
+
+			#if window fails, check if previous endpoint is acceptable
 			else:
+				#print("end")
 				#If window fails, check if previous bait region passes to submit to DB
 				#print (stop-start)
-				if (stop - start) > params.blen:
+				if (stop - start) >= params.blen:
 					target = (seq[2])[start:stop]
 					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 					n_mask = utils.n_lower_chars(target)
@@ -227,11 +250,13 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 					flank_counts = s.getFlankCounts(seq[2], start, stop, params.flank_dist)
 					m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
 					generator.setI(stop)
-
-				#If bait fails, set start to start point of next window
-				start = generator.getI()+params.win_shift
+				else:
+					#If bait fails, set start to start point of next window
+					start = generator.getI()+params.win_shift
 	#Now update regions table to include information for flanking regions if available
 	#m.flankDistParser(conn, params.flank_dist)
+
+
 
 #Function to filter target regions by --filter_R arguments
 def filterTargetRegions(conn, params):
