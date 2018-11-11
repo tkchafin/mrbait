@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+v1.1.5
+- Bug fix for parsing command line options (-v and -c not working properly)
+- Bug fix for targets not being added when sliding window exceeds locus
+
 v1.1.4 https://github.com/tkchafin/mrbait/releases/tag/v1.1.4
 - Added --vcfALT option (changes behavior for building consensus from VCF)
 - Fixed bug in VCF parsing when reference is N or gap
