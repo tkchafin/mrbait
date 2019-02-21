@@ -340,7 +340,7 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	#if 'lock' not in globals():
 	lock = multiprocessing.Lock()
 	with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
-		func = partial(targetDiscoverySlidingWindow_worker, params.db, params.win_shift, params.win_width, params.var_max, params.numN, params.numG, params.blen, params.flank_dist)
+		func = partial(targetDiscoverySlidingWindow_worker, params.db, params.win_shift, params.win_width, params.var_max, params.numN, params.numG, params.blen, params.flank_dist, params.target_all)
 		results = pool.map(func, files)
 	pool.close()
 	pool.join()
@@ -354,31 +354,31 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 
 
 #Function to discover target regions using a sliding windows through passedLoci
-def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank_dist, chunk):
+def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank_dist, target_all, chunk):
 	connection = sqlite3.connect(db)
 	#print("process: reading hdf from",chunk)
 	loci = pd.read_hdf(chunk)
-	#looping through passedLoci only
-	#print("process: starting iteration")
-	if params.target_all:
-		#submit full locus as target
-		seq_norm = s.simplifySeq(seq[2])
-		counts = s.seqCounterSimple(seq_norm)
-		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
-			target = seq[2]
-			tr_counts = s.seqCounterSimple(seq_norm)
-			n_mask = utils.n_lower_chars(seq[2])
-			n_gc = s.gc_counts(seq[2])
-			#NOTE: flank count set to number of variable sites in whole locus
-			#print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, flank_counts, n_mask, n_gc)
-			lock.acquire()
-			m.add_region_record(conn, int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
-			lock.release()
-	else:
-		for seq in loci.itertuples():
-			#print(seq)
-			start = 0
-			stop = 0
+
+	for seq in loci.itertuples():
+		#print(seq)
+		start = 0
+		stop = 0
+		if target_all:
+			print("target_all")
+			#submit full locus as target
+			seq_norm = s.simplifySeq(seq[2])
+			counts = s.seqCounterSimple(seq_norm)
+			if counts['*'] <= var and counts['N'] <= n and counts['-'] <= g:
+				target = seq[2]
+				tr_counts = s.seqCounterSimple(seq_norm)
+				n_mask = utils.n_lower_chars(seq[2])
+				n_gc = s.gc_counts(seq[2])
+				#NOTE: flank count set to number of variable sites in whole locus
+				print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
+				lock.acquire()
+				m.add_region_record(connection, int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
+				lock.release()
+		else:
 			#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
 			generator = s.slidingWindowGenerator(seq[2], shift, width)
 			for window_seq in generator():
@@ -392,8 +392,8 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 					stop = window_seq[2]
 					#if this window passes BUT is the last window, evaluate it
 					if stop == len(seq[2]):
-						print("last window")
-						if (stop - start) >= params.blen:
+						#print("last window")
+						if (stop - start) >= blen:
 							target = (seq[2])[start:stop]
 							tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 							n_mask = utils.n_lower_chars(target)
@@ -433,7 +433,6 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 
 					#If bait fails, set start to start point of next window
 					start = generator.getI()+shift
-
 	connection.close()
 
 
