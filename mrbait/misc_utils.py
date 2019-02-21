@@ -29,7 +29,7 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(n, int)
     assert isinstance(l, int)
     assert isinstance(o, int)
-    return((2*(l-o) + (n-2)*(l-2*(o)))) #2 segments are length - overlap; other segments are length - 2*overlap
+    return((l) + (n-1)*(l-o)) 
     #return ((n*l)-((n-1)*o))
 
 #Function for checking if two things with start and end coordinates overlap on single axis
