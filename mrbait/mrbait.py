@@ -275,7 +275,11 @@ def targetDiscovery(conn, params):
 	passedLoci = m.getPassedLoci(conn)
 	numPassedLoci = m.getNumPassedLoci(conn)
 	#sliding window call
-	print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
+	if params.target_all:
+		#NOTE: Target criteria still apply (e.g. number of allowed Ns, gaps, vars)
+		print("\t\tSkipping target discovery and applying target filtersg to",numPassedLoci,"full-length loci...")
+	else:
+		print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
 	if int(params.threads) > 1:
 		print("\t\t\tFinding targets using",str(params.threads),"parallel processes...")
 		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)

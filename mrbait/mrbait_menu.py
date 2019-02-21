@@ -237,7 +237,7 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT"])
+			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -282,6 +282,7 @@ class parseArgs():
 		self.filter_r=0 #bool
 		self.filter_t_whole=None
 		self.filter_r_objects=[]
+		self.target_all=False
 
 		#VSEARCH options - deduplication
 		self.vsearch = "vsearch"
@@ -446,6 +447,9 @@ class parseArgs():
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
 				else:
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
+
+			elif opt == "--target_all":
+				self.target_all=True
 
 			#Bait selection options
 			elif opt=='-s' or opt=='--select_b':
