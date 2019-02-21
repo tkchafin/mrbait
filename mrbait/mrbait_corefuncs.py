@@ -752,6 +752,28 @@ def baitDiscovery(conn, params, targets):
 				subseq = (seq[2])[start:stop]
 				#print(subseq)
 				baitSlidingWindowCoord(conn, seq[1], subseq, params.bait_shift, params.blen, start)
+	elif params.select_b == "calc":
+		#calculate the minimum target length to meet requirement
+		union = utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap)
+
+		#NOTE: Here select_b_num is a desired amount and bait_shift is a overlap is a MAXIMUM allowable overlap
+		for seq in targets.itertuples():
+			length = len(seq[2])
+			#if target LONGER than union length, calculate necessary new overlap value (could be negative)
+			if union >= length:
+				print(length,">",union,"- tiling all")
+				baitSlidingWindow(conn, seq[1], seq[2], params.bait_shift, params.blen)
+			#otherwise if target is shorter than union length, tile the whole thing
+			else:
+				#bait_shift = how far to shift each starting point
+				new_overlap = params.blen - (length/params.select_b_num)
+				print("To place",params.select_b_num,"baits of ",params.blen,"in target of length",length,", need overlap:",new_overlap)
+				sys.exit()
+
+
+
+		#check if overlap is greater than n, tile full locus with n overlap
+		pass
 	elif params.select_b == "flank":
 		#First calculate union length needed, if this is longer than target, just
 		#tile all of it
