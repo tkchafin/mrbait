@@ -6,6 +6,7 @@ import Bio
 import os
 import time
 from Bio import AlignIO
+from decimal import *
 from mrbait import mrbait_menu
 from mrbait import substring
 from mrbait.substring import SubString
@@ -707,6 +708,7 @@ def baitSlidingWindow(conn, source, sequence, overlap, length):
 		if (len(window_seq[0]) == length):
 			n_mask = utils.n_lower_chars(window_seq[0])
 			n_gc = s.gc_counts(window_seq[0])
+			#print("add")
 			m.add_bait_record(conn, source, window_seq[0], window_seq[1], window_seq[2], n_mask, n_gc)
 
 #function for sliding window bait generation, with custom coordinates
@@ -755,25 +757,26 @@ def baitDiscovery(conn, params, targets):
 	elif params.select_b == "calc":
 		#calculate the minimum target length to meet requirement
 		union = utils.calculateUnionLengthFixed(params.select_b_num, params.blen, params.overlap)
-
+		#print("union:",union)
+		#print("max",params.overlap)
 		#NOTE: Here select_b_num is a desired amount and bait_shift is a overlap is a MAXIMUM allowable overlap
 		for seq in targets.itertuples():
 			length = len(seq[2])
-			#if target LONGER than union length, calculate necessary new overlap value (could be negative)
-			if union >= length:
-				print(length,">",union,"- tiling all")
+			#if target shorter than union length, tile whole thing
+			if length < union:
+				#print(length,"<",union,"- tiling all")
 				baitSlidingWindow(conn, seq[1], seq[2], params.bait_shift, params.blen)
-			#otherwise if target is shorter than union length, tile the whole thing
+			#otherwise if target is LONGER, calculate new overlap
 			else:
 				#bait_shift = how far to shift each starting point
-				new_overlap = params.blen - (length/params.select_b_num)
-				print("To place",params.select_b_num,"baits of ",params.blen,"in target of length",length,", need overlap:",new_overlap)
-				sys.exit()
+				getcontext().prec = 6
+				pad_shift = Decimal(length - union) / Decimal(params.select_b_num) #this is the extra space to add to max_overlap
+				new_shift = int(params.bait_shift + pad_shift)
+				#print("old_shift",params.bait_shift)
+				#print("pas_shift",pad_shift)
+				#print("new_shift",new_shift)
+				baitSlidingWindow(conn, seq[1], seq[2], new_shift, params.blen)
 
-
-
-		#check if overlap is greater than n, tile full locus with n overlap
-		pass
 	elif params.select_b == "flank":
 		#First calculate union length needed, if this is longer than target, just
 		#tile all of it
@@ -956,82 +959,82 @@ def filterBaits_verbose(conn, params):
 			m.baitFilterRandom(conn, rand_num)
 
 #Function to filter target regions by --filter_R arguments
-def filterBaits(conn, params):
-	rand_num = None
-	aln = False
-	minid = None
-	mincov = None
-	if (len(params.filter_b_objects) <= 0):
-		return(0)
-	else:
-		for option in params.filter_b_objects:
-			#print("Bait filtering option: ", option.o1)
-			if option.o1 == "rand":
-			#Set 'rand' to TRUE for random selection AFTER other filters
-				rand_num = int(option.o2)
-				assert rand_num > 0, "Number for random bait selection must be greater than zero!"
-			elif option.o1 == "mask":
-				max_mask_prop = option.o2
-				m.baitFilterMask(conn, maxprop=max_mask_prop)
-			elif option.o1 == "gc":
-				min_mask_prop = option.o2
-				max_mask_prop = option.o3
-				m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
-			elif option.o1 == "pw":
-				#print("Filtering baits by pairwise alignment")
-				aln = True
-				minid = option.o2
-				mincov = option.o3
-			elif option.o1 in ("blast_x", "blast_i"):
-				#if blast database given as fasta, make a blastdb:
-				db_path = None
-				if (params.blastdb):
-					db_path = params.blastdb
-				elif (params.fastadb):
-					db_path = params.workdir + "/blastdb/" + params.out
-					b.makeblastdb(params.makedb, params.fastadb, db_path)
-					params.blastdb = db_path
-				elif(not params.blastdb and not params.fastadb):
-					print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
-					break
-				#print("BLASTDB PATH IS: ", db_path)
-				#Get targets, print to fasta
-				seqs = m.getPassedTRs(conn)
-				fas = params.workdir + "/.temp.fasta"
-				aln_file_tools.writeFasta(seqs, fas)
-				outfile = params.workdir + "/.temp.blast"
-				if option.o1 == "blast_x":
-					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-					m.removeBaitsByList(conn, blacklist)
-				elif option.o1 == "blast_i":
-					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-					m.removeBaitsByWhitelist(conn, whitelist)
-				elif option.o1 == "blast_a":
-					sys.exit("blast_a option is not yet implemented.")
-					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-					#m.removeRegionsByList(conn, blacklist)
-				os.remove(fas)
-				os.remove(outfile)
-			else:
-				assert False, "Unhandled option %r"%option
-
-		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-		if aln:
-			passedBaits = m.getPassedBaits(conn)
-			assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-			assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
-			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
-			#print("Blacklisted edges:",blacklist_edges)
-			if (len(blacklist_edges) > 0):
-				params._noWeightGraph = 1
-				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
-				if len(revised_blacklist) > 0:
-					m.removeBaitsByList(conn, revised_blacklist)
-
-		#If 'random' select is turned on, then apply AFTER all other options
-		if rand_num:
-			#print("Randomly selecting",rand_num,"baits.")
-			m.baitFilterRandom(conn, rand_num)
+# def filterBaits(conn, params):
+# 	rand_num = None
+# 	aln = False
+# 	minid = None
+# 	mincov = None
+# 	if (len(params.filter_b_objects) <= 0):
+# 		return(0)
+# 	else:
+# 		for option in params.filter_b_objects:
+# 			#print("Bait filtering option: ", option.o1)
+# 			if option.o1 == "rand":
+# 			#Set 'rand' to TRUE for random selection AFTER other filters
+# 				rand_num = int(option.o2)
+# 				assert rand_num > 0, "Number for random bait selection must be greater than zero!"
+# 			elif option.o1 == "mask":
+# 				max_mask_prop = option.o2
+# 				m.baitFilterMask(conn, maxprop=max_mask_prop)
+# 			elif option.o1 == "gc":
+# 				min_mask_prop = option.o2
+# 				max_mask_prop = option.o3
+# 				m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
+# 			elif option.o1 == "pw":
+# 				#print("Filtering baits by pairwise alignment")
+# 				aln = True
+# 				minid = option.o2
+# 				mincov = option.o3
+# 			elif option.o1 in ("blast_x", "blast_i"):
+# 				#if blast database given as fasta, make a blastdb:
+# 				db_path = None
+# 				if (params.blastdb):
+# 					db_path = params.blastdb
+# 				elif (params.fastadb):
+# 					db_path = params.workdir + "/blastdb/" + params.out
+# 					b.makeblastdb(params.makedb, params.fastadb, db_path)
+# 					params.blastdb = db_path
+# 				elif(not params.blastdb and not params.fastadb):
+# 					print("WARNING: No blast database was provided. Skipping <--filter_r> option %s"%option.o1)
+# 					break
+# 				#print("BLASTDB PATH IS: ", db_path)
+# 				#Get targets, print to fasta
+# 				seqs = m.getPassedTRs(conn)
+# 				fas = params.workdir + "/.temp.fasta"
+# 				aln_file_tools.writeFasta(seqs, fas)
+# 				outfile = params.workdir + "/.temp.blast"
+# 				if option.o1 == "blast_x":
+# 					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+# 					m.removeBaitsByList(conn, blacklist)
+# 				elif option.o1 == "blast_i":
+# 					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+# 					m.removeBaitsByWhitelist(conn, whitelist)
+# 				elif option.o1 == "blast_a":
+# 					sys.exit("blast_a option is not yet implemented.")
+# 					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+# 					#m.removeRegionsByList(conn, blacklist)
+# 				os.remove(fas)
+# 				os.remove(outfile)
+# 			else:
+# 				assert False, "Unhandled option %r"%option
+#
+# 		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
+# 		if aln:
+# 			passedBaits = m.getPassedBaits(conn)
+# 			assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+# 			assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+# 			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
+# 			#print("Blacklisted edges:",blacklist_edges)
+# 			if (len(blacklist_edges) > 0):
+# 				params._noWeightGraph = 1
+# 				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+# 				if len(revised_blacklist) > 0:
+# 					m.removeBaitsByList(conn, revised_blacklist)
+#
+# 		#If 'random' select is turned on, then apply AFTER all other options
+# 		if rand_num:
+# 			#print("Randomly selecting",rand_num,"baits.")
+# 			m.baitFilterRandom(conn, rand_num)
 
 
 #Function to print baits in final output

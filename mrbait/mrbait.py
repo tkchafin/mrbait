@@ -280,7 +280,7 @@ def targetDiscovery(conn, params):
 		print("\t\tSkipping target discovery and applying target filtersg to",numPassedLoci,"full-length loci...")
 	else:
 		print("\t\tStarting sliding window target discovery of",numPassedLoci,"loci...")
-		
+
 	if int(params.threads) > 1:
 		print("\t\t\tFinding targets using",str(params.threads),"parallel processes...")
 		pcore.targetDiscoverySlidingWindow_parallel(conn, params, passedLoci)
@@ -342,11 +342,13 @@ def baitDiscovery(conn, params):
 	print("\t\t\tBait length (-b, --blen):",params.blen)
 
 	if (params.select_b == "tile"):
-		print("\t\t\tTiling baits with",params.bait_shift,"base overlap")
+		print("\t\t\tTiling baits with",params.overlap,"base overlap")
 	elif (params.select_b == "center"):
-		print("\t\t\tCentering",params.select_b_num,"baits with",params.bait_shift,"overlap")
+		print("\t\t\tCentering",params.select_b_num,"baits with",params.overlap,"overlap")
 	elif(params.select_b == "flank"):
-		print("\t\t\tDesigning",params.select_b_num,"baits with",params.bait_shift,"flanking targets")
+		print("\t\t\tDesigning",params.select_b_num,"terminal baits with",params.overlap,"overlap")
+	elif(params.select_b=="calc"):
+		print("\t\t\tDesigning",params.select_b_num,"baits per target with",params.overlap,"maximum overlap")
 	#core function call
 	core.baitDiscovery(conn, params, m.getPassedTRs(conn))
 

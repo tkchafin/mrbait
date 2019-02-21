@@ -374,7 +374,7 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 				n_mask = utils.n_lower_chars(seq[2])
 				n_gc = s.gc_counts(seq[2])
 				#NOTE: flank count set to number of variable sites in whole locus
-				print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
+				#print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
 				lock.acquire()
 				m.add_region_record(connection, int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
 				lock.release()
