@@ -475,15 +475,16 @@ class parseArgs():
 				self.filter_b_whole = arg
 				#for sub in temp:
 				subopts = re.split('=|,',arg)
-				if subopts[0] in ('pw','gc'):
+				if subopts[0] in ('pw','gc','rc'):
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
 					assert 0.0 <= float(subopts[2]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
 					if subopts[0] == "gc":
-						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"mask\" and \"gc\": Min must be less than max"
+						assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"gc\": Min must be less than max"
 					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 				elif subopts[0] == 'mask':
 					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_b> suboption \"%s\": Value must be between 0.0 and 1.0"%subopts[0]
+					assert subopts[1] < subopts[2], "In <--filter_b> for suboptions \"gc\": Min must be less than max"
 					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1])))
 				elif (subopts[0] == 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
