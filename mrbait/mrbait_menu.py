@@ -25,7 +25,7 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version: 1.1.5
+	Version: 1.1.6
 	Author: Tyler K. Chafin
 	Contact: tkchafin@uark.edu
 	License: GNU Public License v3.0
@@ -123,6 +123,8 @@ Target Region options:
 		--See relevant options in <--select_r> and <--filter_r>
 		--By default will be set to [500]
 		--Appopriate value likely will correspond to your sequencing insert size
+	--target_all	: Skip target region search, and use full (passing) loci for bait design
+		--Note that --select_r and --filter_r methods will still be applied
 	-S, --select_r	: Which criterion to select target regions w/in <-D>
 		--Options
 			snp          : Most SNPs w/in \"d\" bases
@@ -159,21 +161,23 @@ Bait Design / Selection options:
 	-s,--select_b	: Which criterion to select a bait for target region
 		--NOTE: This option is ignored when <-W>
 		--Options
-		  	tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
-		  	center=[n,x] : Design \"n\" centered baits with \"x\" overlap
+			tile=[x]     : Tile baits with \"x\" overlapping bases [default; x= bait_length/2]
+			center=[n,x] : Design \"n\" centered baits with \"x\" overlap
 			flank=[n,x]  : Design \"x\" terminal baits (each side) with \"x\" overlap
+			calc=[n,x]   : Design \"n\" baits per target, with \"x\" maximum overlap
 			Ex: -s tile=40 to tile baits with an overlap of 40 bases
 	-f,--filter_b	: Include any criteria used to filter ALL baits
 		--Options
 			mask=[x]     : Maximum of \"x\" proportion of masked bases allowed
 			gc=[x,y]     : Proportion of G/C bases between \"x\" (min) and \"y\" (max)
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
+			rc=[i,q]     : Pairwise alignment against reverse-complements (see -r pw=[i,q])
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
 			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
-VSEARCH Parameters (use when --select_b or --select_r = \"aln\"):
+VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\"):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
 		--MrBait will try to detect OS and appropriate exectable to use
