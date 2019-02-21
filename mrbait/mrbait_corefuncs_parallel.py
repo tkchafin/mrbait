@@ -360,25 +360,60 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 	loci = pd.read_hdf(chunk)
 	#looping through passedLoci only
 	#print("process: starting iteration")
-	for seq in loci.itertuples():
-		#print(seq)
-		start = 0
-		stop = 0
-		#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
-		generator = s.slidingWindowGenerator(seq[2], shift, width)
-		for window_seq in generator():
+	if params.target_all:
+		#submit full locus as target
+		seq_norm = s.simplifySeq(seq[2])
+		counts = s.seqCounterSimple(seq_norm)
+		if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
+			target = seq[2]
+			tr_counts = s.seqCounterSimple(seq_norm)
+			n_mask = utils.n_lower_chars(seq[2])
+			n_gc = s.gc_counts(seq[2])
+			#NOTE: flank count set to number of variable sites in whole locus
+			#print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, flank_counts, n_mask, n_gc)
+			lock.acquire()
+			m.add_region_record(conn, int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
+			lock.release()
+	else:
+		for seq in loci.itertuples():
+			#print(seq)
+			start = 0
+			stop = 0
+			#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
+			generator = s.slidingWindowGenerator(seq[2], shift, width)
+			for window_seq in generator():
 
-			seq_norm = s.simplifySeq(window_seq[0])
-			counts = s.seqCounterSimple(seq_norm)
+				seq_norm = s.simplifySeq(window_seq[0])
+				counts = s.seqCounterSimple(seq_norm)
 
-			#If window passes filters, extend current bait region
-			#print("Start is ", start, " and stop is ",stop) #debug print
-			if counts['*'] <= var and counts['N'] <= n and counts['-'] <= g:
-				stop = window_seq[2]
-				#if this window passes BUT is the last window, evaluate it
-				if stop == len(seq[2]):
-					print("last window")
-					if (stop - start) >= params.blen:
+				#If window passes filters, extend current bait region
+				#print("Start is ", start, " and stop is ",stop) #debug print
+				if counts['*'] <= var and counts['N'] <= n and counts['-'] <= g:
+					stop = window_seq[2]
+					#if this window passes BUT is the last window, evaluate it
+					if stop == len(seq[2]):
+						print("last window")
+						if (stop - start) >= params.blen:
+							target = (seq[2])[start:stop]
+							tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+							n_mask = utils.n_lower_chars(target)
+							n_gc = s.gc_counts(target)
+							#Check that there aren't too many SNPs
+							#if tr_counts["*"] <= params.vmax_r:
+							#print("	Target region: ", target)
+							#Submit target region to database
+							#print("process: grabbing lock")'
+							flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
+							lock.acquire()
+							m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
+							#print("process: releasing lock")
+							lock.release()
+							#set start of next window to end of current TR
+							generator.setI(stop)
+				else:
+					#If window fails, check if previous bait region passes to submit to DB
+					#print (stop-start)
+					if (stop - start) >= blen:
 						target = (seq[2])[start:stop]
 						tr_counts = s.seqCounterSimple(s.simplifySeq(target))
 						n_mask = utils.n_lower_chars(target)
@@ -395,29 +430,9 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 						lock.release()
 						#set start of next window to end of current TR
 						generator.setI(stop)
-			else:
-				#If window fails, check if previous bait region passes to submit to DB
-				#print (stop-start)
-				if (stop - start) >= blen:
-					target = (seq[2])[start:stop]
-					tr_counts = s.seqCounterSimple(s.simplifySeq(target))
-					n_mask = utils.n_lower_chars(target)
-					n_gc = s.gc_counts(target)
-					#Check that there aren't too many SNPs
-					#if tr_counts["*"] <= params.vmax_r:
-					#print("	Target region: ", target)
-					#Submit target region to database
-					#print("process: grabbing lock")'
-					flank_counts = s.getFlankCounts(seq[2], start, stop, flank_dist)
-					lock.acquire()
-					m.add_region_record(connection, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
-					#print("process: releasing lock")
-					lock.release()
-					#set start of next window to end of current TR
-					generator.setI(stop)
 
-				#If bait fails, set start to start point of next window
-				start = generator.getI()+shift
+					#If bait fails, set start to start point of next window
+					start = generator.getI()+shift
 
 	connection.close()
 
