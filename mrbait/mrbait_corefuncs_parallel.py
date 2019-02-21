@@ -364,7 +364,7 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 		start = 0
 		stop = 0
 		if target_all:
-			print("target_all")
+			#print("target_all")
 			#submit full locus as target
 			seq_norm = s.simplifySeq(seq[2])
 			counts = s.seqCounterSimple(seq_norm)
