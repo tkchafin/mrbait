@@ -455,10 +455,10 @@ class parseArgs():
 			elif opt=='-s' or opt=='--select_b':
 				subopts = re.split('=|,',arg)
 				self.select_b = (subopts[0]).lower()
-				chars = (['tile', 'center', 'flank'])
+				chars = (['tile', 'center', 'flank', 'calc'])
 				if self.select_b not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_b>" % self.select_b)
-				subchars = (['center','flank'])
+				subchars = (['center','flank','calc'])
 				if self.select_b in subchars:
 					assert len(subopts) == 3, "Incorrect specification of option %r for <--select_b>" %subopts[0]
 					self.overlap = int(subopts[2])
