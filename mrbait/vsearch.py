@@ -54,6 +54,29 @@ def sortByLength(binary, seqpath, outpath):
 	if proc.returncode:
 		raise CalledProcessError ("VSEARCH exited with non-zero status")
 
+#Function to sort FASTA by length, needed before allpairsGlobal call
+def fastxRevcomp(binary, seqpath, outpath):
+	vsearch = [binary,
+			"--fastx_revcomp", seqpath,
+			"--fastaout", outpath,
+			"--quiet"]
+	command = " ".join(vsearch)
+	#print(command)
+	#Vsearch subprocess
+	proc = Popen(vsearch, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
+
+	#WRap to enable keyboard interrupe
+	try:
+		t = proc.communicate()[0]
+	except KeyboardInterrupt:
+		proc.kill()
+		raise KeyboardInterrupt
+
+	#Get return code from process
+	if proc.returncode:
+		raise CalledProcessError ("VSEARCH exited with non-zero status")
+
+
 #Function to parse output of allpairsGlobal
 def parsePairwiseAlign(filename):
 	#Function assumes id's are the first 2 positions, and prepended with "id_"
