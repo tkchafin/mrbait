@@ -153,8 +153,7 @@ with total lengths outside of this range will fail, and be excluded from bait de
   region to parse for counting SNPs, ambiguities, gaps, etc when filtering |br|
   target regions (see *-S,--select_r* and *-F,--filter_r*) [default=500]. |br|
   Note that this value will tell mrbait_ to search ‘*d*’ bases to the left AND |br|
-  right of each target region.
-
+  right of each target region. |br|
   Note that currently, the same *--flank_dist* value will be used for all filters.
 -S, --select_r
   **Target selection criterion**: Method to resolve conflicts when targets are |br|
