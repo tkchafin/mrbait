@@ -23,6 +23,20 @@ def writeFasta(seqs, fas):
 		file_object.write(seq)
 	file_object.close()
 
+#Write FASTA from pandas df where col1 is index, col2 is sequence
+#seqs must be a pandas df
+#this version replaces gaps with N characters
+def writeFastaNogap(seqs, fas):
+	file_object = open(fas, "w")
+	#Write seqs to FASTA first
+	#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
+	for a in seqs.itertuples():
+		name = ">id_" + str(a[1]) + "\n"
+		seq = a[2].replace("-", "N") + "\n"
+		file_object.write(name)
+		file_object.write(seq)
+	file_object.close()
+
 #Read genome as FASTA. FASTA header will be used
 #This is a generator function
 #Doesn't matter if sequences are interleaved or not.
@@ -30,7 +44,6 @@ def read_fasta(fas):
 
 	if not utils.fileCheck(fas):
 		raise FileNotFoundError("Fatal exception, file %s not found."%fas)
-
 	fh = open(fas)
 	try:
 		with fh as file_object:
