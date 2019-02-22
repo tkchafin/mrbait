@@ -58,7 +58,7 @@ Input Options
 --vcfALT
     **REF calling with VCF**: For use with --assembly and --vcf: This option  |br|
     tells mrbait to attempt to override N/gap characters in the reference sequence  |br|
-		using values from the ALT column in the VCF file. [default=off; boolean]
+    using values from the ALT column in the VCF file. [default=off; boolean]
 
 Alignment filtering/ consensus options (use with -M, -X, -L)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
