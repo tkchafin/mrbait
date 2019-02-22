@@ -10,6 +10,8 @@ v1.1.6
 - Bug fix in parallel target selection
 - Added --target_all option
 - Added option to design x baits per target with n max overlap (-b calc)
+- Fixed bug in calculating target IDs for output
+- Added reverse complement filtering of baits (-f rc)
 
 v1.1.5
 - Bug fix for parsing command line options (-v and -c not working properly)
