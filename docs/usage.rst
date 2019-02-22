@@ -143,6 +143,11 @@ with total lengths outside of this range will fail, and be excluded from bait de
   to specify the minimum distance between targets. When targets are in conflict |br|
   (e.g. they are less than *-D,--dist_r* bases apart), conflicts will be resolved |br|
   using the criterion set with *-S,--select_r*. [default=100]
+--target_all
+  **Use all loci as targets**: This option tells mrbait to use all *passing* loci |br|
+  as target regions for bait design. Note that all target filtering options will |br|
+  still be in effect. Use this option if your input loci are already curated, and |br|
+  you simply want to design baits for them [default=False]
 -d, --flank_dist
   **Flanking distance for target filtering**: Distance from boundaries of target |br|
   region to parse for counting SNPs, ambiguities, gaps, etc when filtering |br|
@@ -205,6 +210,7 @@ passing baits will be included in the final output FASTA file.
   Usage: |br|
   *-s tile=[x]*: Tile baits over whole region, with *x* overlap |br|
   *-s center=[n,x]*: *n* centered baits with *x* overlap |br|
+  *-s calc=[n,x]*: Design *n* baits per target with *x* maximum overlap |br|
   *-s flank=[n,x]*: *n* terminal baits (each end) with *x* overlap
   Default behavior is to tile baits across all targets with 50% overlap
 
@@ -213,12 +219,13 @@ passing baits will be included in the final output FASTA file.
   Can be specified any number of times to use additional filtering criteria.
 
   Usage: |br|
-  *-F mask=[x]*:  Maximum of *x* N characters in target region
-  *-F gc=[x,y]*:  G/C propotion between *x* (min) and *y* (max)
-  *-F rand=[x]*:  Randomly retain *x* targets
-  *-F pw=[i,q]*:  Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
-  *-F blast_i=[i,q]*:  Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
-  *-F blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage
+  *-f mask=[x]*:  Maximum of *x* N characters in target region
+  *-f gc=[x,y]*:  G/C propotion between *x* (min) and *y* (max)
+  *-f rand=[x]*:  Randomly retain *x* targets
+  *-f pw=[i,q]*:  Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
+  *-f rc=[i,q]*:  Pairwise align reverse complements, where i and q are as in -f pw |br|
+  *-f blast_i=[i,q]*:  Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
+  *-f blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage
 
 Output Options
 ~~~~~~~~~~~~~~

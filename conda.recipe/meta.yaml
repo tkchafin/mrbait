@@ -13,21 +13,25 @@ build:
 requirements:
   build:
     - python {{PY_VER}}*,>=3.6
+    - certifi
+    - setuptools
     - pandas >=0.22
     - biopython
     - numpy >=1.9
     - pyvcf >=0.6.8
-    - networkx >=2.0
-    - setuptools
+    - decorator >=4.3.0
+    - networkx >=2.2
     - blast
     - vsearch
   run:
     - python {{PY_VER}}*,>=3.6
+    - certifi
+    - setuptools
     - pandas >=0.22
     - biopython
     - numpy >=1.9
     - pyvcf >=0.6.8
-    - networkx >=2.0
+    - networkx >=2.2
     - blast
     - vsearch
 
