@@ -25,10 +25,10 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version: 1.1.6
-	Author: Tyler K. Chafin
-	Contact: tkchafin@uark.edu
-	License: GNU Public License v3.0
+	Version:  1.1.6
+	Author:   Tyler K. Chafin
+	Contact:  tkchafin@uark.edu
+	License:  GNU Public License v3.0
 
 	Releases: https://github.com/tkchafin/mrbait/releases
 
@@ -337,7 +337,6 @@ class parseArgs():
 
 		#First pass to see if help menu was called
 		for o, a in options:
-			print(o)
 			if o == "-h" or o == "--help" or o == "-help":
 				display_help("\tExiting because help menu was called.")
 				sys.exit(0)
@@ -363,7 +362,8 @@ class parseArgs():
 			elif opt =='-A' or opt== '--assembly':
 				self.assembly = arg
 			elif opt =="--vcfALT":
-				print("Argument provided for boolean:",str(arg))
+				if arg:
+					print("Argument provided for boolean:",str(arg))
 				self.vcfALT = True
 
 			#Locus filtering params
@@ -451,7 +451,8 @@ class parseArgs():
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
 			elif opt == "--target_all":
-				print("Argument provided for boolean:",str(arg))
+				if arg:
+					print("Argument provided for boolean:",str(arg))
 				self.target_all=True
 
 			#Bait selection options
@@ -523,7 +524,8 @@ class parseArgs():
 			elif opt == "--makedb":
 				self.makedb = arg
 			elif opt == "--nodust":
-				print("Argument provided for boolean:",str(arg))
+				if arg:
+					print("Argument provided for boolean:",str(arg))
 				self.nodust = "TRUE"
 
 			#output options
@@ -538,10 +540,12 @@ class parseArgs():
 			elif opt=='-o' or opt=='--out':
 				self.out = arg
 			elif opt=='-t' or opt=='--print_tr':
-				print("Argument provided for boolean:",str(arg))
+				if arg:
+					print("Argument provided for boolean:",str(arg))
 				self.print_tr = True
 			elif opt=='--print_loc':
-				print("Argument provided for boolean:",str(arg))
+				if arg:
+					print("Argument provided for boolean:",str(arg))
 				self.print_loc = True
 			elif opt == "--db":
 				self.db = str(arg)
