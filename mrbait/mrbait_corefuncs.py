@@ -613,12 +613,12 @@ def checkTargetRegions(conn):
 def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
 	fas = params.workdir + "/.temp_ref.fasta"
-	aln_file_tools.writeFasta(seqs, fas)
+	aln_file_tools.writeFastaNogap(seqs, fas)
 
 	#First sort FASTA by size
 	sor = params.workdir + "/.temp.sort"
 	try:
-		vsearch.sortByLength(params.vsearch, fas, sor)
+		vsearch.sortByLength(params.vsearch, fas, sor, params.blen)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -636,7 +636,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	#Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
 	pw = params.workdir + "/" + params.out + ".pw"
 	try:
-		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw)
+		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw, params.blen)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -652,9 +652,79 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Returns a list of edges
 	ret = vsearch.parsePairwiseAlign(pw)
-	os.remove(pw)
+	#os.remove(pw)
 	return(ret)
 
+#Function for deduplication of targets by pairwise alignment
+def pairwiseAlignReverseComp(conn, params, seqs, minid, mincov):
+	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
+	#write sequences
+	fas = params.workdir + "/.temp_ref.fasta"
+	aln_file_tools.writeFastaNogap(seqs, fas)
+
+	# #First sort FASTA by size
+	sor = params.workdir + "/.temp.sort"
+	try:
+		vsearch.sortByLength(params.vsearch, fas, sor, params.blen)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except NameError as err:
+		sys.exit(err.args)
+	except OSError as err:
+		print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
+	os.remove(fas)
+	
+	
+	#VSEARCH call to reverse complement .temp_ref.fasta
+	# revcomp = params.workdir + "/.temp_revcomp.fasta"
+	# try:
+	# 	vsearch.fastxRevcomp(params.vsearch, sor, revcomp)
+	# except KeyboardInterrupt:
+	# 	sys.exit("Process aborted: Keyboard Interrupt")
+	# except subprocess.CalledProcessError as err:
+	# 	print("VSEARCH encountered a problem.")
+	# 	sys.exit(err.args)
+	# except NameError as err:
+	# 	sys.exit(err.args)
+	# except OSError as err:
+	# 	print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
+	# 	sys.exit(err.args)
+	# except:
+	# 	sys.exit(sys.exc_info()[0])
+	
+	#custom function call to reverse complement FASTA 
+	revcomp = params.workdir + "/.temp_revcomp.fasta"
+	aln_file_tools.reverseComplementFasta(sor, revcomp)
+	
+	# global align of baits against reverse complements
+	pw = params.workdir + "/" + params.out + ".rc"
+	try:
+		vsearch.usearchGlobal(params.vsearch, params.vthreads, sor, revcomp, minid, mincov, pw, params.blen)
+	except KeyboardInterrupt:
+		sys.exit("Process aborted: Keyboard Interrupt")
+	except subprocess.CalledProcessError as err:
+		print("VSEARCH encountered a problem.")
+		sys.exit(err.args)
+	except OSError as err:
+		print("Exception: OSError in VSEARCH call. Check that you are using the correct executable.")
+		sys.exit(err.args)
+	except:
+		sys.exit(sys.exc_info()[0])
+	os.remove(sor)
+	os.remove(revcomp)
+	
+	#Finally, parse the output of pairwise alignment, to get 'bad matches'
+	#Returns a list of edges
+	ret = vsearch.parsePairwiseAlign(pw)
+	#os.remove(pw)
+	#print(ret)
+	return(ret)
 
 #Function to perform conflict resolution based on VSEARCH results
 def dupEdgeResolution(conn, params, blacklist_edges):
@@ -834,9 +904,12 @@ def baitDiscovery(conn, params, targets):
 #Function to filter target regions by --filter_R arguments
 def filterBaits_verbose(conn, params):
 	rand_num = None
-	aln = False
-	minid = None
-	mincov = None
+	alnP = False
+	minidP = None
+	mincovP = None
+	alnR = False
+	minidR = None
+	mincovR = None
 	if (len(params.filter_b_objects) <= 0):
 		print("\t\t\tNo filtering criteria provided. Retaining all baits.")
 		return(0)
@@ -858,9 +931,13 @@ def filterBaits_verbose(conn, params):
 				m.baitFilterGC(conn, minprop=min_mask_prop, maxprop=max_mask_prop)
 			elif option.o1 == "pw":
 				#print("Filtering baits by pairwise alignment")
-				aln = True
-				minid = option.o2
-				mincov = option.o3
+				alnP = True
+				minidP = option.o2
+				mincovP = option.o3
+			elif option.o1 == "rc":
+				alnR = True
+				minidR = option.o2
+				mincovR = option.o3
 			elif option.o1 in ("blast_x", "blast_i"):
 				#if blast database given as fasta, make a blastdb:
 				db_path = None
@@ -921,17 +998,17 @@ def filterBaits_verbose(conn, params):
 				assert False, "Unhandled option %r"%option
 
 		#Perform pairwise alignment AFTER all other filters because it is analytically more expensive
-		if aln:
+		if alnP:
 			print("\t\t\tFiltering criterion: Pairwise alignment")
 			passedBaits = m.getPassedBaits(conn)
-			assert (0.0 < minid < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
-			assert (0.0 < mincov < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 < minidP < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 < mincovP < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
 			print("\t\t\t  --VSEARCH executable:",params.vsearch)
 			print("\t\t\t  --VSEARCH threads:",params.vthreads)
-			print("\t\t\t  --Percent identity:",minid)
-			print("\t\t\t  --Query coverage:",mincov)
+			print("\t\t\t  --Percent identity:",minidP)
+			print("\t\t\t  --Query coverage:",mincovP)
 
-			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minid, mincov)
+			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minidP, mincovP)
 
 			#print("Blacklisted edges:",blacklist_edges)
 			if (len(blacklist_edges) > 0):
@@ -953,6 +1030,39 @@ def filterBaits_verbose(conn, params):
 				if len(revised_blacklist) > 0:
 					m.removeBaitsByList(conn, revised_blacklist)
 
+		#Perform reverse complement search 
+		if alnR:
+			print("\t\t\tFiltering criterion: Reverse Complement Pairwise Alignment")
+			passedBaits = m.getPassedBaits(conn)
+			assert (0.0 < minidR < 1.0), "Minimum ID for pairwise alignment must be between 0.0 and 1.0"
+			assert (0.0 < mincovR < 1.0), "Minimum alignment coverage for pairwise alignment must be between 0.0 and 1.0"
+			print("\t\t\t  --VSEARCH executable:",params.vsearch)
+			print("\t\t\t  --VSEARCH threads:",params.vthreads)
+			print("\t\t\t  --Percent identity:",minidR)
+			print("\t\t\t  --Query coverage:",mincovR)
+
+			blacklist_edges = pairwiseAlignReverseComp(conn, params, passedBaits, minidR, mincovR)
+
+			#print("Blacklisted edges:",blacklist_edges)
+			if (len(blacklist_edges) > 0):
+				print("\t\t\tResolving edges...")
+				if(params._noGraph):
+					print("\t\t\t  --Resolve by graph: False (deleting all conflicts)")
+				else:
+					print("\t\t\t  --Resolve by graph: True")
+					if (params._noWeightGraph):
+						print("\t\t\t  --MIS method: Approximate")
+					else:
+						print("\t\t\t  --MIS method: Weighted")
+						if (params._weightByMin):
+							print("\t\t\t  --Weights: Minimum ambiguity")
+						else:
+							print("\t\t\t  --Weights: Maximum variation")
+				params._noWeightGraph = 1
+				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
+				if len(revised_blacklist) > 0:
+					m.removeBaitsByList(conn, revised_blacklist)
+	
 		#If 'random' select is turned on, then apply AFTER all other options
 		if rand_num:
 			print("\t\t\tRandomly selecting",rand_num,"baits.")
@@ -1046,13 +1156,13 @@ def printBaits(conn, params):
 	rel_bait = dict() # dictionary to keep bait number relative to target
 
 	for i, r in df.iterrows():
-		if r.locid in rel_targ:
-			rel_targ[r.locid] += 1
-		else:
-			rel_targ[r.locid] = 1
 		if r.regid in rel_bait:
 			rel_bait[r.regid] += 1
 		else:
+			if r.locid in rel_targ:
+				rel_targ[r.locid] += 1
+			else:
+				rel_targ[r.locid] = 1
 			rel_bait[r.regid] = 1
 		#If user wants expanded sequences:
 		if params.expand:
