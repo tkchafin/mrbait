@@ -17,34 +17,45 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.1.2',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Acknowledgements" href="acknowledgements.html" />
     <link rel="prev" title="Output Files" href="output.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -181,7 +192,7 @@ up. Testing was performed on a 2014 iMac with a 4-core Intel i7 processor and
 <h2>Runtime scaling<a class="headerlink" href="#runtime-scaling" title="Permalink to this headline">¶</a></h2>
 <p>With a ddRAD dataset sequencing on HiSeq 2500 paired-end with 150bp reads, including
 48 individuals and generating 51,931 alignments, the following command was run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -L wtd_run1.loci -T <span class="m">4</span> -c <span class="m">12</span> -l <span class="m">150</span> -b <span class="m">60</span> -K <span class="m">1</span>.0 -d <span class="m">200</span> -F <span class="nv">snp</span><span class="o">=</span><span class="m">1</span>,10 -s <span class="nv">tile</span><span class="o">=</span><span class="m">30</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mrbait -L wtd_run1.loci -T <span class="m">4</span> -c <span class="m">12</span> -l <span class="m">150</span> -b <span class="m">60</span> -K 1.0 -d <span class="m">200</span> -F <span class="nv">snp</span><span class="o">=</span>1,10 -s <span class="nv">tile</span><span class="o">=</span>30
 </pre></div>
 </div>
 <p>A total of 46,219 alignments passed filtering, of which 44,808 included a
@@ -297,7 +308,7 @@ not utilize parallel computation</p>
         <a href="acknowledgements.html" class="btn btn-neutral float-right" title="Acknowledgements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="output.html" class="btn btn-neutral" title="Output Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-left" title="Output Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -306,7 +317,7 @@ not utilize parallel computation</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Tyler K. Chafin.
+        &copy; Copyright 2018, Tyler K. Chafin
 
     </p>
   </div>
@@ -323,32 +334,16 @@ not utilize parallel computation</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.1.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

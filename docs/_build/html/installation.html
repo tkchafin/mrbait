@@ -17,34 +17,45 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.1.2',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Input files" href="files.html" />
     <link rel="prev" title="Pipeline Description" href="pipeline.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -229,7 +240,7 @@ the same commands. After installation, be sure to test that conda is installed b
 <strong>conda info</strong>, which will print information about your installation. Note, you may first need
 to reload your bash environment by typing <strong>source ~/.bashrc</strong> or <strong>source ~/.bash_profile</strong> on Mac.
 Assuming success, the installation process is then very straightforward:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#This command tells conda that the code and dependencies for mrbait can</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">#This command tells conda that the code and dependencies for mrbait can</span>
 <span class="c1">#be found in ‘channels’ bioconda, conda-forge, and tylerkchafin.</span>
 conda install mrbait -c tylerkchafin -c bioconda -c conda-forge
 
@@ -256,8 +267,8 @@ have permissions to modify. Anaconda will instead install your own local flavor 
 your home directory, where is will also install any additional packages you choose to add.</p>
 <p><strong>BLAST and VSEARCH</strong>: conda will also install both BLAST and VSEARCH and place them within
 your conda environment. If you would like to manually manage versions of these programs, or
-use an existing installation, you can provide the paths to those binaries using the <em>–vsearch</em>
-and <em>–blastn</em> commands for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>.</p>
+use an existing installation, you can provide the paths to those binaries using the <em>&#8211;vsearch</em>
+and <em>&#8211;blastn</em> commands for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>.</p>
 </div>
 <div class="section" id="running-mrbait">
 <h2>Running <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a><a class="headerlink" href="#running-mrbait" title="Permalink to this headline">¶</a></h2>
@@ -269,12 +280,12 @@ mrbait -h</p>
 instructions, and Section 8 for tutorials). For example, to generate baits of length
 80, tiled across target regions with an overlap of 40 bases, from a Multiple Alignment
 File (MAF) “example.maf”:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span><span class="m">40</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span>40
 </pre></div>
 </div>
 <p>Or, to also filter for only alignments including 5 or more individuals, and
 of length &gt;500:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span><span class="m">40</span> -l <span class="m">500</span> -c <span class="m">5</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>mrbait -M example.maf -b <span class="m">80</span> -s <span class="nv">tile</span><span class="o">=</span><span class="m">40</span> -l <span class="m">500</span> -c 5
 </pre></div>
 </div>
 </div>
@@ -291,7 +302,7 @@ of length &gt;500:</p>
         <a href="files.html" class="btn btn-neutral float-right" title="Input files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="pipeline.html" class="btn btn-neutral" title="Pipeline Description" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="pipeline.html" class="btn btn-neutral float-left" title="Pipeline Description" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -300,7 +311,7 @@ of length &gt;500:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Tyler K. Chafin.
+        &copy; Copyright 2018, Tyler K. Chafin
 
     </p>
   </div>
@@ -317,32 +328,16 @@ of length &gt;500:</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.1.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -17,34 +17,45 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.1.2',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Usage options" href="usage.html" />
     <link rel="prev" title="Getting Started" href="installation.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -79,7 +90,26 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="introduction.html">Introduction</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Input files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#assembled-genomes">Assembled genomes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#annotating-genomes-with-vcf">Annotating genomes with VCF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#annotating-genomes-with-gff">Annotating genomes with GFF</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-genome-alignments">Multiple genome alignments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reduced-representation-data">Reduced representation data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage.html">Usage options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input files</a><ul>
@@ -175,7 +205,7 @@ a sequence should begin with a header line, or short description (indicated by t
 not matter if the following lines are interleaved or on a single line, and any blank
 lines in the file will be ignored, as will any leading or trailing whitespace.</p>
 <p>An example FASTA-formatted sequence is given below.</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -198,7 +228,7 @@ ATCGTGCTGCGGCGCTGCCTCAGC…
 <h3>Annotating genomes with VCF<a class="headerlink" href="#annotating-genomes-with-vcf" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> also supports supplementing genomic sequences with coordinate-reference SNP
 data (e.g. obtained from population-level sequencing) using the <a class="reference external" href="http://samtools.github.io/hts-specs/">Variant Call Format</a>:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
  4
@@ -230,14 +260,14 @@ target regions for those which capture flanking SNPs.</p>
 <p>NOTE: When using VCF, the REF column is ignored. Instead, the reference allele will be
 taken from the FASTA reference provided. For cases when the reference allele is an N or
 gap (-), you can choose to either retain the N/gap allele, OR attempt to override it
-using the ALT alleles provided in the VCF for that position (<em>–vcfALT</em>)</p>
+using the ALT alleles provided in the VCF for that position (<em>&#8211;vcfALT</em>)</p>
 </div>
 <div class="section" id="annotating-genomes-with-gff">
 <h3>Annotating genomes with GFF<a class="headerlink" href="#annotating-genomes-with-gff" title="Permalink to this headline">¶</a></h3>
 <p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> can also make use of genomic features provided using the Generic Feature Format (GFF),
 independently or in addition to any variant data provided via VCF. mrbait assumes that input
 GFF files follow the version 3 <cite>GFF specification &lt;https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md&gt;</cite>_:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -268,7 +298,7 @@ attribute.</p>
 be provided using the Multiple Alignment Format (<a class="reference external" href="https://genome.ucsc.edu/FAQ/FAQformat.html#format9.3">MAF</a>), or the eXtended Multi-FastA (<a class="reference external" href="https://asap.genetics.wisc.edu/software/mauve/mauve-user-guide/mauve-output-file-formats.php">XMFA</a>) formats.</p>
 <p>The MAF format is output by several multiple alignment programs, including <a class="reference external" href="https://mafft.cbrc.jp/alignment/software/">MAFFT</a>
 and <a class="reference external" href="http://mugsy.sourceforge.net/">Mugsy</a>, and take the following general form:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
  4
@@ -312,7 +342,7 @@ MAUVE (which outputs it as “.alignment”) is an extension of the standard FAS
 to allow alignment blocks from many different loci, with header lines representing
 identifiers for the aligned sequence, and start-end coordinates representing the alignment
 block location within the genome, followed by the sequence:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -333,7 +363,7 @@ TTA-CCAAGC--GC…
 </td></tr></table></div>
 <p>Alignment blocks are delimited by the “=” symbol. All alignment blocks are assumed
 by <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to represent separate, discontinuous loci. Note that because
-no individual ‘alignment block’ in the .xmfa file is guaranteed to contain the same
+no individual &#8216;alignment block&#8217; in the .xmfa file is guaranteed to contain the same
 genome representatives, no reference coordinates are saved by mrbait. This means
 that additional annotation via GFF or VCF cannot be added to whole-genome alignments
 provided in .xmfa format.</p>
@@ -346,7 +376,7 @@ the “.loci” format output by the RADseq assembly pipeline <a class="referenc
 its successor <a class="reference external" href="https://github.com/dereneaton/ipyrad">ipyrad</a>. This format shows individual
 loci delimited by a line starting with “//” which features additional annotation of
 variants and parsimony-informative sites:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -368,7 +398,7 @@ a consensus sequence), and only uses the “//” delimiter to distinguish betwe
 blocks. Creating a .loci file from other formats can be accomplished relatively easily.
 For example, a series of separate alignments (each as .fasta), could be converted to the
 <strong>.loci</strong> format using the following <strong>bash</strong> command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> file in <span class="sb">`</span>ls example*.fasta<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="k">for</span> file in <span class="sb">`</span>ls example*.fasta<span class="sb">`</span><span class="p">;</span> <span class="k">do</span>
   awk <span class="s1">&#39;BEGIN{ORS=&quot;&quot;}$1~/^\&gt;/{print $01&quot;\t&quot;;next}{print $0&quot;\n&quot;}&#39;</span> <span class="nv">$file</span>
   &gt;&gt; example.loci<span class="p">;</span>
   <span class="nb">echo</span> <span class="s2">&quot;//&quot;</span> &gt;&gt; example.loci<span class="p">;</span>
@@ -389,7 +419,7 @@ For example, a series of separate alignments (each as .fasta), could be converte
         <a href="usage.html" class="btn btn-neutral float-right" title="Usage options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="installation.html" class="btn btn-neutral" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -398,7 +428,7 @@ For example, a series of separate alignments (each as .fasta), could be converte
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Tyler K. Chafin.
+        &copy; Copyright 2018, Tyler K. Chafin
 
     </p>
   </div>
@@ -415,32 +445,16 @@ For example, a series of separate alignments (each as .fasta), could be converte
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.1.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

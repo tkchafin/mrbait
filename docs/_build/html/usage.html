@@ -17,34 +17,45 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.1.2',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Output Files" href="output.html" />
     <link rel="prev" title="Input files" href="files.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -79,7 +90,35 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="introduction.html">Introduction</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Getting Started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="files.html">Input files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Usage options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#main-parameters">Main Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#general-options">General options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#input-options">Input Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alignment-filtering-consensus-options-use-with-m-x-l">Alignment filtering/ consensus options (use with -M, -X, -L)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#general-bait-design-options">General Bait Design Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#target-region-options">Target Region Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bait-selection-options">Bait Selection Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#output-options">Output Options</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#filtering-using-vsearch">Filtering using vsearch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vsearch-options">vsearch Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#graph-based-conflict-resolution">Graph-based conflict resolution</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#filtering-using-blast">Filtering using blast</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="output.html">Output Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarking.html">Benchmarking and Hardware Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acknowledgements.html">Acknowledgements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pipeline.html">Pipeline Description</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Input files</a></li>
@@ -192,7 +231,7 @@ from 1 to infinity.</p>
 <kbd><span class="option">-r</span>, <span class="option">--resume</span></kbd></td>
 <td><p class="first"><strong>Resume</strong>: This flag is used to tell mrbait if you would like to resume work <br>
 following a particular step. Use this option in conjunction with the <br>
-<strong>–db</strong> flag to continue the pipeline if you would like to re-perform <br>
+<strong>&#8211;db</strong> flag to continue the pipeline if you would like to re-perform <br>
 filtering steps without needing to re-load and parse alignments</p>
 <p class="last">Usage: <br>
 -r 1: Continue pipeline after Step 1 (loading alignments) <br>
@@ -203,7 +242,7 @@ For example, -r 4 will tell <a class="reference external" href="https://github.c
 </td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--db</span></kbd></td>
-<td><strong>Database</strong>: Use this with the –resume flag to specify a .sqlite <br>
+<td><strong>Database</strong>: Use this with the &#8211;resume flag to specify a .sqlite <br>
 database file from which to start the pipeline.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-T</span>, <span class="option">--threads</span></kbd></td>
@@ -238,13 +277,13 @@ being called. [default=1]</td></tr>
 <td><strong>FASTA input</strong>: Genome assembly provided as FASTA</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-V</span>, <span class="option">--vcf</span></kbd></td>
-<td><strong>VCF input</strong>: For use with –assembly: VCF file containing variant data</td></tr>
+<td><strong>VCF input</strong>: For use with &#8211;assembly: VCF file containing variant data</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-G</span>, <span class="option">--gff</span></kbd></td>
-<td><strong>GFF input</strong>: For use with –assembly: GFF file containing feature data</td></tr>
+<td><strong>GFF input</strong>: For use with &#8211;assembly: GFF file containing feature data</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--vcfALT</span></kbd></td>
-<td><p class="first"><strong>REF calling with VCF</strong>: For use with –assembly and –vcf: This option  <br>
+<td><p class="first"><strong>REF calling with VCF</strong>: For use with &#8211;assembly and &#8211;vcf: This option  <br>
 tells mrbait to attempt to override N/gap characters in the reference sequence  <br></p>
 <blockquote class="last">
 <div>using values from the ALT column in the VCF file. [default=off; boolean]</div></blockquote>
@@ -275,7 +314,7 @@ base. [default=0.1]</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-Q</span>, <span class="option">--max_ambig</span></kbd></td>
 </tr>
-<tr><td>&#160;</td><td><strong>Max bad bases</strong>: Maximum allowable proportion of gap/N characters <br>
+<tr><td>&nbsp;</td><td><strong>Max bad bases</strong>: Maximum allowable proportion of gap/N characters <br>
 allowed in a consensus sequence before it will be discarded. <em>-Q 0.5</em> means a <br>
 consensus sequence can be 50% N’s or gap characters (“-“) before being dropped <br>
 from consideration. [default=0.5]</td></tr>
@@ -312,7 +351,7 @@ discovery [default=80]</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-w</span>, <span class="option">--win_shift</span></kbd></td>
 </tr>
-<tr><td>&#160;</td><td><strong>Sliding window shift distance</strong>: Shift distance for sliding window used <br>
+<tr><td>&nbsp;</td><td><strong>Sliding window shift distance</strong>: Shift distance for sliding window used <br>
 to discover target regions. Generally, there should not be a reason to <br>
 alter this. If target discovery (step 2) is taking a very long time, adjusting <br>
 this may make it faster although it could result in more targets failing <br>
@@ -334,7 +373,7 @@ this will affect the specificity of your resulting probes. [default=0]</td></tr>
 <td><strong>Maximum gaps per bait</strong>: Maximum allowable gap characters allowed per bait. <br>
 If dealing with alignments containing many indels, it might be desirable to <br>
 allow a small number per bait sequence. These can be expanded in the final <br>
-output using the -x,–expand option, which will expand gap characters as <br>
+output using the -x,&#8211;expand option, which will expand gap characters as <br>
 A, G, T, C, and absent. [default=0]</td></tr>
 </tbody>
 </table>
@@ -357,31 +396,36 @@ with total lengths outside of this range will fail, and be excluded from bait de
 <td><strong>Multiple targets per locus</strong>: By default, <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> only chooses one target <br>
 region (e.g. conserved region for which baits could be designed) per locus/ <br>
 alignment. When multiple are discovered, they are ranked according to the <br>
-criterion selected with the <em>-S,–select_r</em> option. When <em>-R,–mult_reg</em> not <br>
+criterion selected with the <em>-S,&#8211;select_r</em> option. When <em>-R,&#8211;mult_reg</em> not <br>
 in use, only a single target region (and corresponding baits) is chosen per <br>
 alignment. [default=false]</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-m</span>, <span class="option">--min_mult</span></kbd></td>
 <td><strong>Minimum length for multiple targets</strong>: Specify this to set a minimum alignment <br>
 or locus length to allow multiple target regions to be selected. By default will <br>
-be set to the value of <em>-l,–len</em> (thus, when <em>-R,–mult_reg</em> is used, all loci <br>
+be set to the value of <em>-l,&#8211;len</em> (thus, when <em>-R,&#8211;mult_reg</em> is used, all loci <br>
 passing length filter will be allowed multiple targets).</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-D</span>, <span class="option">--dist_r</span></kbd></td>
-<td><strong>Distance between targets</strong>: When <em>-R,–mult_reg</em> is in use, use this parameter <br>
+<td><strong>Distance between targets</strong>: When <em>-R,&#8211;mult_reg</em> is in use, use this parameter <br>
 to specify the minimum distance between targets. When targets are in conflict <br>
-(e.g. they are less than <em>-D,–dist_r</em> bases apart), conflicts will be resolved <br>
-using the criterion set with <em>-S,–select_r</em>. [default=100]</td></tr>
+(e.g. they are less than <em>-D,&#8211;dist_r</em> bases apart), conflicts will be resolved <br>
+using the criterion set with <em>-S,&#8211;select_r</em>. [default=100]</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--target_all</span></kbd></td>
+<td><strong>Use all loci as targets</strong>: This option tells mrbait to use all <em>passing</em> loci <br>
+as target regions for bait design. Note that all target filtering options will <br>
+still be in effect. Use this option if your input loci are already curated, and <br>
+you simply want to design baits for them [default=False]</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">-d</span>, <span class="option">--flank_dist</span></kbd></td>
 </tr>
-<tr><td>&#160;</td><td><p class="first"><strong>Flanking distance for target filtering</strong>: Distance from boundaries of target <br>
+<tr><td>&nbsp;</td><td><strong>Flanking distance for target filtering</strong>: Distance from boundaries of target <br>
 region to parse for counting SNPs, ambiguities, gaps, etc when filtering <br>
-target regions (see <em>-S,–select_r</em> and <em>-F,–filter_r</em>) [default=500]. <br>
+target regions (see <em>-S,&#8211;select_r</em> and <em>-F,&#8211;filter_r</em>) [default=500]. <br>
 Note that this value will tell <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to search ‘<em>d</em>’ bases to the left AND <br>
-right of each target region.</p>
-<p class="last">Note that currently, the same <em>–flank_dist</em> value will be used for all filters.</p>
-</td></tr>
+right of each target region. <br>
+Note that currently, the same <em>&#8211;flank_dist</em> value will be used for all filters.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-S</span>, <span class="option">--select_r</span></kbd></td>
 <td><p class="first"><strong>Target selection criterion</strong>: Method to resolve conflicts when targets are <br>
@@ -424,8 +468,8 @@ Can be specified any number of times to use additional filtering criteria. <br><
 <div class="section" id="bait-selection-options">
 <h3>Bait Selection Options<a class="headerlink" href="#bait-selection-options" title="Permalink to this headline">¶</a></h3>
 <p>These options are used to specify how baits will be designed in passing target
-regions (<em>-s, –select_b</em>) and how designed baits will be curated to create
-the final set of sequences for synthesis (<em>-f, –filter_b</em>).</p>
+regions (<em>-s, &#8211;select_b</em>) and how designed baits will be curated to create
+the final set of sequences for synthesis (<em>-f, &#8211;filter_b</em>).</p>
 <p>The default behavior is to tile baits across all <em>passing</em> target regions, with
 an overlap of 50%. This corresponds to ~2X coverage across the target region. Only
 passing baits will be included in the final output FASTA file.</p>
@@ -440,6 +484,7 @@ to design baits from passing target regions.</p>
 <p class="last">Usage: <br>
 <em>-s tile=[x]</em>: Tile baits over whole region, with <em>x</em> overlap <br>
 <em>-s center=[n,x]</em>: <em>n</em> centered baits with <em>x</em> overlap <br>
+<em>-s calc=[n,x]</em>: Design <em>n</em> baits per target with <em>x</em> maximum overlap <br>
 <em>-s flank=[n,x]</em>: <em>n</em> terminal baits (each end) with <em>x</em> overlap
 Default behavior is to tile baits across all targets with 50% overlap</p>
 </td></tr>
@@ -448,12 +493,13 @@ Default behavior is to tile baits across all targets with 50% overlap</p>
 <td><p class="first"><strong>Bait filtering criteria</strong>: Method(s) used to filter baits. <br>
 Can be specified any number of times to use additional filtering criteria.</p>
 <p class="last">Usage: <br>
-<em>-F mask=[x]</em>:  Maximum of <em>x</em> N characters in target region
-<em>-F gc=[x,y]</em>:  G/C propotion between <em>x</em> (min) and <em>y</em> (max)
-<em>-F rand=[x]</em>:  Randomly retain <em>x</em> targets
-<em>-F pw=[i,q]</em>:  Pairwise alignment, removing when <em>i</em> percent identity over at least <em>q</em> proportion of the sequences <br>
-<em>-F blast_i=[i,q]</em>:  Only retain BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage <br>
-<em>-F blast_i=[i,q]</em>:  Exclude BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage</p>
+<em>-f mask=[x]</em>:  Maximum of <em>x</em> N characters in target region
+<em>-f gc=[x,y]</em>:  G/C propotion between <em>x</em> (min) and <em>y</em> (max)
+<em>-f rand=[x]</em>:  Randomly retain <em>x</em> targets
+<em>-f pw=[i,q]</em>:  Pairwise alignment, removing when <em>i</em> percent identity over at least <em>q</em> proportion of the sequences <br>
+<em>-f rc=[i,q]</em>:  Pairwise align reverse complements, where i and q are as in -f pw <br>
+<em>-f blast_i=[i,q]</em>:  Only retain BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage <br>
+<em>-f blast_i=[i,q]</em>:  Exclude BLAST hits with <em>i</em> percent identity over at least <em>q</em> query coverage</p>
 </td></tr>
 </tbody>
 </table>
@@ -477,12 +523,12 @@ absent. Bait sequences will be output as FASTA to $out_baits.fasta</td></tr>
 <td><strong>Print target regions</strong>: Boolean. Use this flag if you would <br>
 like target regions to be printed to a FASTA file. FASTA headers will reflect <br>
 locus number, target number within locus, and pass=T or pass=F indicating if the <br>
-target passed or failed filtering specified using the <em>-F,–filter_r</em> options, as|br|
-well as any targets which were excluded due to -S,–select_r criteria. Output file <br>
+target passed or failed filtering specified using the <em>-F,&#8211;filter_r</em> options, as|br|
+well as any targets which were excluded due to -S,&#8211;select_r criteria. Output file <br>
 will be named as $out_targets.fasta.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--print_loc</span></kbd></td>
-<td><strong>Print locus cataog</strong>: Boolean. Prints consensus loci, formatted as in <em>–print_tr</em></td></tr>
+<td><strong>Print locus cataog</strong>: Boolean. Prints consensus loci, formatted as in <em>&#8211;print_tr</em></td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--strand</span></kbd></td>
 <td><strong>Output strand</strong>: Use this if you want to print baits as-designed, or as <br>
@@ -497,17 +543,17 @@ or “both”.</td></tr>
 </div>
 <div class="section" id="filtering-using-vsearch">
 <h2>Filtering using <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a><a class="headerlink" href="#filtering-using-vsearch" title="Permalink to this headline">¶</a></h2>
-<p>Using the –filter_r or –filter_b ‘pw’ (for pairwise-align) options call an external open-source
+<p>Using the &#8211;filter_r or &#8211;filter_b ‘pw’ (for pairwise-align) options call an external open-source
 package <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>. Internally, this is accomplished using the “<em>allpairs_global</em>” function in
 <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>, which performs all-vs-all global alignments of target or bait sequences.
 <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> then parses the output of <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> to find pairs of sequences with greater
 than <em>i</em> percent identity over at least <em>q</em> percent of the query sequence.
 Sequences are first sorted by length, meaning the <em>q</em> proportion should be measured
 by the shorter of the two sequences in each pairwise alignment (although when called
-with the <em>–filter_b</em> command, all pairs are of equal length). Because all sequences
+with the <em>&#8211;filter_b</em> command, all pairs are of equal length). Because all sequences
 will be compared in a pairwise fashion, keep in mind that this step could take
 considerable time, although VSEARCH is exceptionally efficient and does take advantage
-of multiple cores for parallel computation (passed using the –threads argument).</p>
+of multiple cores for parallel computation (passed using the &#8211;threads argument).</p>
 <p>If you did NOT install <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> using the <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> installation instructions for <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a>,
 you may need to point <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> to the <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a> executable. You can specify this path, as
 well asspecify how mrbait parses the results of vsearch using the following parameters:</p>
@@ -527,7 +573,7 @@ alternate path using this flag.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--vthreads</span></kbd></td>
 <td><strong>VSEARCH threads</strong>: Number of threads to use for <a class="reference external" href="https://github.com/torognes/vsearch">vsearch</a>. By default, <br>
-this is assumed to be the same value as the <em>–threads</em> argument passed to <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a></td></tr>
+this is assumed to be the same value as the <em>&#8211;threads</em> argument passed to <a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a></td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--noGraph</span></kbd></td>
 <td><strong>No conflict graph</strong>: By default, mrbait will try to recover as many <br>
@@ -536,7 +582,7 @@ structure (see below) to remove only enough sequences to resolve all conflicts</
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--noWeightGraph</span></kbd></td>
 </tr>
-<tr><td>&#160;</td><td><strong>Unweighted conflict resolution</strong>: By default, mrbait weights all <br>
+<tr><td>&nbsp;</td><td><strong>Unweighted conflict resolution</strong>: By default, mrbait weights all <br>
 nodes by the number of SNPs that the corresponding target or bait captures. <br>
 Use this option to turn this off, and instead use the built-in maximal_independent_set <br>
 function from the <a class="reference external" href="https://networkx.github.io/">networkx</a> package.</td></tr>
@@ -589,22 +635,22 @@ no direct edges remain in the graph after removing failed nodes.</p>
 using a similar scheme of setting a threshold of <em>i</em> sequence identity of hits, and <em>q</em>
 query coverage. Currently, mrbait supports blastn filtering using these cutoff values
 to either exclude (<em>blast_x</em>) or include (<em>blast_i</em>) sequences based on presence of hits.</p>
-<p>Usage of the ‘<em>blast_x</em>’ option for either target (<em>–filter_r</em>) or bait (<em>–filter_b</em>)
+<p>Usage of the ‘<em>blast_x</em>’ option for either target (<em>&#8211;filter_r</em>) or bait (<em>&#8211;filter_b</em>)
 filtering would most generally be used to prevent non-target matches to potential
 contaminant DNA, given a representative genome for the putative non-target organism
 (for example a common bacterial contaminant). If such a reference genome is lacking,
 you can also increase specificity of chosen targets or baits using the ‘<em>blast_i</em>’
 option, which only retains queries with hits to a specified genome.</p>
 <p>When using either ‘<em>blast_x</em>’ or ‘<em>blast_i</em>’ options for filtering, a database file must
-be specified either as a pre-built BLAST-formatted database using the <em>–blastdb</em> flag,
-or alternatively as a FASTA file using <em>–fastadb</em>. In the latter case, mrbait will
+be specified either as a pre-built BLAST-formatted database using the <em>&#8211;blastdb</em> flag,
+or alternatively as a FASTA file using <em>&#8211;fastadb</em>. In the latter case, mrbait will
 call the NCBI MakeBlastDB executable. When using the <a class="reference external" href="http://docs.continuum.io/conda/">conda</a> install, this is included
 with all other BLAST+ binaries (including the blastn executable also required by
 mrbait for BLAST filtering). If not using the conda installation instructions,
 these are both assumed to be accessible in your $PATH as ‘<em>blastn</em>’ and ‘<em>makeblastdb</em>’.</p>
 <p>Please note that with particularly large sets of query sequences, this process may
 take a while, although it does take advantage of multithreading if passed via the
-<em>–threads</em> argument.</p>
+<em>&#8211;threads</em> argument.</p>
 <p>BLAST options:</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
@@ -672,7 +718,7 @@ nearly identical alignments to a very closely related genome.</td></tr>
         <a href="output.html" class="btn btn-neutral float-right" title="Output Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="files.html" class="btn btn-neutral" title="Input files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="files.html" class="btn btn-neutral float-left" title="Input files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -681,7 +727,7 @@ nearly identical alignments to a very closely related genome.</td></tr>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Tyler K. Chafin.
+        &copy; Copyright 2018, Tyler K. Chafin
 
     </p>
   </div>
@@ -698,32 +744,16 @@ nearly identical alignments to a very closely related genome.</td></tr>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.1.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

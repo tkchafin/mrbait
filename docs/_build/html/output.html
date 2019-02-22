@@ -17,34 +17,45 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'1.1.2',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Benchmarking and Hardware Requirements" href="benchmarking.html" />
     <link rel="prev" title="Usage options" href="usage.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -167,12 +178,12 @@
   <div class="section" id="output-files">
 <span id="output"></span><h1>Output Files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h1>
 <p>Final output of baits will be formatted as FASTA and named $out_baits.fasta
-(where $out is defined using the -o/–out flag). When the <em>-t/–print_tr</em> option is in
+(where $out is defined using the -o/&#8211;out flag). When the <em>-t/&#8211;print_tr</em> option is in
 use, targets will also be output as $out_targets.fasta, with an additional field
 in the header indicating if these targets passed or failed target selection and filtering.</p>
 <p>By default, baits are reported with any ambiguity sequences included (e.g. as a
 consensus sequence) like so:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -187,8 +198,8 @@ TATGAATGTCGCGCGAT……
 …
 </pre></div>
 </td></tr></table></div>
-<p>If using the <em>-x/–expand</em> option, ambiguities will be reported as all combinations, like so:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+<p>If using the <em>-x/&#8211;expand</em> option, ambiguities will be reported as all combinations, like so:</p>
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
 2
 3
 4
@@ -207,9 +218,9 @@ TATGAATGTCGCGCGAT……
 …
 </pre></div>
 </td></tr></table></div>
-<p>Baits can also be printed as reverse complement. For example, if the <em>–expand</em> option was
-specified, in addition to <em>–strand both</em>:</p>
-<div class="highlight-none notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+<p>Baits can also be printed as reverse complement. For example, if the <em>&#8211;expand</em> option was
+specified, in addition to <em>&#8211;strand both</em>:</p>
+<div class="highlight-none"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
  4
@@ -239,7 +250,7 @@ ATACTTACAGCGCGCTA……
 </pre></div>
 </td></tr></table></div>
 <p><a class="reference external" href="https://github.com/tkchafin/mrbait">mrbait</a> will also produce a .sqlite file (e.g. $out.sqlite) which can be used with
-the <em>–resume</em> flag to restart the pipeline at different stages- for example to
+the <em>&#8211;resume</em> flag to restart the pipeline at different stages- for example to
 re-perform bait filtering with different options. This stores the complete database,
 including all consensus loci parsed from the alignment input files, all targets, and
 all bait sequences (including those which failed filtering) and can be used independently
@@ -257,7 +268,7 @@ with your own SQLite queries.</p>
         <a href="benchmarking.html" class="btn btn-neutral float-right" title="Benchmarking and Hardware Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="usage.html" class="btn btn-neutral" title="Usage options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="usage.html" class="btn btn-neutral float-left" title="Usage options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -266,7 +277,7 @@ with your own SQLite queries.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Tyler K. Chafin.
+        &copy; Copyright 2018, Tyler K. Chafin
 
     </p>
   </div>
@@ -283,32 +294,16 @@ with your own SQLite queries.</p>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'1.1.2',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
