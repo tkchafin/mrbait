@@ -5,4 +5,3 @@ pyvcf >=0.6.8
 decorator >=4.3.0
 networkx >=2.2
 blast
-vsearch
