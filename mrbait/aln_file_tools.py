@@ -4,6 +4,8 @@ import os
 import sys
 import Bio
 import vcf
+import pandas as pd
+from mrbait import sequence_tools as s
 from mrbait import misc_utils as utils
 from Bio import AlignIO
 
@@ -33,6 +35,28 @@ def writeFasta(seqs, fas):
 
 #Write FASTA from pandas df where col1 is index, col2 is sequence
 #seqs must be a pandas df
+def writeFastaNoprefix(seqs, fas):
+	with open(fas, 'w') as fh:
+		try:
+			#Write seqs to FASTA first
+			#Assumes that a[0] is index, a[1] is id, and a[2] is sequence
+			for a in seqs.itertuples():
+				name = ">" + str(a[1]) + "\n"
+				seq = a[2] + "\n"
+				fh.write(name)
+				fh.write(seq)
+		except IOError as e:
+			print("Could not read file:",e)
+			sys.exit(1)
+		except Exception as e:
+			print("Unexpected error:",e)
+			sys.exit(1)
+		finally:
+			fh.close()
+
+
+#Write FASTA from pandas df where col1 is index, col2 is sequence
+#seqs must be a pandas df
 #this version replaces gaps with N characters
 def writeFastaNogap(seqs, fas):
 	with open(fas, 'w') as fh:
@@ -53,6 +77,15 @@ def writeFastaNogap(seqs, fas):
 			sys.exit(1)
 		finally:
 			fh.close()
+
+#function to reverse complement a fasta file
+def reverseComplementFasta(infile, outfile):
+	data = list()
+	for tuple in read_fasta(infile):
+		tuple[1] = s.reverseComplement(tuple[1])
+		data.append(tuple)
+	writeFastaNoprefix(pd.DataFrame(data), outfile)
+	return(0)
 
 #Read genome as FASTA. FASTA header will be used
 #This is a generator function
