@@ -7,9 +7,37 @@ from mrbait import seq_graph as sg
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
 
-def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw):
+def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw, minlen):
 	vsearch = [binary,
 			"--allpairs_global", seqpath,
+			"--threads", str(threads),
+			"--id", str(qid),
+			"--minseqlength", str(minlen),
+			"--blast6out", pw,
+			"--rowlen", "0", "--self",
+			"--target_cov", str(qcov),
+			"--quiet"]
+	command = " ".join(vsearch)
+
+	#Vsearch subprocess
+	proc = Popen(vsearch, stdout=PIPE, stdin=PIPE, env={'PATH': os.getenv('PATH')})
+
+	#WRap to enable keyboard interrupe
+	try:
+		t = proc.communicate()[0]
+	except KeyboardInterrupt:
+		proc.kill()
+		raise KeyboardInterrupt
+
+	#Get return code from process
+	if proc.returncode:
+		raise CalledProcessError ("VSEARCH exited with non-zero status")
+
+def usearchGlobal(binary, threads, seqpath, qpath, qid, qcov, pw, minlen):
+	vsearch = [binary,
+			"--usearch_global", seqpath,
+			"--db", qpath,
+			"--minseqlength", str(minlen),
 			"--threads", str(threads),
 			"--id", str(qid),
 			"--blast6out", pw,
@@ -33,9 +61,10 @@ def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw):
 		raise CalledProcessError ("VSEARCH exited with non-zero status")
 
 #Function to sort FASTA by length, needed before allpairsGlobal call
-def sortByLength(binary, seqpath, outpath):
+def sortByLength(binary, seqpath, outpath, minlen):
 	vsearch = [binary,
 			"--sortbylength", seqpath,
+			"--minseqlength", str(minlen),
 			"--output", outpath,
 			"--quiet"]
 	command = " ".join(vsearch)
@@ -55,7 +84,7 @@ def sortByLength(binary, seqpath, outpath):
 		raise CalledProcessError ("VSEARCH exited with non-zero status")
 
 #Function to sort FASTA by length, needed before allpairsGlobal call
-def fastxRevcomp(binary, seqpath, outpath):
+def fastxRevcomp(binary, seqpath, outpath, minlen):
 	vsearch = [binary,
 			"--fastx_revcomp", seqpath,
 			"--fastaout", outpath,
