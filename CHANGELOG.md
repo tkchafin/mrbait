@@ -13,7 +13,7 @@ v1.1.6
 - Fixed bug in calculating target IDs for output
 - Added reverse complement filtering of baits (-f rc)
 
-v1.1.5
+[v1.1.5](https://github.com/tkchafin/mrbait/releases/tag/v1.1.5)
 - Bug fix for parsing command line options (-v and -c not working properly)
 - Bug fix for targets not being added when sliding window exceeds locus
 
