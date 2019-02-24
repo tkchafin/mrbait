@@ -17,6 +17,34 @@ I currently supports native installation on Linux and Mac OS. MrBait is not nati
 Regardless of OS, the easiest way to install is using the conda package manager (https://conda.io/docs/):
 ```conda install mrbait -c tylerkchafin -c bioconda -c conda-forge ```
 
+If you are concerned about conflicting dependencies, you can also create a contained virtual conda environment for mrbait and associated dependencies: 
+```
+#conda call to create a blank python3.6 environment named "mrbait"
+conda create -n mrbait python=3.6
+
+#activate the mrbait conda environment.
+source activate mrbait
+
+#add some channels 
+conda config --env --add channels bioconda --add channels conda-forge
+
+#install mrbait
+conda install -c tylerkchafin mrbait
+
+#run mrbait:
+python3 mrbait -v example.VCF <etc>
+...
+...
+
+#exit environment
+source deactivate
+
+#note that you can now reactivate your mrbait environment at any time by typing:
+source activat mrbait 
+
+#and then exit again just as before
+source deactivate
+```
 
 [CHANGELOG]: ./CHANGELOG.md
 [LICENSE]: ./LICENSE
