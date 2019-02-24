@@ -11,7 +11,7 @@ Documentation: https://mrbait.readthedocs.io/
 Conda package: https://anaconda.org/tylerkchafin/mrbait
 
 ## Installation
-I currently supports native installation on Linux and Mac OS. MrBait is not natively supported on Windows, however will run using the Linux subsystem for Windows 10 (see: https://docs.microsoft.com/en-us/windows/wsl/install-win10). MrBait was tested using the Ubuntu Windows-10 subsystem. 
+I currently support native installation on Linux and Mac OS. MrBait is not natively supported on Windows, however will run using the Linux subsystem for Windows 10 (see: https://docs.microsoft.com/en-us/windows/wsl/install-win10). MrBait was tested using the Ubuntu Windows-10 subsystem. 
 
 
 Regardless of OS, the easiest way to install is using the conda package manager (https://conda.io/docs/):
@@ -40,7 +40,7 @@ python3 mrbait -v example.VCF <etc>
 source deactivate
 
 #note that you can now reactivate your mrbait environment at any time by typing:
-source activat mrbait 
+source activate mrbait 
 
 #and then exit again just as before
 source deactivate
