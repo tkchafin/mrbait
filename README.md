@@ -4,7 +4,7 @@
 
 Python program for universal design of targeted-enrichment probes from multiple input datatypes. Can be used to generate probe sets for ultraconserved elements, anchored enrichment, RAD-capture, etc. 
 
-Citation: Chafin TK, Douglas MR, Douglas ME. 2018. MrBait: Universalidentification and design of targeted-enrichment capture probes. Bioinformatics. https://doi.org/10.1093/bioinformatics/bty548
+Citation: Chafin TK, Douglas MR, Douglas ME. 2018. MrBait: Universal identification and design of targeted-enrichment capture probes. Bioinformatics. https://doi.org/10.1093/bioinformatics/bty548
 
 Documentation: https://mrbait.readthedocs.io/
 
