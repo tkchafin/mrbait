@@ -1,6 +1,1 @@
-pandas >=0.22
-biopython
-numpy >=1.9
-pyvcf >=0.6.8
-blast
 setuptools
