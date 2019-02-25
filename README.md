@@ -32,7 +32,7 @@ conda config --env --add channels bioconda --add channels conda-forge
 conda install -c tylerkchafin mrbait
 
 #run mrbait:
-python3 mrbait -v example.VCF <etc>
+mrbait -v example.VCF <etc>
 ...
 ...
 
