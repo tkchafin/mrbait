@@ -33,8 +33,8 @@ def naiveIndependentSet(G):
 		if C.has_edge(n[0],n[1]):
 			right = n[1]
 			left = n[0]
-			right_n = len(C.neighbors(right))
-			left_n = len(C.neighbors(left))
+			right_n = len(list(C.neighbors(right)))
+			left_n = len(list(C.neighbors(left)))
 			#print("Right neighbor <",right,"> has ", right_n, " connections.")
 			#print("Left neighbor <",left,"> has ", left_n, " connections.")
 			#Remove right if it has more neighbors, otherwise remove left
@@ -56,8 +56,8 @@ def weightedNaiveIndependentSet(G, weights):
 		if C.has_edge(n[0],n[1]):
 			right = n[1]
 			left = n[0]
-			right_n = len(C.neighbors(right))
-			left_n = len(C.neighbors(left))
+			right_n = len(list(C.neighbors(right)))
+			left_n = len(list(C.neighbors(left)))
 			#print("Right neighbor <",right,"> has ", right_n, " connections.")
 			#print("Left neighbor <",left,"> has ", left_n, " connections.")
 			#Remove right if it has more neighbors, otherwise remove left
