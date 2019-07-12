@@ -25,7 +25,7 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version:  1.1.6
+	Version:  1.1.7
 	Author:   Tyler K. Chafin
 	Contact:  tkchafin@uark.edu
 	License:  GNU Public License v3.0
