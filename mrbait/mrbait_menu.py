@@ -185,6 +185,16 @@ VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\"):
 		--Will set to the value of <--threads> if not defined""")
 
 	print("""
+Graph Parameters (relevant for conflict resolution when --select_b or --select_r = \"pw\" or \"rc\"):
+	
+	--noGraph	: Skip graph-based conflict resolution and remove ALL conflicting pairs
+	--noWeightGraph	: Unweighted (random) conflict resolution
+		--MrBait will by default weight conflict resolution to maximize flanking SNPs
+	--weightByMin	: Weight loci by minimum ambiguities (NOT by flanking SNPs)
+	--weightMax	: Maximum graph size to attempt weighted algorithm
+		--Default is 50,000. May be necessary for very large datasets with a lot of redundancy""")
+
+	print("""
 BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 
 	--blastdb	: Path and prefix to existing Blast database to use
@@ -237,7 +247,8 @@ class parseArgs():
 			"vthreads=","hacker=", "evalue=", "e_value=", "gapopen=", "gapextend=",
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
-			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all"])
+			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
+			"noGraph", "noWeightGraph", "weightByMin", "weightMax"])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -327,10 +338,10 @@ class parseArgs():
 		self.resume=None
 
 		#HACKER ONLY OPTIONS
-		self._noGraph = 0
-		self._noWeightGraph = 0
+		self._noGraph = False
+		self._noWeightGraph = False
 		self._weightMax = 50000 #maximum size to attempt weighted edge resolution
-		self._weightByMin = 0
+		self._weightByMin = False
 		self._os = None
 
 
@@ -344,78 +355,79 @@ class parseArgs():
 		#Second pass to set all args.
 		for opt, arg_raw in options:
 			arg = arg_raw.replace(" ","")
+			arg = arg.replace("-","")
 			arg = arg.strip()
 
-			if opt=='-M' or opt=='--maf':
+			if opt=='M' or opt=='maf':
 				self.alignment = arg
-			elif opt=='-X' or opt=='--xmfa':
+			elif opt=='X' or opt=='xmfa':
 				self.xmfa=arg
-			elif opt=='-h' or opt=='--help':
+			elif opt=='h' or opt=='help':
 				pass
 			#Input params
-			elif opt=='-G' or opt=='--gff':
+			elif opt=='G' or opt=='gff':
 				self.gff = arg
-			elif opt=='-V' or opt== '--vcf':
+			elif opt=='V' or opt== 'vcf':
 				self.vcf = arg
-			elif opt=='-L' or opt=='--loci':
+			elif opt=='L' or opt=='loci':
 				self.loci = arg
-			elif opt =='-A' or opt== '--assembly':
+			elif opt =='A' or opt== 'assembly':
 				self.assembly = arg
-			elif opt =="--vcfALT":
+			elif opt =="vcfALT":
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.vcfALT = True
 
 			#Locus filtering params
-			elif opt =='-c' or opt == '--cov':
+			elif opt =='c' or opt == 'cov':
 				self.cov = int(arg)
-			elif opt=='-l' or opt=='--len':
+			elif opt=='l' or opt=='len':
 				self.minlen = int(arg)
-			elif opt=='-q' or opt=='--thresh':
+			elif opt=='q' or opt=='thresh':
 				self.thresh = float(arg)
-			elif opt=='-Q' or opt=='--max_ambig':
+			elif opt=='Q' or opt=='max_ambig':
 				self.max_ambig = float(arg)
-			elif opt=='-k' or opt=='--mask':
+			elif opt=='k' or opt=='mask':
 				self.mask = float(arg)
-			elif opt=='-K' or opt=='--max_mask':
+			elif opt=='K' or opt=='max_mask':
 				self.max_mask = float(arg)
 
 			#Bait general params
-			elif opt=='-b' or opt=='--bait':
+			elif opt=='b' or opt=='bait':
 				self.blen = int(arg)
-			elif opt=='-w' or opt=='--win_shift':
+			elif opt=='w' or opt=='win_shift':
 				self.win_shift = int(arg)
-			elif opt=='-R' or opt=='--mult_reg':
+			elif opt=='R' or opt=='mult_reg':
 				self.mult_reg = 1
-			elif opt=='-m' or opt=='--min_mult':
+			elif opt=='m' or opt=='min_mult':
 				self.min_mult = int(arg)
-			elif opt =='-v' or opt == '--var_max':
+			elif opt =='v' or opt == 'var_max':
 				self.var_max = int(arg)
-			elif opt=='-n' or opt=='--numN':
+			elif opt=='n' or opt=='numN':
 				self.numN = int(arg)
-			elif opt=='-g' or opt=='--numG':
+			elif opt=='g' or opt=='numG':
 				self.numG = int(arg)
-			elif opt=='-E' or opt=='--gff_type':
+			elif opt=='E' or opt=='gff_type':
 				self.anchor = arg
 
 			#target region opts
-			elif opt=='-D' or opt=='--dist_r':
+			elif opt=='D' or opt=='dist_r':
 				self.dist_r = int(arg)
-			elif opt=='-p' or opt=='--tile_min':
+			elif opt=='p' or opt=='tile_min':
 				self.tile_min = int(arg)
 				self.tiling = 1
-			elif opt=='-d' or opt=='--flank_dist':
+			elif opt=='d' or opt=='flank_dist':
 				self.flank_dist = int(arg)
-				assert isinstance(self.flank_dist, int), "<--flank_dist> must be an integer"
-				assert self.flank_dist >= 0, "<--flank_dist> must be an integer greater than zero!"
-			elif opt=='-S' or opt=='--select_r':
+				assert isinstance(self.flank_dist, int), "<flank_dist> must be an integer"
+				assert self.flank_dist >= 0, "<flank_dist> must be an integer greater than zero!"
+			elif opt=='S' or opt=='select_r':
 				temp = arg.split('=')
 				assert len(temp) == 1, "Invalid specification for <--select_r>: %s"%arg
 				self.select_r = (temp[0]).lower()
 				chars = (['snp','bad','cons','rand'])
 				if self.select_r not in chars:
 					raise ValueError("Invalid option \"%r\" for <--select_r>" % self.select_r)
-			elif opt=='-F' or opt=='--filter_r':
+			elif opt=='F' or opt=='filter_r':
 				self.filter_r = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
 				self.filter_r_whole = arg
@@ -450,13 +462,13 @@ class parseArgs():
 				else:
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
-			elif opt == "--target_all":
+			elif opt == "target_all":
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.target_all=True
 
 			#Bait selection options
-			elif opt=='-s' or opt=='--select_b':
+			elif opt=='s' or opt=='select_b':
 				subopts = re.split('=|,',arg)
 				self.select_b = (subopts[0]).lower()
 				chars = (['tile', 'center', 'flank', 'calc'])
@@ -473,7 +485,7 @@ class parseArgs():
 					self.overlap = int(subopts[1])
 				#print("select_b is %r" %self.select_b)
 				#print("select_b_dist is %r"%self.select_b_dist)
-			elif opt=='-f' or opt=='--filter_b':
+			elif opt=='f' or opt=='filter_b':
 				self.filter_b = 1 #turn on region filtering
 				#temp = arg.split('/') #parse region filtering options
 				self.filter_b_whole = arg
@@ -499,61 +511,71 @@ class parseArgs():
 			#Running options
 
 			#vsearch options
-			elif opt == "--vsearch":
+			elif opt == "vsearch":
 				self.vsearch = str(arg)
-			elif opt == "--vthreads":
+			elif opt == "vthreads":
 				self.vthreads = int(arg)
 
 			#BLAST options
-			elif opt=='--blastdb' or opt=='--blast_db':
+			elif opt=='blastdb' or opt=='blast_db':
 				self.blastdb = arg
-			elif opt=='--fastadb' or opt=='--fasta_db':
+			elif opt=='fastadb' or opt=='fasta_db':
 				self.fastadb = arg
-			elif opt=='--e_value' or opt=='--evalue':
+			elif opt=='e_value' or opt=='evalue':
 				self.evalue = float(arg)
-			elif opt=='--gapopen' or opt=='--gap_open':
+			elif opt=='gapopen' or opt=='gap_open':
 				self.gapopen = int(arg)
-			elif opt=='--gapextend' or opt=='--gap_extend':
+			elif opt=='gapextend' or opt=='gap_extend':
 				self.gapextend = int(arg)
-			elif opt=='--word' or opt=='--word_size' or opt=='--wordsize':
+			elif opt=='word' or opt=='word_size' or opt=='wordsize':
 				self.word_size = int(arg)
-			elif opt=='--mega' or opt=='--megablast':
+			elif opt=='mega' or opt=='megablast':
 				self.blast_method = "megablast"
-			elif opt == "--blastn":
+			elif opt == "blastn":
 				self.blastn = arg
-			elif opt == "--makedb":
+			elif opt == "makedb":
 				self.makedb = arg
-			elif opt == "--nodust":
+			elif opt == "nodust":
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.nodust = "TRUE"
 
 			#output options
-			elif opt=='-x' or opt=='--expand':
+			elif opt=='x' or opt=='expand':
 				self.expand = 1
-			elif opt == "--strand":
+			elif opt == "strand":
 				assert arg in ("+", "-", "both"), "Invalid option" + arg + "for <--strand>"
 				self.strand = arg
-			elif opt=='-r' or opt=='--resume':
+			elif opt=='r' or opt=='resume':
 				assert int(arg) in (0, 1, 2, 3, 4), "Invalid option" + arg + "for <-r, --resume>. Please specify a step (1-4) to resume pipeline."
 				self.resume = int(arg)
-			elif opt=='-o' or opt=='--out':
+			elif opt=='o' or opt=='out':
 				self.out = arg
-			elif opt=='-t' or opt=='--print_tr':
+			elif opt=='t' or opt=='print_tr':
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.print_tr = True
-			elif opt=='--print_loc':
+			elif opt=='print_loc':
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.print_loc = True
-			elif opt == "--db":
+			elif opt == "db":
 				self.db = str(arg)
-			elif opt=='-T' or opt=='--threads':
+			elif opt=='T' or opt=='threads':
 				self.threads = arg
+			
+			#graph options
+			elif opt=='noWeightGraph':
+				self._noWeightGraph=True
+			elif opt=="noGraph":
+				self._noGraph=True
+			elif opt=="weightByMin":
+				self._weightByMin=True
+			elif opt=="weightMax":
+				self._weightMax=int(arg)
 
 			#HACKER ONLY OPTIONS
-			elif opt=='--hacker':
+			elif opt=='hacker':
 				print(opt, arg)
 				subopts = re.split('=|, ',arg)
 				main = subopts[0]
