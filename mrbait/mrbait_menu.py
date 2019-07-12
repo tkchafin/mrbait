@@ -353,9 +353,9 @@ class parseArgs():
 				sys.exit(0)
 
 		#Second pass to set all args.
-		for opt, arg_raw in options:
+		for opt_raw, arg_raw in options:
 			arg = arg_raw.replace(" ","")
-			arg = arg.replace("-","")
+			opt = opt_raw.replace("-","")
 			arg = arg.strip()
 
 			if opt=='M' or opt=='maf':
