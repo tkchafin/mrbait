@@ -28,7 +28,7 @@ def naiveIndependentSet(G):
 	#Make a copy of graph
 	C = G.copy()
 	#Loop through ALL edges
-	for n in G.edges_iter():
+	for n in G.edges():
 		#If either node has been trimmed from Copy, skip.
 		if C.has_edge(n[0],n[1]):
 			right = n[1]
@@ -51,7 +51,7 @@ def weightedNaiveIndependentSet(G, weights):
 	C = G.copy()
 	#print(weights)
 	#Loop through ALL edges
-	for n in G.edges_iter():
+	for n in G.edges():
 		#If either node has been trimmed from Copy, skip.
 		if C.has_edge(n[0],n[1]):
 			right = n[1]
