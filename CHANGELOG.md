@@ -5,9 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
-v1.1.7
+[v1.1.7](https://github.com/tkchafin/mrbait/releases/tag/v1.1.7)
 - Bug fix with changed ipyrad .loci format
 - Bug fix with deprecated networkx.edges_iter() 
+- Allow arbitrary leading dashes for flags
+- Added option to skip gaph-based conflict resolution
+- Added option to do graph-based resolution unweighted
+- Added option to weight by minimizing N's 
 
 [v1.1.6](https://github.com/tkchafin/mrbait/releases/tag/v1.1.6)
 - Bug fix in reporting for bait design
