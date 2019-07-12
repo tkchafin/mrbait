@@ -145,7 +145,7 @@ def read_loci(infile):
 			line = line.strip()
 			if not line:
 				continue
-			if line[0] == ">":
+			if line[0] != "/":
 				identifier = line.split()[0]
 				sequence = line.split()[1]
 				loci.add_sequence(identifier, sequence)
