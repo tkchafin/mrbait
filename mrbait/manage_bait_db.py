@@ -107,7 +107,7 @@ def resetTargets(conn):
 	SET
 		pass = 1
 	'''
-	cur.execute(sql, stuff)
+	cur.execute(sql)
 	conn.commit()
 
 #function to reset all baits to passing 
@@ -119,7 +119,7 @@ def resetBaits(conn):
 	SET
 		pass = 1
 	'''
-	cur.execute(sql, stuff)
+	cur.execute(sql)
 	conn.commit()
 
 #Function to filter loci by coverage and length
