@@ -59,6 +59,9 @@ def main():
 				m.init_new_db(conn)
 			loadAlignments(conn, params)
 			#PASS=1 is PASS=FALSE
+			
+			#optional masking of loci using DUST algorithm
+			
 			#Pre-filters: Length, alignment depth
 			print("\t\tFiltering loci...",end="")
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)

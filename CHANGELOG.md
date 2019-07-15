@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.0]
+- New functionality: Added capacity to run masking on consensus loci [beta]
+- Added ability to skip masking in VSEARCH pw and rc calls
+- Bug fix for -r 2 failing to reset baits from previous run
+- Bug fix for -r 5 failing to reset baits from previous run
+
 [v1.1.7](https://github.com/tkchafin/mrbait/releases/tag/v1.1.7)
 - Bug fix with changed ipyrad .loci format
 - Bug fix with deprecated networkx.edges_iter() 
