@@ -115,6 +115,8 @@ def main():
 			else:
 				#Clear baits
 				m.clearBaits(conn)
+				#reset targets
+				m.resetTargets(conn)
 				#select: resolve conflicts, apply filters
 				selectFilterTargets(conn, params)
 			passed = m.getNumPassedTRs(conn)
@@ -159,6 +161,8 @@ def main():
 				sys.exit("\nProgram killed: No passed targets in database.\n")
 			else:
 				#Bait filtering
+				#reset baits 
+				m.resetBaits(conn)
 				filterBaits(conn,params)
 				passedBaits = m.getNumPassedBaits(conn)
 				if passedBaits <= 0:
