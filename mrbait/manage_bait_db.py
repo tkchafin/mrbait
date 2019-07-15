@@ -98,6 +98,29 @@ def clearGFF(conn):
 
 ################################################################################
 
+#function to reset all targets to passing 
+def resetTargets(conn):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		regions
+	SET
+		pass = 1
+	'''
+	cur.execute(sql, stuff)
+	conn.commit()
+
+#function to reset all baits to passing 
+def resetBaits(conn):
+	cur = conn.cursor()
+	sql = '''
+	UPDATE
+		baits
+	SET
+		pass = 1
+	'''
+	cur.execute(sql, stuff)
+	conn.commit()
 
 #Function to filter loci by coverage and length
 def filterLoci(conn, minlen, mincov, max_ambig, max_mask):
