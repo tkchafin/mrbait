@@ -62,7 +62,7 @@ def main():
 			
 			#optional masking of loci using DUST algorithm
 			if params.dustMask:
-				print("\t\tMasking loci using the DUST algorithm in VSEARCH...", end="")
+				print("\t\tMasking consensus sequences using the DUST algorithm in VSEARCH...", end="")
 				masked = core.fastxMaskLoci(conn, params, m.getPassedLoci(conn))
 				m.updateLociMask(conn, masked)
 				print(" Done!\n")
@@ -82,7 +82,6 @@ def main():
 				print("\t\tPrinting locus catalog to file...")
 				core.printLoci(conn, params)
 			step = 2
-			sys.exit() ##########################??!!!!!#############
 			printTime(start,2)
 		elif step == 2:
 			start = timer()

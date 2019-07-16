@@ -7,7 +7,7 @@ from mrbait import seq_graph as sg
 
 """Includes utilities for calling VSEARCH and parsing output of pairwise alignments"""
 
-def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw, minlen):
+def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw, minlen, qmask):
 	vsearch = [binary,
 			"--allpairs_global", seqpath,
 			"--threads", str(threads),
@@ -16,6 +16,7 @@ def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw, minlen):
 			"--blast6out", pw,
 			"--rowlen", "0", "--self",
 			"--target_cov", str(qcov),
+			"--qmask", str(qmask),
 			"--quiet"]
 	command = " ".join(vsearch)
 
@@ -33,7 +34,7 @@ def allpairsGlobal(binary, threads, seqpath, qid, qcov, pw, minlen):
 	if proc.returncode:
 		raise CalledProcessError ("VSEARCH exited with non-zero status")
 
-def usearchGlobal(binary, threads, seqpath, qpath, qid, qcov, pw, minlen):
+def usearchGlobal(binary, threads, seqpath, qpath, qid, qcov, pw, minlen, qmask):
 	vsearch = [binary,
 			"--usearch_global", seqpath,
 			"--db", qpath,
@@ -43,6 +44,7 @@ def usearchGlobal(binary, threads, seqpath, qpath, qid, qcov, pw, minlen):
 			"--blast6out", pw,
 			"--rowlen", "0", "--self",
 			"--target_cov", str(qcov),
+			"--qmask", str(qmask),
 			"--quiet"]
 	command = " ".join(vsearch)
 

@@ -503,6 +503,7 @@ def filterTargetRegions_verbose(conn, params):
 			print("\t\t\t  --VSEARCH threads:",params.vthreads)
 			print("\t\t\t  --Percent identity:",minid)
 			print("\t\t\t  --Query coverage:",mincov)
+			print("\t\t\t  --Masking method:",params.vsearch_qmask)
 			blacklist_edges = pairwiseAlignDedup(conn, params, passedTargets, minid, mincov)
 			if (len(blacklist_edges) > 0):
 				print("\t\t\tResolving edges...")
@@ -636,7 +637,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	#Pairwise align sorted FASTA (sorted so the shorter seq is always 'target' amd longer is 'query')
 	pw = params.workdir + "/" + params.out + ".pw"
 	try:
-		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw, params.blen)
+		vsearch.allpairsGlobal(params.vsearch, params.vthreads, sor, minid, mincov, pw, params.blen, params.vsearch_qmask)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -745,7 +746,7 @@ def pairwiseAlignReverseComp(conn, params, seqs, minid, mincov):
 	# global align of baits against reverse complements
 	pw = params.workdir + "/" + params.out + ".rc"
 	try:
-		vsearch.usearchGlobal(params.vsearch, params.vthreads, sor, revcomp, minid, mincov, pw, params.blen)
+		vsearch.usearchGlobal(params.vsearch, params.vthreads, sor, revcomp, minid, mincov, pw, params.blen, params.vsearch_qmask)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -1047,6 +1048,7 @@ def filterBaits_verbose(conn, params):
 			print("\t\t\t  --VSEARCH threads:",params.vthreads)
 			print("\t\t\t  --Percent identity:",minidP)
 			print("\t\t\t  --Query coverage:",mincovP)
+			print("\t\t\t  --Masking method:",params.vsearch_qmask)
 
 			blacklist_edges = pairwiseAlignDedup(conn, params, passedBaits, minidP, mincovP)
 
@@ -1080,6 +1082,7 @@ def filterBaits_verbose(conn, params):
 			print("\t\t\t  --VSEARCH threads:",params.vthreads)
 			print("\t\t\t  --Percent identity:",minidR)
 			print("\t\t\t  --Query coverage:",mincovR)
+			print("\t\t\t  --Masking method:",params.vsearch_qmask)
 
 			blacklist_edges = pairwiseAlignReverseComp(conn, params, passedBaits, minidR, mincovR)
 

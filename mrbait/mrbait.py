@@ -82,7 +82,6 @@ def main():
 				print("\t\tPrinting locus catalog to file...")
 				core.printLoci(conn, params)
 			step = 2
-			sys.exit() ##########################??!!!!!#############
 			printTime(start,2)
 		elif step == 2:
 			start = timer()

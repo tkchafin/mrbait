@@ -178,12 +178,18 @@ Bait Design / Selection options:
 			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
-VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\"):
+VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\", or --dustMask):
 
 	--vsearch	: Path to VSEARCH executable if other than provided
 		--MrBait will try to detect OS and appropriate exectable to use
 	--vthreads	: Number of threads for VSEARCH
-		--Will set to the value of <--threads> if not defined""")
+		--Will set to the value of <--threads> if not defined
+	--vsearch_qmask	: Option for the --qmask option in VSEARCH
+		--Only relevant when --select_b or --select_r = \"pw\" or \"rc\"
+		--Options
+			dust       : Mask sequences using the DUST algorithm [default]
+			soft       : Mask sequences using lower-cased characters
+			none       : Skip masking for pairwise alignments""")
 
 	print("""
 Graph Parameters (relevant for conflict resolution when --select_b or --select_r = \"pw\" or \"rc\"):
@@ -249,7 +255,7 @@ class parseArgs():
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
 			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
-			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask"])
+			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -300,7 +306,8 @@ class parseArgs():
 		#VSEARCH options - deduplication
 		self.vsearch = "vsearch"
 		self.vthreads = None
-
+		self.vsearch_qmask = "dust"
+		
 		#BLAST options - contaminant removal and filtering by specificity
 		self.blastdb=None
 		self.fastadb=None
@@ -519,7 +526,16 @@ class parseArgs():
 				self.vsearch = str(arg)
 			elif opt == "vthreads":
 				self.vthreads = int(arg)
-
+			elif opt == "vsearch_qmask":
+				if str(arg).lower() == "dust":
+					self.vsearch_qmask = "dust"
+				elif str(arg).lower() == "soft":
+					self.vsearch_qmask = "soft"
+				elif str(arg).lower() == "none":
+					self.vsearch_qmask = "none"
+				else:
+					bad_opts("Invalid option %r for <--vsearch_qmask>! Please choose one of: [soft, dust, none]" %arg)
+					
 			#BLAST options
 			elif opt=='blastdb' or opt=='blast_db':
 				self.blastdb = arg
