@@ -65,14 +65,14 @@ def main():
 				print("\t\tMasking consensus sequences using the DUST algorithm in VSEARCH...", end="")
 				masked = core.fastxMaskLoci(conn, params, m.getPassedLoci(conn))
 				m.updateLociMask(conn, masked)
-				print(" Done!\n")
-
+				print(" Done!")
 			
 			#Pre-filters: Length, alignment depth
 			print("\t\tFiltering loci...",end="")
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
 			#print(m.getLoci(conn))
-			print(" Done!")
+			print(" Done!\n")
+			
 			passedLoci = m.getNumPassedLoci(conn)
 			if passedLoci <= 0:
 				sys.exit("\nProgram killed: No loci passed filtering.\n")
