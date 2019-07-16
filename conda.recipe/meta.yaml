@@ -34,6 +34,7 @@ requirements:
     - pyvcf >=0.6.8
     - networkx >=2.2
     - blast
+    - pyTables
     - vsearch
 
   commands:

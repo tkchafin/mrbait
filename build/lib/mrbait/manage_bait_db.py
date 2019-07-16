@@ -667,7 +667,7 @@ def updateLociMask(conn, newMask):
 	
 	#create temporary table 
 	df.to_sql('m', conn, if_exists='replace')
-	#print(pd.read_sql_query("SELECT * FROM loci", conn))
+	print(pd.read_sql_query("SELECT * FROM loci", conn))
 	
 	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
 	sql_update = '''
@@ -683,7 +683,7 @@ def updateLociMask(conn, newMask):
 	#Clear up the temp table t
 	cur.execute("DROP TABLE IF EXISTS m")
 	conn.commit()
-	#print(pd.read_sql_query("SELECT * FROM loci", conn))
+	print(pd.read_sql_query("SELECT * FROM loci", conn))
 
 #Function to build conflicts table when --R is false
 def fetchConflictTRs_NoMult(conn):

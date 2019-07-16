@@ -1,0 +1,11 @@
+Metadata-Version: 1.1
+Name: mrbait
+Version: 1.2.0
+Summary: Universal design of target-enrichment capture probes from genomic data
+Home-page: https://github.com/tkchafin/mrbait
+Author: Tyler K. Chafin
+Author-email: tkchafin@uark.edu
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.6

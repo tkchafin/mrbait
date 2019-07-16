@@ -89,6 +89,8 @@ Alignment filtering/ consensus options (use with -M, -X, -L)
   dropped from consideration.[default=0.5].
 
   If lowercase bases do not contain masking information, set to *-K 1.0*
+--dustMask  **Perform DUST masking**: Using this flag will have mrbait mask |br|
+  the consensus sequences using the DUST algorithm in VSEARCH
 
 
 General Bait Design Options
