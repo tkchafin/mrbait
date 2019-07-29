@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.1](https://github.com/tkchafin/mrbait/releases/tag/v1.2.0)
+- New functionality: Added new BLAST option 'blast_a' to remove ambiguous hits (>1 match)
+- Added hidden options to add secondary BLAST database
+- Added --max_hits option for BLAST which maps to BLAST param --max_target_seqs
+- Bug fix for where --filter_b erroneously rejects blast_x and blast_i options
+
 [v1.2.0](https://github.com/tkchafin/mrbait/releases/tag/v1.2.0)
 - New functionality: Added capacity to run masking on consensus loci
 - New functionality: Added option to control masking behavior in VSEARCH for rc and pw filters

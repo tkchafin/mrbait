@@ -48,4 +48,4 @@ source deactivate
 
 [CHANGELOG]: ./CHANGELOG.md
 [LICENSE]: ./LICENSE
-[version-badge]: https://img.shields.io/badge/version-1.2.0-blue.svg
+[version-badge]: https://img.shields.io/badge/version-1.2.1-blue.svg
