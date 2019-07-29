@@ -185,6 +185,7 @@ with total lengths outside of this range will fail, and be excluded from bait de
   *-F pw=[i,q]*:  Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
   *-F blast_i=[i,q]*:  Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
   *-F blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage |br|
+	*-F blast_a=[i,q]*:  Exclude targets with multiple non-overlapping BLAST hits having *i* percent identity over at least *q* query coverage |br|
   *-F gff=[type]*:  Only retain targets within *d* bases of a GFF-annotated feature of type type. Only for use when *-A* and *-G* inputs provided. Use *-F gff=all* to target any type of annotated feature. |br|
   *-F gff_a=[alias]*:  Only retain targets within *d* bases of a GFF-annotated feature of tagged with the Alias attribute matching alias. Only for use when *-A* and *-G* inputs provided. |br|
 
@@ -226,7 +227,8 @@ passing baits will be included in the final output FASTA file.
   *-f pw=[i,q]*:  Pairwise alignment, removing when *i* percent identity over at least *q* proportion of the sequences |br|
   *-f rc=[i,q]*:  Pairwise align reverse complements, where i and q are as in -f pw |br|
   *-f blast_i=[i,q]*:  Only retain BLAST hits with *i* percent identity over at least *q* query coverage |br|
-  *-f blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage
+  *-f blast_i=[i,q]*:  Exclude BLAST hits with *i* percent identity over at least *q* query coverage |br|
+  *-f blast_a=[i,q]*:  Exclude baits with multiple non-overlapping BLAST hits having *i* percent identity over at least *q* query coverage
 
 Output Options
 ~~~~~~~~~~~~~~
@@ -372,6 +374,7 @@ BLAST options:
 --gapextend  **Gap extension penalty**: Penalty for extending gaps when |br|
   performing alignment [default=2]
 --word_size  **Word size**: Word size [default=11]
+--max_hits  **Max hits**: Value for BLAST parameter --max_target_seqs [default=10000] 
 --nodust  **Turn off dusting**: Use this flag to turn off the low-complexity |br|
   filter using by blastn. Depending on what your goals are for BLAST filtering, |br|
   this may be necessary. Boolean.
