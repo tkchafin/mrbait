@@ -338,9 +338,8 @@ def filterTargetRegions(conn, params):
 					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
 					m.removeRegionsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
-					sys.exit("blast_a option is not yet implemented.")
-					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-					#m.removeRegionsByList(conn, blacklist)
+					blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 				#sys.exit()
@@ -446,13 +445,23 @@ def filterTargetRegions_verbose(conn, params):
 					print("\t\t\t  --Gap open penalty:",params.gapopen)
 					print("\t\t\t  --Gap extend:",params.gapextend)
 					print("\t\t\t  --E-value cutoff:",params.evalue)
+					print("\t\t\t  --Maximum returned hits:",params.max_hits)
 					if (params.nodust):
 						print("\t\t\t  --DUST: False")
 					else:
 						print("\t\t\t  --DUST: True")
 					print("\t\t\t  --Method:",params.blast_method)
 					print("\t\t\t  --Method:",params.blast_method)
-					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					local_db_path = db_path
+					if params._bx_db or params._bx_fdb:
+						if params._bx_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bx_db)
+							local_db_path = params._bx_db
+						elif params._bx_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bx_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._bx_fdb, local_db_path)
+					blacklist = b.blastExcludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
 					m.removeRegionsByList(conn, blacklist)
 				elif option.o1 == "blast_i":
 					print("\t\t\tFiltering criterion: BLAST inclusion")
@@ -465,17 +474,51 @@ def filterTargetRegions_verbose(conn, params):
 					print("\t\t\t  --Gap open penalty:",params.gapopen)
 					print("\t\t\t  --Gap extend:",params.gapextend)
 					print("\t\t\t  --E-value cutoff:",params.evalue)
+					print("\t\t\t  --Maximum returned hits:",params.max_hits)
 					if (params.nodust):
 						print("\t\t\t  --DUST: False")
 					else:
 						print("\t\t\t  --DUST: True")
 					print("\t\t\t  --Method:",params.blast_method)
-					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					local_db_path = db_path
+					if params._bi_db or params._bi_fdb:
+						if params._bi_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bi_db)
+							local_db_path = params._bi_db
+						elif params._bi_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bi_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._bi_fdb, local_db_path)
+					whitelist = b.blastIncludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
 					m.removeRegionsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
-					sys.exit("blast_a option is not yet implemented.")
-					#blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-					#m.removeRegionsByList(conn, blacklist)
+					print("\t\t\tFiltering criterion: BLAST ambiguous map exclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					print("\t\t\t  --Maximum returned hits:",params.max_hits)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
+					else:
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					local_db_path = db_path
+					if params._ba_db or params._ba_fdb:
+						if params._ba_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._ba_db)
+							local_db_path = params._ba_db
+						elif params._ba_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._ba_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._ba_fdb, local_db_path)
+					blacklist = b.blastExcludeAmbig(params, local_db_path, fas, option.o2, option.o3, outfile)
+					m.removeRegionsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 				#sys.exit()
@@ -979,7 +1022,7 @@ def filterBaits_verbose(conn, params):
 				alnR = True
 				minidR = option.o2
 				mincovR = option.o3
-			elif option.o1 in ("blast_x", "blast_i"):
+			elif option.o1 in ("blast_x", "blast_i", "blast_a"):
 				#if blast database given as fasta, make a blastdb:
 				db_path = None
 				if (params.blastdb):
@@ -1013,7 +1056,16 @@ def filterBaits_verbose(conn, params):
 					else:
 						print("\t\t\t  --DUST: True")
 					print("\t\t\t  --Method:",params.blast_method)
-					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					local_db_path = db_path
+					if params._bx_db or params._bx_fdb:
+						if params._bx_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bx_db)
+							local_db_path = params._bx_db
+						elif params._bx_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bx_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._bx_fdb, local_db_path)
+					blacklist = b.blastExcludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
 					m.removeBaitsByList(conn, blacklist)
 				elif option.o1 == "blast_i":
 					print("\t\t\tFiltering criterion: BLAST inclusion")
@@ -1031,8 +1083,45 @@ def filterBaits_verbose(conn, params):
 					else:
 						print("\t\t\t  --DUST: True")
 					print("\t\t\t  --Method:",params.blast_method)
-					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
+					local_db_path = db_path
+					if params._bi_db or params._bi_fdb:
+						if params._bi_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bi_db)
+							local_db_path = params._bi_db
+						elif params._bi_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._bi_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._bi_fdb, local_db_path)
+					whitelist = b.blastIncludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
 					m.removeBaitsByWhitelist(conn, whitelist)
+				elif option.o1 == "blast_a":
+					print("\t\t\tFiltering criterion: BLAST ambiguous map exclusion")
+					print("\t\t\t  --blastn path:",params.blastn)
+					print("\t\t\t  --Database:",db_path)
+					print("\t\t\t  --Percent identity:",option.o2)
+					print("\t\t\t  --Query coverage:",option.o3)
+					print("\t\t\t  --N threads:",params.threads)
+					print("\t\t\t  --Word size",params.word_size)
+					print("\t\t\t  --Gap open penalty:",params.gapopen)
+					print("\t\t\t  --Gap extend:",params.gapextend)
+					print("\t\t\t  --E-value cutoff:",params.evalue)
+					print("\t\t\t  --Maximum returned hits:",params.max_hits)
+					if (params.nodust):
+						print("\t\t\t  --DUST: False")
+					else:
+						print("\t\t\t  --DUST: True")
+					print("\t\t\t  --Method:",params.blast_method)
+					local_db_path = db_path
+					if params._ba_db or params._ba_fdb:
+						if params._ba_db:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._ba_db)
+							local_db_path = params._ba_db
+						elif params._ba_fdb:
+							print("\t\t\t  --OVERRIDING BLAST DB:",params._ba_fdb)
+							local_db_path = params.workdir + "/blastdb/" + params.out
+							b.makeblastdb(params.makedb, params._ba_fdb, local_db_path)
+					blacklist = b.blastExcludeAmbig(params, local_db_path, fas, option.o2, option.o3, outfile)
+					m.removeBaitsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 			else:

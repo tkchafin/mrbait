@@ -6,6 +6,7 @@ import os
 import sys
 import Bio
 import pandas as pd
+from mrbait import misc_utils as utils
 
 """Includes utilities for calling NCBI BLAST and parsing outputs"""
 
@@ -16,7 +17,7 @@ def blastExcludeMatch(opts, db, fas, pid, qcov, out):
 	if opts.nodust:
 		dust = "no"
 	try:
-		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, 1, dust, out)
+		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, opts.max_hits, dust, out)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -40,7 +41,7 @@ def blastExcludeMatch(opts, db, fas, pid, qcov, out):
 	pid_adj = pid*100
 	blacklist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
 	blacklist = [s.replace('id_', '') for s in blacklist]
-	return(blacklist)
+	return(list(set(blacklist)))
 
 #Function to parse params object to call blastn, and parse output to remove all matching queries
 #Parses a MrBait parseArg object
@@ -50,7 +51,7 @@ def blastExcludeAmbig(opts, db, fas, pid, qcov, out):
 	if opts.nodust:
 		dust = "no"
 	try:
-		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, 1, dust, out)
+		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, opts.max_hits, dust, out)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -72,10 +73,30 @@ def blastExcludeAmbig(opts, db, fas, pid, qcov, out):
 	#Parse output and return blacklisted IDs
 	results = getBlastResults(out)
 	pid_adj = pid*100
+	
+	#reduce to matches passing thresholds, and only queries with >1 hit
 	subset = results[(results.pident > pid_adj) & (results.qcov > qcov)]
-	subset = findNonOverlappingMatches(subset)
-	#blacklist = [s.replace('id_', '') for s in blacklist]
-	return(blacklist)
+	subset = subset[subset.groupby('qseqid').qseqid.transform(len) > 1]
+	
+	#
+	blacklist = list()
+	unique_queries = dict(list(subset.groupby(['qseqid','sseqid'])))
+	if (len(unique_queries) > 1):
+		index = next(iter(unique_queries))
+		#print(index[0])
+		blacklist.append(index[0])
+	else:
+	# print("All hits are to same target: Check for overlaps!")
+		for qseqid, qseqid_group in unique_queries.items():
+			nonoverlapping_hits = 0
+			for (indx1,row1),(indx2,row2) in zip(qseqid_group[:-1].iterrows(),qseqid_group[1:].iterrows()):
+				if utils.calcOverlap(row1["sstart"], row1["send"], row2["sstart"], row2["send"]):
+					#print(qseqid[0])
+					blacklist.append(qseqid[0])
+					break
+					
+	blacklist = [s.replace('id_', '') for s in blacklist]
+	return(list(set(blacklist)))
 
 
 #Function to parse params object to call blastn, and parse output to INCLUDE all matching queries
@@ -86,7 +107,7 @@ def blastIncludeMatch(opts, db, fas, pid, qcov, out):
 	if opts.nodust:
 		dust = "no"
 	try:
-		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, 1, dust, out)
+		blastn(opts.blastn, fas, db, opts.blast_method,opts.gapopen, opts.gapextend, opts.evalue, opts.threads, opts.max_hits, dust, out)
 	except KeyboardInterrupt:
 		sys.exit("Process aborted: Keyboard Interrupt")
 	except subprocess.CalledProcessError as err:
@@ -110,11 +131,11 @@ def blastIncludeMatch(opts, db, fas, pid, qcov, out):
 	pid_adj = pid*100
 	whitelist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
 	whitelist = [s.replace('id_', '') for s in whitelist]
-	return(whitelist)
+	return(list(set(blacklist)))
 
 #Function reads a blast oufmt-6 table and returns pandas dataframe
 def getBlastResults(out):
-	r = pd.read_csv(out, sep="\t",names = ["qseqid", "sseqid", "pident", "qlen", "length", "evalue", "bitscore"])
+	r = pd.read_csv(out, sep="\t",names = ["qseqid", "sseqid", "pident", "qlen", "length", "evalue", "bitscore", "sstart", "send"])
 	r["qcov"] = r["length"] / r["qlen"]
 	return(r)
 
@@ -132,7 +153,7 @@ def blastn(binary, fasta, blastdb, method, gapopen, gapextend, e_value, threads,
 		"-query", str(fasta),
 		"-db", str(blastdb),
 		"-evalue", str(e_value),
-		"-outfmt", "6 qseqid sseqid pident qlen length evalue bitscore",
+		"-outfmt", "6 qseqid sseqid pident qlen length evalue bitscore sstart send",
 		"-num_threads", str(threads),
 		"-max_target_seqs", str(hits),
 		"-max_hsps", str(1),

@@ -25,7 +25,7 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version:  1.2.0
+	Version:  1.2.1
 	Author:   Tyler K. Chafin
 	Contact:  tkchafin@uark.edu
 	License:  GNU Public License v3.0
@@ -145,6 +145,7 @@ Target Region options:
 			pw=[i,q]     : Pairwise alignment, removing when \"i\" identity in \"q\" proportion
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_a=[i,q]: Remove targets having >1 hits with \"i\" identity and \"q\" query coverage to provided db
 			gff=[type]   : Only retain targets within \"d\" distance of \"type\" GFF elements
 			               Use \"all\" to target all types, or see GFF3 specifications for SO feature types:
 			               https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md
@@ -175,6 +176,7 @@ Bait Design / Selection options:
 			rc=[i,q]     : Pairwise alignment against reverse-complements (see -r pw=[i,q])
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
+			blast_a=[i,q]: Remove targets having >1 hits with \"i\" identity and \"q\" query coverage to provided db
 			rand=[x]     : Randomly retain \"x\" baits""")
 
 	print("""
@@ -215,7 +217,10 @@ BLAST Parameters (use when --select_b or --select_r = \"blast\"):
 		--Default word size will be set to 28 if not provided
 	--blastn	: Path to blastn binary if different than default
 	--makedb	: Path to makeblastdb binary if different than default
-		--MrBait will try to detect OS and appropriate exectable to use""")
+		--MrBait will try to detect OS and appropriate exectable to use
+	--max_hits	: This value is passed directly to blast as --max_target_seqs
+		--By default this is set at 10,000. Should only be necessary to change
+		  if computation time becomes excessive with highly redundant databases""")
 
 
 	print("""
@@ -255,7 +260,8 @@ class parseArgs():
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
 			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
-			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask="])
+			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask=", 
+			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -319,6 +325,13 @@ class parseArgs():
 		self.blastn = "blastn"
 		self.makedb = "makeblastdb"
 		self.nodust = None
+		self._ba_db = None
+		self._bx_db = None
+		self._bi_db = None
+		self._ba_fdb = None
+		self._bx_fdb = None
+		self._bi_fdb = None
+		self.max_hits = 10000
 
 		#Bait selection options
 		self.overlap=None
@@ -516,6 +529,10 @@ class parseArgs():
 				elif (subopts[0] == 'rand'):
 					assert len(subopts) == 2, "Incorrect specification of option %r for <--filter_b>" %subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],subopts[1]))
+				elif subopts[0] in ("blast_x", "blast_i", "blast_a"):
+					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
+					assert 0.0 <= float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
+					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
 				else:
 					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
@@ -559,7 +576,21 @@ class parseArgs():
 				if arg:
 					print("Argument provided for boolean:",str(arg))
 				self.nodust = "TRUE"
-
+			elif opt == "blasta_db":
+				self._ba_db = arg
+			elif opt == "blasta_fdb":
+				self._ba_fdb = arg
+			elif opt == "blastx_db":
+				self._bx_db = None
+			elif opt == "blastx_fdb":
+				self._bx_fdb = arg
+			elif opt == "blasti_db":
+				self._bi_db = arg
+			elif opt == "blasti_fdb":
+				self._bi.fdb = arg
+			elif opt == "max_hits":
+				self.max_hits = int(arg)
+				
 			#output options
 			elif opt=='x' or opt=='expand':
 				self.expand = 1
