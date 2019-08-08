@@ -38,6 +38,8 @@ def blastExcludeMatch(opts, db, fas, pid, qcov, out):
 
 	#Parse output and return blacklisted IDs
 	results = getBlastResults(out)
+	if (len(results) < 1):
+		return(list())
 	pid_adj = pid*100
 	blacklist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
 	blacklist = [s.replace('id_', '') for s in blacklist]
@@ -72,6 +74,8 @@ def blastExcludeAmbig(opts, db, fas, pid, qcov, out):
 
 	#Parse output and return blacklisted IDs
 	results = getBlastResults(out)
+	if (len(results) < 1):
+		return(list())
 	pid_adj = pid*100
 	
 	#reduce to matches passing thresholds, and only queries with >1 hit
@@ -128,10 +132,13 @@ def blastIncludeMatch(opts, db, fas, pid, qcov, out):
 
 	#Parse output and return blacklisted IDs
 	results = getBlastResults(out)
+	if (len(results) < 1):
+		return(list())
 	pid_adj = pid*100
+	whitelist = list()
 	whitelist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
 	whitelist = [s.replace('id_', '') for s in whitelist]
-	return(list(set(blacklist)))
+	return(list(set(whitelist)))
 
 #Function reads a blast oufmt-6 table and returns pandas dataframe
 def getBlastResults(out):

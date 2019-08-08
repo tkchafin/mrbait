@@ -333,13 +333,16 @@ def filterTargetRegions(conn, params):
 				outfile = params.workdir + "/.temp.blast"
 				if option.o1 == "blast_x":
 					blacklist = b.blastExcludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByList(conn, blacklist)
+					if len(blacklist) > 1:
+						m.removeRegionsByList(conn, blacklist)
 				elif option.o1 == "blast_i":
 					whitelist = b.blastIncludeMatch(params, db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByWhitelist(conn, whitelist)
+					if len(blacklist) > 1:
+						m.removeRegionsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
 					blacklist = b.blastExcludeAmbig(params, db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByList(conn, blacklist)
+					if len(blacklist) > 1:
+						m.removeRegionsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 				#sys.exit()
@@ -462,7 +465,8 @@ def filterTargetRegions_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._bx_fdb, local_db_path)
 					blacklist = b.blastExcludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByList(conn, blacklist)
+					if len(blacklist) > 1:
+						m.removeRegionsByList(conn, blacklist)
 				elif option.o1 == "blast_i":
 					print("\t\t\tFiltering criterion: BLAST inclusion")
 					print("\t\t\t  --blastn path:",params.blastn)
@@ -490,7 +494,8 @@ def filterTargetRegions_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._bi_fdb, local_db_path)
 					whitelist = b.blastIncludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByWhitelist(conn, whitelist)
+					if whitelist:
+						m.removeRegionsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
 					print("\t\t\tFiltering criterion: BLAST ambiguous map exclusion")
 					print("\t\t\t  --blastn path:",params.blastn)
@@ -518,7 +523,8 @@ def filterTargetRegions_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._ba_fdb, local_db_path)
 					blacklist = b.blastExcludeAmbig(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeRegionsByList(conn, blacklist)
+					if whitelist:
+						m.removeRegionsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 				#sys.exit()
@@ -1066,7 +1072,8 @@ def filterBaits_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._bx_fdb, local_db_path)
 					blacklist = b.blastExcludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeBaitsByList(conn, blacklist)
+					if len(blacklist) > 1:
+						m.removeBaitsByList(conn, blacklist)
 				elif option.o1 == "blast_i":
 					print("\t\t\tFiltering criterion: BLAST inclusion")
 					print("\t\t\t  --blastn path:",params.blastn)
@@ -1093,7 +1100,8 @@ def filterBaits_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._bi_fdb, local_db_path)
 					whitelist = b.blastIncludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeBaitsByWhitelist(conn, whitelist)
+					if len(whitelist) > 1:
+						m.removeBaitsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
 					print("\t\t\tFiltering criterion: BLAST ambiguous map exclusion")
 					print("\t\t\t  --blastn path:",params.blastn)
@@ -1121,7 +1129,8 @@ def filterBaits_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._ba_fdb, local_db_path)
 					blacklist = b.blastExcludeAmbig(params, local_db_path, fas, option.o2, option.o3, outfile)
-					m.removeBaitsByList(conn, blacklist)
+					if len(blacklist) > 1:
+						m.removeBaitsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
 			else:
