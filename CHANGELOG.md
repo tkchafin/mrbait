@@ -5,11 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
-[v1.2.2](https://github.com/tkchafin/mrbait/releases/tag/v1.2.0)
+[v1.2.3](https://github.com/tkchafin/mrbait/releases/tag/v1.2.3)
+- Bug fix introduced in 1.2.2 to the filter_targets
+
+[v1.2.2](https://github.com/tkchafin/mrbait/releases/tag/v1.2.2)
 - Bug fix introduced in 1.2.1 to the blast_i filter 
 - Bug fix causing crash when blast filter returned zero hits
 
-[v1.2.1](https://github.com/tkchafin/mrbait/releases/tag/v1.2.0)
+[v1.2.1](https://github.com/tkchafin/mrbait/releases/tag/v1.2.1)
 - New functionality: Added new BLAST option 'blast_a' to remove ambiguous hits (>1 match)
 - Added hidden options to add secondary BLAST database
 - Added --max_hits option for BLAST which maps to BLAST param --max_target_seqs
