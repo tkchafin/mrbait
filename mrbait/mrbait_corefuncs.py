@@ -494,7 +494,7 @@ def filterTargetRegions_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._bi_fdb, local_db_path)
 					whitelist = b.blastIncludeMatch(params, local_db_path, fas, option.o2, option.o3, outfile)
-					if whitelist:
+					if len(whitelist) > 1:
 						m.removeRegionsByWhitelist(conn, whitelist)
 				elif option.o1 == "blast_a":
 					print("\t\t\tFiltering criterion: BLAST ambiguous map exclusion")
@@ -523,7 +523,7 @@ def filterTargetRegions_verbose(conn, params):
 							local_db_path = params.workdir + "/blastdb/" + params.out
 							b.makeblastdb(params.makedb, params._ba_fdb, local_db_path)
 					blacklist = b.blastExcludeAmbig(params, local_db_path, fas, option.o2, option.o3, outfile)
-					if whitelist:
+					if len(blacklist) > 1:
 						m.removeRegionsByList(conn, blacklist)
 				os.remove(fas)
 				os.remove(outfile)
