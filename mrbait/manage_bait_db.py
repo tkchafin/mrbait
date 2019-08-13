@@ -1333,7 +1333,7 @@ def removeBaitsByWhitelist(conn, whitelist):
 		SET
 			pass = 0
 		WHERE
-			NOT EXISTS(SELECT * FROM ttt WHERE ttt.baitid = regions.baitid)
+			NOT EXISTS(SELECT * FROM ttt WHERE ttt.baitid = baits.baitid)
 	'''
 	cur.execute(sql_update)
 	#Clear up the temp table t
