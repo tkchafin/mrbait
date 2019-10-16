@@ -25,7 +25,7 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version:  1.2.3
+	Version:  1.2.4
 	Author:   Tyler K. Chafin
 	Contact:  tkchafin@uark.edu
 	License:  GNU Public License v3.0
@@ -94,6 +94,7 @@ Alignment filtering/ consensus options (use with -M or -L inputs):
 	-Q,--max_ambig	: Maximum proportion of gap/N bases allowed in a consensus sequence [0.5]
 	-k,--mask	: Threshold proportion for masking (lower case) to include in consensus [0.1]
 	-K,--max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.5]
+	--maf	: Threshold minor allele frequency to code a SNP in consensus sequence [0.0]
 	--dustMask	: Use VSEARCH to mask consensus sequences using the DUST algorithm""")
 
 	print("""
@@ -195,7 +196,7 @@ VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\", or --d
 
 	print("""
 Graph Parameters (relevant for conflict resolution when --select_b or --select_r = \"pw\" or \"rc\"):
-	
+
 	--noGraph	: Skip graph-based conflict resolution and remove ALL conflicting pairs
 	--noWeightGraph	: Unweighted (random) conflict resolution
 		--MrBait will by default weight conflict resolution to maximize flanking SNPs
@@ -260,8 +261,8 @@ class parseArgs():
 			"word_size=", "megablast", "blastn=", "makedb=", "gap_extend=",
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
 			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
-			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask=", 
-			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits="])
+			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask=",
+			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits=", "maf="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -285,6 +286,7 @@ class parseArgs():
 		self.max_ambig=0.5
 		self.mask=0.1
 		self.max_mask=0.5
+		self.maf=0.0
 		self.dustMask=False
 
 		#Bait params
@@ -313,7 +315,7 @@ class parseArgs():
 		self.vsearch = "vsearch"
 		self.vthreads = None
 		self.vsearch_qmask = "dust"
-		
+
 		#BLAST options - contaminant removal and filtering by specificity
 		self.blastdb=None
 		self.fastadb=None
@@ -415,6 +417,8 @@ class parseArgs():
 				self.max_mask = float(arg)
 			elif opt=="dustMask":
 				self.dustMask=True
+			elif opt=="maf":
+				self.maf = float(arg)
 
 			#Bait general params
 			elif opt=='b' or opt=='bait':
@@ -552,7 +556,7 @@ class parseArgs():
 					self.vsearch_qmask = "none"
 				else:
 					bad_opts("Invalid option %r for <--vsearch_qmask>! Please choose one of: [soft, dust, none]" %arg)
-					
+
 			#BLAST options
 			elif opt=='blastdb' or opt=='blast_db':
 				self.blastdb = arg
@@ -590,7 +594,7 @@ class parseArgs():
 				self._bi.fdb = arg
 			elif opt == "max_hits":
 				self.max_hits = int(arg)
-				
+
 			#output options
 			elif opt=='x' or opt=='expand':
 				self.expand = 1
@@ -614,7 +618,7 @@ class parseArgs():
 				self.db = str(arg)
 			elif opt=='T' or opt=='threads':
 				self.threads = arg
-			
+
 			#graph options
 			elif opt=='noWeightGraph':
 				self._noWeightGraph=True
