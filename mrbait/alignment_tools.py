@@ -120,7 +120,7 @@ def filterListByMAF(l, counts, depth, threshold):
 	else:
 		ret = []
 		for c in utils.listToSortUniqueString(l):
-			print(c, depth, counts[c], float((float(counts[c]))/float(depth)))
+			#print(c, depth, counts[c], float((float(counts[c]))/float(depth)))
 			if float((float(counts[c]))/float(depth)) >= threshold:
 				ret.append(c)
 		return(ret)
