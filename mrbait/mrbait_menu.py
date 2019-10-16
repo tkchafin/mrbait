@@ -418,6 +418,7 @@ class parseArgs():
 			elif opt=="dustMask":
 				self.dustMask=True
 			elif opt=="maf":
+				assert 0.0 <= float(arg) < 1.0, "--maf: value must be between 0.0 and 1.0"
 				self.maf = float(arg)
 
 			#Bait general params
