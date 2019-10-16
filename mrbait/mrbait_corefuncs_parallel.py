@@ -77,7 +77,7 @@ def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, c
 	   		if cov < params_cov or alen < params_minlen:
 	   			continue
 	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask, maf=param.maf)
 	   		lock.acquire()
 	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
 	   		lock.release()
@@ -209,7 +209,7 @@ def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, ch
 	   		if cov < params_cov or alen < params_minlen:
 	   			continue
 	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask, maf=param.maf)
 	   		lock.acquire()
 	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
 	   		lock.release()
@@ -277,7 +277,7 @@ def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, c
 			continue
 		else:
 			#Add each locus to database
-			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask, maf=param.maf)
 
 			#Acquire lock, submit to Database
 			lock.acquire()
