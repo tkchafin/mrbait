@@ -94,7 +94,7 @@ Alignment filtering/ consensus options (use with -M or -L inputs):
 	-Q,--max_ambig	: Maximum proportion of gap/N bases allowed in a consensus sequence [0.5]
 	-k,--mask	: Threshold proportion for masking (lower case) to include in consensus [0.1]
 	-K,--max_mask	: Maximum proportion of masked bases allowed in a consensus sequence [0.5]
-	--maf	: Threshold minor allele frequency to code a SNP in consensus sequence [0.0]
+	--consens_maf	: Threshold minor allele frequency to code a SNP in consensus sequence [0.0]
 	--dustMask	: Use VSEARCH to mask consensus sequences using the DUST algorithm""")
 
 	print("""
@@ -262,7 +262,7 @@ class parseArgs():
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
 			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
 			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask=",
-			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits=", "maf="])
+			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits=", "consens_maf="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -417,7 +417,7 @@ class parseArgs():
 				self.max_mask = float(arg)
 			elif opt=="dustMask":
 				self.dustMask=True
-			elif opt=="maf":
+			elif opt=="consens_maf":
 				assert 0.0 <= float(arg) < 1.0, "--maf: value must be between 0.0 and 1.0"
 				self.maf = float(arg)
 

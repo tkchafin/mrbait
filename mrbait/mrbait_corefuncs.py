@@ -45,7 +45,7 @@ def loadXMFA(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=param.maf)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
@@ -66,7 +66,7 @@ def loadMAF(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=param.maf)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
@@ -97,7 +97,7 @@ def loadLOCI(conn, params):
 			continue
 		else:
 			#Add each locus to database
-			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=param.maf)
+			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 			#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NULL")
 			#print("Loading Locus #:",locid)

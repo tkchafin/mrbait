@@ -5,9 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.4](https://github.com/tkchafin/mrbait/releases/tag/v1.2.4)
+- Fixed bug where alleles were miscounted in consensAlign
+- Changed consensAlign so that IUPAC ambiguities BDHV randomly resolve to diploid genotype
+-- NOTE: If this behavior is undesired, recode B, D, H, and V ambiguities as needed
+- Added --consens_maf option to constrain consensus sequence to alleles above some frequency threshold
+
 [v1.2.3](https://github.com/tkchafin/mrbait/releases/tag/v1.2.3)
 - Bug fix introduced in 1.2.2 to the filter_targets
-- Fixed bug with blast_i when applied to baits 
+- Fixed bug with blast_i when applied to baits
 
 [v1.2.2](https://github.com/tkchafin/mrbait/releases/tag/v1.2.2)
 - Bug fix introduced in 1.2.1 to the blast_i filter
