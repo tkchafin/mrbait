@@ -67,23 +67,23 @@ def loadXMFA_parallel(conn, params):
 #worker function version of loadMAF
 def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
 	try:
-	   	connection = sqlite3.connect(db)
-	   	#Parse MAF file and create database
-	   	for aln in AlignIO.parse(chunk, "mauve"):
-	   		#NOTE: Add error handling, return error code
-	   		cov = len(aln)
-	   		alen = aln.get_alignment_length()
+		connection = sqlite3.connect(db)
+		#Parse MAF file and create database
+		for aln in AlignIO.parse(chunk, "mauve"):
+			#NOTE: Add error handling, return error code
+			cov = len(aln)
+			alen = aln.get_alignment_length()
 
-	   		if cov < params_cov or alen < params_minlen:
-	   			continue
-	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
-	   		lock.acquire()
-	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-	   		lock.release()
-	   	connection.close()
+			if cov < params_cov or alen < params_minlen:
+				continue
+			#Add each locus to database
+			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+			lock.acquire()
+			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+			lock.release()
+		connection.close()
 	except Exception as e:
-	   raise Exception(e.message)
+	 raise Exception(e.message)
 
 
 #Function to load LOCI file in parallel
@@ -187,8 +187,8 @@ def loadMAF_parallel(conn, params):
 #Found on StackOverflow: https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-processes
 #Thanks go to SO user dano
 def init(l):
-    global lock
-    lock = l
+	global lock
+	lock = l
 
 #Function to reset lock
 def reset_lock():
@@ -199,26 +199,27 @@ def reset_lock():
 #worker function version of loadMAF
 def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
 	try:
-	   	connection = sqlite3.connect(db)
-	   	#Parse MAF file and create database
-	   	for aln in AlignIO.parse(chunk, "maf"):
-	   		#NOTE: Add error handling, return error code
-	   		cov = len(aln)
-	   		alen = aln.get_alignment_length()
+		connection = sqlite3.connect(db)
+		#Parse MAF file and create database
+		for aln in AlignIO.parse(chunk, "maf"):
+			#NOTE: Add error handling, return error code
+			cov = len(aln)
+			alen = aln.get_alignment_length()
 
-	   		if cov < params_cov or alen < params_minlen:
-	   			continue
-	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
-	   		lock.acquire()
-	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-	   		lock.release()
-	   		#Extract variable positions for database
-	   		#for var in locus.alnVars:
-	   			#m.add_variant_record(connection, locid, var.position, var.value)
-	   	connection.close()
+			if cov < params_cov or alen < params_minlen:
+				continue
+			#Add each locus to database
+			locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask)
+			lock.acquire()
+			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+			print(locid)
+			lock.release()
+			#Extract variable positions for database
+			#for var in locus.alnVars:
+				#m.add_variant_record(connection, locid, var.position, var.value)
+		connection.close()
 	except Exception as e:
-	   raise Exception(e.message)
+	 raise Exception(e.message)
 
 # #Function to load VCF variants file
 # def loadVCF_worker(db, threshold, chunk):
@@ -282,12 +283,12 @@ def loadLOCI_worker(db, params_cov, params_minlen, params_thresh, params_mask, c
 			#Acquire lock, submit to Database
 			lock.acquire()
 			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
+			lock.release()
 			#print("Loading Locus #:",locid)
 
 			#Extract variable positions for database
 			#for var in locus.alnVars:
 				#m.add_variant_record(connection, locid, var.position, var.value)
-			lock.release()
 	connection.close()
 
 
@@ -349,8 +350,8 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	#Remove chunkfiles
 	d = os.listdir(params.workdir)
 	for item in d:
-	    if item.endswith(".chunk.hdf"):
-	        os.remove(os.path.join(params.workdir, item))
+		if item.endswith(".chunk.hdf"):
+			os.remove(os.path.join(params.workdir, item))
 
 
 #Function to discover target regions using a sliding windows through passedLoci

@@ -10,7 +10,7 @@ def requires():
 setup(
     name="mrbait",
     install_requires=requires(),
-    version="1.2.3",
+    version="1.2.5",
     description="Universal design of target-enrichment capture probes from genomic data",
     author='Tyler K. Chafin',
     author_email='tkchafin@uark.edu',

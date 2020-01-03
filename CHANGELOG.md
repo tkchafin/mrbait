@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.5](https://github.com/tkchafin/mrbait/releases/tag/v1.2.5)
+- Bug fix where loci are all lost in multithreading version
+
 [v1.2.3](https://github.com/tkchafin/mrbait/releases/tag/v1.2.3)
 - Bug fix introduced in 1.2.2 to the filter_targets
 
