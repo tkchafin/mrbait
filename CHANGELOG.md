@@ -10,9 +10,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 [v1.2.3](https://github.com/tkchafin/mrbait/releases/tag/v1.2.3)
 - Bug fix introduced in 1.2.2 to the filter_targets
+- Fixed bug with blast_i when applied to baits
 
 [v1.2.2](https://github.com/tkchafin/mrbait/releases/tag/v1.2.2)
-- Bug fix introduced in 1.2.1 to the blast_i filter 
+- Bug fix introduced in 1.2.1 to the blast_i filter
 - Bug fix causing crash when blast filter returned zero hits
 
 [v1.2.1](https://github.com/tkchafin/mrbait/releases/tag/v1.2.1)
@@ -29,11 +30,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 [v1.1.7](https://github.com/tkchafin/mrbait/releases/tag/v1.1.7)
 - Bug fix with changed ipyrad .loci format
-- Bug fix with deprecated networkx.edges_iter() 
+- Bug fix with deprecated networkx.edges_iter()
 - Allow arbitrary leading dashes for flags
 - Added option to skip gaph-based conflict resolution
 - Added option to do graph-based resolution unweighted
-- Added option to weight by minimizing N's 
+- Added option to weight by minimizing N's
 
 [v1.1.6](https://github.com/tkchafin/mrbait/releases/tag/v1.1.6)
 - Bug fix in reporting for bait design

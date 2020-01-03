@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import random
 from mrbait import misc_utils as utils
 from Bio import AlignIO
 
@@ -9,9 +10,9 @@ from Bio import AlignIO
 class consensAlign():
 	'Consensus alignment object'
 	#Default constructor
-	def __init__(self, alignment, threshold, mask):
+	def __init__(self, alignment, threshold, mask, maf=0.0):
 		self.alnVars = []
-		self.conSequence = make_consensus(alignment, threshold, mask)
+		self.conSequence = make_consensus(alignment, threshold, mask, maf)
 		self.alnVars = get_vars(self.conSequence)
 
 class variablePosition():
@@ -35,7 +36,7 @@ class variablePosition():
 
 #Less shitty consensus function than BioPython has..
 #From an AlignIO alignment object
-def make_consensus(alignment, threshold, mask):
+def make_consensus(alignment, threshold, mask, maf=0.0):
 	aln_depth = len(alignment)
 	#If only one sequence in alignment, return that seq as consensus
 	if aln_depth == 1:
@@ -81,7 +82,7 @@ def make_consensus(alignment, threshold, mask):
 					temp = "N"
 				bad_count += nuc_count[temp]
 				bad_counts[temp] = nuc_count[temp]
-				if float((nuc_count[temp])/aln_depth) >= threshold:
+				if float((nuc_count[temp])/aln_depth*2) >= threshold:
 					#print("Found ", nuc_count[key], key, "'s in alignment")
 					#print((nuc_count[key])/aln_depth)
 					consensus+=str(key)
@@ -96,10 +97,35 @@ def make_consensus(alignment, threshold, mask):
 				#print(nuc)
 				consensus+=nuc
 			else:
+				#call consensus from alleles!
 				temp = utils.listToSortUniqueString(nucs)
+				if len(temp) > 1 and maf > 0.0:
+					#print(temp)
+					#first, remove alleles below MAF filter
+					nucs_clean = filterListByMAF(nucs, nuc_count, aln_depth*2, maf)
+					#recreate unique list
+					temp = utils.listToSortUniqueString(nucs_clean)
+					#print(temp)
+					#print()
 				#print(nucs,":",temp)
 				consensus+=reverse_iupac_case(temp)
 	return(consensus)
+
+
+def filterListByMAF(l, counts, depth, threshold):
+	if threshold <= 0.0:
+		return(l)
+	elif threshold >= 1.0:
+		return(l)
+	else:
+		ret = []
+		for c in utils.listToSortUniqueString(l):
+			#print(c, depth, counts[c], float((float(counts[c]))/float(depth)))
+			if float((float(counts[c]))/float(depth)) >= threshold:
+				ret.append(c)
+		return(ret)
+		#sys.exit(0)
+
 
 #Function to get a list of variablePositions
 def get_vars(con):
@@ -134,25 +160,25 @@ def get_vars(con):
 		'''
 	return var_objects
 
-#Function to split character to IUPAC codes, assuing diploidy
+#Function to split character to IUPAC codes, assuming diploidy
 def get_iupac(char):
 	iupac = {
-		"A"	: ["A"],
-		"G"	: ["G"],
-		"C"	: ["C"],
-		"T"	: ["T"],
-		"N"	: ["N"],
-		"-"	: ["-"],
+		"A"	: ["A", "A"],
+		"G"	: ["G", "G"],
+		"C"	: ["C", "C"],
+		"T"	: ["T", "T"],
+		"N"	: ["N", "N"],
+		"-"	: ["-", "-"],
 		"R"	: ["A","G"],
 		"Y"	: ["C","T"],
 		"S"	: ["G","C"],
 		"W"	: ["A","T"],
 		"K"	: ["G","T"],
 		"M"	: ["A","C"],
-		"B"	: ["C","G","T"],
-		"D"	: ["A","G","T"],
-		"H"	: ["A","C","T"],
-		"V"	: ["A","C","G"]
+		"B"	: random.sample(["C","G","T"], 2),
+		"D"	: random.sample(["A","G","T"], 2),
+		"H"	: random.sample(["A","C","T"], 2),
+		"V"	: random.sample(["A","C","G"], 2)
 	}
 	return iupac[char]
 

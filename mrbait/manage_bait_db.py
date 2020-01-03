@@ -98,7 +98,7 @@ def clearGFF(conn):
 
 ################################################################################
 
-#function to reset all targets to passing 
+#function to reset all targets to passing
 def resetTargets(conn):
 	cur = conn.cursor()
 	sql = '''
@@ -110,7 +110,7 @@ def resetTargets(conn):
 	cur.execute(sql)
 	conn.commit()
 
-#function to reset all baits to passing 
+#function to reset all baits to passing
 def resetBaits(conn):
 	cur = conn.cursor()
 	sql = '''
@@ -658,17 +658,17 @@ def updateChosenFromPandas(conn, df):
 	cur.execute("DROP TABLE IF EXISTS t")
 	conn.commit()
 
-#Updates 
+#Updates
 def updateLociMask(conn, newMask):
 	cur = conn.cursor()
 
-	#convert to data frame 
+	#convert to data frame
 	df = pd.DataFrame(newMask, columns=("id", "mask"))
-	
-	#create temporary table 
+
+	#create temporary table
 	df.to_sql('m', conn, if_exists='replace')
 	#print(pd.read_sql_query("SELECT * FROM loci", conn))
-	
+
 	#Hacky way to do it, but SQlite doesn't support FROM clause in UPDATEs...
 	sql_update = '''
 		UPDATE
@@ -1333,7 +1333,7 @@ def removeBaitsByWhitelist(conn, whitelist):
 		SET
 			pass = 0
 		WHERE
-			NOT EXISTS(SELECT * FROM ttt WHERE tt.baitid = regions.baitid)
+			NOT EXISTS(SELECT * FROM ttt WHERE ttt.baitid = baits.baitid)
 	'''
 	cur.execute(sql_update)
 	#Clear up the temp table t

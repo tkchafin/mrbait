@@ -45,7 +45,7 @@ def loadXMFA(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
@@ -66,7 +66,7 @@ def loadMAF(conn, params):
 		alen = aln.get_alignment_length()
 
 		#Add each locus to database
-		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+		locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 		#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 		locid = m.add_locus_record(conn, cov, locus.conSequence, 1, num)
 		num+=1
@@ -97,7 +97,7 @@ def loadLOCI(conn, params):
 			continue
 		else:
 			#Add each locus to database
-			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask)
+			locus = a.consensAlign(aln, threshold=params.thresh, mask=params.mask, maf=params.maf)
 			#consensus = str(a.make_consensus(aln, threshold=params.thresh)) #Old way
 			locid = m.add_locus_record(conn, cov, locus.conSequence, 1, "NULL")
 			#print("Loading Locus #:",locid)
@@ -705,7 +705,7 @@ def pairwiseAlignDedup(conn, params, seqs, minid, mincov):
 	#os.remove(pw)
 	return(ret)
 
-#Function to call VSEARCH to mask loci 
+#Function to call VSEARCH to mask loci
 def fastxMaskLoci(conn, params, seqs):
 	"""Seqs must be a pandas DF where cols: 0=index, 1=name, 2=sequence"""
 	fas = params.workdir + "/.temp_premask.fasta"
@@ -728,10 +728,10 @@ def fastxMaskLoci(conn, params, seqs):
 		sys.exit(err.args)
 	except:
 		sys.exit(sys.exc_info()[0])
-		
-	
+
+
 	os.remove(fas)
-	# 
+	#
 	# Finally, parse masked fasta for new mask values
 	newMask = list()
 	for contig in aln_file_tools.read_fasta(mask):
@@ -769,8 +769,8 @@ def pairwiseAlignReverseComp(conn, params, seqs, minid, mincov):
 	except:
 		sys.exit(sys.exc_info()[0])
 	os.remove(fas)
-	
-	
+
+
 	#VSEARCH call to reverse complement .temp_ref.fasta
 	# revcomp = params.workdir + "/.temp_revcomp.fasta"
 	# try:
@@ -787,11 +787,11 @@ def pairwiseAlignReverseComp(conn, params, seqs, minid, mincov):
 	# 	sys.exit(err.args)
 	# except:
 	# 	sys.exit(sys.exc_info()[0])
-	
-	#custom function call to reverse complement FASTA 
+
+	#custom function call to reverse complement FASTA
 	revcomp = params.workdir + "/.temp_revcomp.fasta"
 	aln_file_tools.reverseComplementFasta(sor, revcomp)
-	
+
 	# global align of baits against reverse complements
 	pw = params.workdir + "/" + params.out + ".rc"
 	try:
@@ -808,7 +808,7 @@ def pairwiseAlignReverseComp(conn, params, seqs, minid, mincov):
 		sys.exit(sys.exc_info()[0])
 	os.remove(sor)
 	os.remove(revcomp)
-	
+
 	#Finally, parse the output of pairwise alignment, to get 'bad matches'
 	#Returns a list of edges
 	ret = vsearch.parsePairwiseAlign(pw)
@@ -1170,7 +1170,7 @@ def filterBaits_verbose(conn, params):
 				if len(revised_blacklist) > 0:
 					m.removeBaitsByList(conn, revised_blacklist)
 
-		#Perform reverse complement search 
+		#Perform reverse complement search
 		if alnR:
 			print("\t\t\tFiltering criterion: Reverse Complement Pairwise Alignment")
 			passedBaits = m.getPassedBaits(conn)
@@ -1203,7 +1203,7 @@ def filterBaits_verbose(conn, params):
 				revised_blacklist = dupEdgeResolution(conn, params, blacklist_edges)
 				if len(revised_blacklist) > 0:
 					m.removeBaitsByList(conn, revised_blacklist)
-	
+
 		#If 'random' select is turned on, then apply AFTER all other options
 		if rand_num:
 			print("\t\t\tRandomly selecting",rand_num,"baits.")
