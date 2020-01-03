@@ -67,7 +67,6 @@ def loadXMFA_parallel(conn, params):
 #worker function version of loadMAF
 def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
 	try:
-<<<<<<< HEAD
 		connection = sqlite3.connect(db)
 		#Parse MAF file and create database
 		for aln in AlignIO.parse(chunk, "mauve"):
@@ -83,23 +82,6 @@ def loadXMFA_worker(db, params_cov, params_minlen, params_thresh, params_mask, c
 			locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
 			lock.release()
 		connection.close()
-=======
-	   	connection = sqlite3.connect(db)
-	   	#Parse MAF file and create database
-	   	for aln in AlignIO.parse(chunk, "mauve"):
-	   		#NOTE: Add error handling, return error code
-	   		cov = len(aln)
-	   		alen = aln.get_alignment_length()
-
-	   		if cov < params_cov or alen < params_minlen:
-	   			continue
-	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask, maf=params.maf)
-	   		lock.acquire()
-	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-	   		lock.release()
-	   	connection.close()
->>>>>>> 1142c1e7a5c265cbb988b78ab506007ed85c7698
 	except Exception as e:
 	 raise Exception(e.message)
 
@@ -217,7 +199,6 @@ def reset_lock():
 #worker function version of loadMAF
 def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, chunk):
 	try:
-<<<<<<< HEAD
 		connection = sqlite3.connect(db)
 		#Parse MAF file and create database
 		for aln in AlignIO.parse(chunk, "maf"):
@@ -237,26 +218,6 @@ def loadMAF_worker(db, params_cov, params_minlen, params_thresh, params_mask, ch
 			#for var in locus.alnVars:
 				#m.add_variant_record(connection, locid, var.position, var.value)
 		connection.close()
-=======
-	   	connection = sqlite3.connect(db)
-	   	#Parse MAF file and create database
-	   	for aln in AlignIO.parse(chunk, "maf"):
-	   		#NOTE: Add error handling, return error code
-	   		cov = len(aln)
-	   		alen = aln.get_alignment_length()
-
-	   		if cov < params_cov or alen < params_minlen:
-	   			continue
-	   		#Add each locus to database
-	   		locus = a.consensAlign(aln, threshold=params_thresh, mask=params_mask, maf=params.maf)
-	   		lock.acquire()
-	   		locid = m.add_locus_record(connection, cov, locus.conSequence, 1, "NULL")
-	   		lock.release()
-	   		#Extract variable positions for database
-	   		#for var in locus.alnVars:
-	   			#m.add_variant_record(connection, locid, var.position, var.value)
-	   	connection.close()
->>>>>>> 1142c1e7a5c265cbb988b78ab506007ed85c7698
 	except Exception as e:
 	 raise Exception(e.message)
 

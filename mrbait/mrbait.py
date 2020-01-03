@@ -69,9 +69,9 @@ def main():
 			
 			#Pre-filters: Length, alignment depth
 			print("\t\tFiltering loci...",end="")
-			print(m.getLoci(conn))
+			#print(m.getLoci(conn))
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
-			print(m.getLoci(conn))
+			#print(m.getLoci(conn))
 			print(" Done!\n")
 			
 			passedLoci = m.getNumPassedLoci(conn)
