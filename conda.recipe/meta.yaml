@@ -17,11 +17,11 @@ requirements:
     - setuptools
     - pandas >=0.22
     - biopython
-    - numpy >=1.16
+    - numpy >=1.11
     - pyvcf >=0.6.8
     - decorator >=4.3.0
     - networkx >=2.2
-    - pytables >=3.6.1
+    - pytables
     - blast
     - vsearch
   run:
@@ -30,11 +30,11 @@ requirements:
     - setuptools
     - pandas >=0.22
     - biopython
-    - numpy >=1.16
+    - numpy >=1.11
     - pyvcf >=0.6.8
     - networkx >=2.2
     - blast
-    - pytables >=3.6.1
+    - pytables
     - vsearch
 
   commands:
