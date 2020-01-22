@@ -48,8 +48,10 @@ source deactivate
 
 [CHANGELOG]: ./CHANGELOG.md
 [LICENSE]: ./LICENSE
-<<<<<<< HEAD
-[version-badge]: https://img.shields.io/badge/version-1.2.5-blue.svg
-=======
-[version-badge]: https://img.shields.io/badge/version-1.2.4-blue.svg
->>>>>>> 1142c1e7a5c265cbb988b78ab506007ed85c7698
+[version-badge]: https://img.shields.io/badge/version-1.2.6-blue.svg
+
+## Updating
+You can update to the latest conda release by typing:
+```
+conda update -c conda-forge -c bioconda -c tylerkchafin mrbait
+```
