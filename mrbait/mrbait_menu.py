@@ -25,7 +25,7 @@ def printHeader():
 	    MrBait: Universal Probe Design for Targeted-Enrichment Methods
 	=======================================================================
 
-	Version:  1.2.5
+	Version:  1.2.6
 	Author:   Tyler K. Chafin
 	Contact:  tkchafin@uark.edu
 	License:  GNU Public License v3.0
@@ -83,6 +83,7 @@ Assembly input options (for use only with -A <genome.fasta>):
 
 	-V,--vcf	: VCF file containing variant information
 	-G,--gff	: GFF file containing annotation information
+	-B,--bed	: BED file containing regions (only 1 header line)
 	--vcfALT	: If using VCF and reference allele is gap/N, attempt
 		 	   to call new consensus using VCF ALT alleles [default=OFF]""")
 	print("""
@@ -152,6 +153,8 @@ Target Region options:
 			               https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md
 			gff_a=[alias]: Only retain targets within \"d\" distance of GFF records with attributes of \"Alias\"
 			               Note that \"gff\" and \"gffa\" options are case-insensitive
+			bed_x        : Exclude targets within \"d\" distance of BED records
+			bed_i        : Only include targets within \"d\" distance of BED records
 		Ex1: -F snp=1,10 -d 100 to sample when 1-10 SNPs w/in 100 bases
 		Ex2: -F gc=0.2,0.8 -F rand=100 to randomly sample 100 targets with GC between 20-80%
 		Ex3: -F mask=0.0,0.1 to remove targets with >10% \masked bases
@@ -178,7 +181,9 @@ Bait Design / Selection options:
 			blast_i=[i,q]: Only retain hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_x=[i,q]: Remove hits over \"i\" identity and \"q\" query coverage to provided db
 			blast_a=[i,q]: Remove targets having >1 hits with \"i\" identity and \"q\" query coverage to provided db
-			rand=[x]     : Randomly retain \"x\" baits""")
+			rand=[x]     : Randomly retain \"x\" baits
+			bed_x        : Exclude baits within \"d\" distance of BED records
+			bed_i        : Only include baits within \"d\" distance of BED records""")
 
 	print("""
 VSEARCH Parameters (use when --select_b or --select_r = \"pw\" or \"rc\", or --dustMask):
@@ -250,7 +255,7 @@ class parseArgs():
 	def __init__(self):
 		#Define options
 		try:
-			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:xo:Pk:K:d:r:T:tX:', \
+			options, remainder = getopt.getopt(sys.argv[1:], 'M:G:V:L:A:hc:l:q:Q:b:w:Rm:v:n:Ng:E:D:p:S:F:s:f:xo:Pk:K:d:r:T:tX:B:', \
 			["maf=","gff=","vcf=","loci=","assembly=",'help',"cov=","len=","thresh=", "max_ambig="
 			"bait=","win_shift=","mult_reg","min_mult=","var_max=","numN=",
 			"callN","numG=","callG","gff_type=","dist_r=","tile_min=",
@@ -262,7 +267,8 @@ class parseArgs():
 			"word=", "mega", "gap_open=", "blast_db=", "fasta_db=", "wordsize=", "nodust", "strand=",
 			"resume=","db=", "print_tr", "xmfa=", "print_loc", "vcfALT", "target_all",
 			"noGraph", "noWeightGraph", "weightByMin", "weightMax", "dustMask", "vsearch_qmask=",
-			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits=", "consens_maf="])
+			"blasta_db=", "blastx_db=", "blasti_db=", "blasta_fdb=", "blastx_fdb=", "blasti_fdb=", "max_hits=",
+			"consens_maf=", "bed="])
 		except getopt.GetoptError as err:
 			print(err)
 			display_help("\nExiting because getopt returned non-zero exit status.")
@@ -278,6 +284,8 @@ class parseArgs():
 		self.assembly=None
 		self.xmfa=None
 		self.vcfALT=False
+		self.bed=None
+		self.bed_header=1 #number of bed header lines
 
 		#Locus filtering params
 		self.cov=1
@@ -395,6 +403,8 @@ class parseArgs():
 				self.vcf = arg
 			elif opt=='L' or opt=='loci':
 				self.loci = arg
+			elif opt=="B" or opt=="bed":
+				self.bed = arg
 			elif opt =='A' or opt== 'assembly':
 				self.assembly = arg
 			elif opt =="vcfALT":
@@ -488,6 +498,8 @@ class parseArgs():
 						self.filter_r_objects.append(subArg(subopts[0],subopts[1]))
 					else:
 						self.filter_r_objects.append(subArg(subopts[0],int(subopts[1])))
+				elif subopts[0] in ('bed_x', 'bed_i'):
+					self.filter_r_objects.append(subArg(subopts[0], 0))
 				else:
 					bad_opts("Invalid option %r for <--filter_r>!" %subopts[0])
 
@@ -538,6 +550,8 @@ class parseArgs():
 					assert 0.0 <= float(subopts[1]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
 					assert 0.0 <= float(subopts[2]) <= 1.0, "In <--filter_r> suboption \"%s\": Values must be given as proportions! "%subopts[0]
 					self.filter_b_objects.append(subArg(subopts[0],float(subopts[1]),float(subopts[2])))
+				elif subopts[0] in ('bed_x', 'bed_i'):
+					self.filter_b_objects.append(subArg(subopts[0], 0))
 				else:
 					bad_opts("Invalid option %r for <--filter_b>!" %subopts[0])
 
@@ -645,6 +659,8 @@ class parseArgs():
 					self._noWeightGraph = 1
 				elif main == "weightByMin":
 					self._weightByMin = 1
+				elif main == "bed_header":
+					self.bed_header=int(subopts[1])
 				elif main == "weightMax":
 					assert len(subopts) == 2, "Warning: HACKER option <graphMax> must have two arguments separated by \"=\""
 					self._weightMax = int(subopts[1])

@@ -59,21 +59,21 @@ def main():
 				m.init_new_db(conn)
 			loadAlignments(conn, params)
 			#PASS=1 is PASS=FALSE
-			
+
 			#optional masking of loci using DUST algorithm
 			if params.dustMask:
 				print("\t\tMasking consensus sequences using the DUST algorithm in VSEARCH...", end="")
 				masked = core.fastxMaskLoci(conn, params, m.getPassedLoci(conn))
 				m.updateLociMask(conn, masked)
 				print(" Done!")
-			
+
 			#Pre-filters: Length, alignment depth
 			print("\t\tFiltering loci...",end="")
 			#print(m.getLoci(conn))
 			m.filterLoci(conn, params.minlen, params.cov, params.max_ambig, params.max_mask)
 			#print(m.getLoci(conn))
 			print(" Done!\n")
-			
+
 			passedLoci = m.getNumPassedLoci(conn)
 			if passedLoci <= 0:
 				sys.exit("\nProgram killed: No loci passed filtering.\n")
@@ -171,7 +171,7 @@ def main():
 				sys.exit("\nProgram killed: No passed targets in database.\n")
 			else:
 				#Bait filtering
-				#reset baits 
+				#reset baits
 				m.resetBaits(conn)
 				filterBaits(conn,params)
 				passedBaits = m.getNumPassedBaits(conn)
@@ -209,6 +209,7 @@ def loadAlignments(conn, params):
 		print("\t\t\tThreshold to retain masked base (-k):",params.mask)
 		print("\t\t\tMaximum allowed gap/N bases (-Q):",params.max_ambig)
 		print("\t\t\tMaximum allowed masked bases (-K):",params.max_mask)
+		print("\t\t\tMinor allele frequency threshold (--consens_maf):",params.maf)
 		#Load alignments
 		if params.alignment:
 			print("\t\tLoading MAF file:",params.alignment)
@@ -259,6 +260,11 @@ def loadAlignments(conn, params):
 		if params.gff:
 			print("\t\tLoading GFF file:",params.gff)
 			core.loadGFF(conn, params)
+			#print(m.getGFF(conn))
+
+		if params.bed:
+			print("\t\tLoading BED file:",params.bed)
+			core.loadBED(conn, params)
 			#print(m.getGFF(conn))
 	else:
 		#Option to load .loci alignment goes here!

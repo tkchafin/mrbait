@@ -1,10 +1,10 @@
 package:
   name: mrbait
-  version: "1.2.5"
+  version: "1.2.6"
 
 source:
   git_url: https://github.com/tkchafin/mrbait.git
-  git_rev: v1.2.5
+  git_rev: v1.2.6
 
 build:
   skip: True  # [win]
@@ -17,11 +17,11 @@ requirements:
     - setuptools
     - pandas >=0.22
     - biopython
-    - numpy >=1.9
+    - numpy >=1.16
     - pyvcf >=0.6.8
     - decorator >=4.3.0
     - networkx >=2.2
-    - pyTables
+    - pytables >=3.6.1
     - blast
     - vsearch
   run:
@@ -30,11 +30,11 @@ requirements:
     - setuptools
     - pandas >=0.22
     - biopython
-    - numpy >=1.9
+    - numpy >=1.16
     - pyvcf >=0.6.8
     - networkx >=2.2
     - blast
-    - pyTables
+    - pytables >=3.6.1
     - vsearch
 
   commands:

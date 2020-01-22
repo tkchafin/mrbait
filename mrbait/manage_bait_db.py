@@ -19,8 +19,10 @@ def init_new_db(connection):
 	clearLoci(connection)
 	#clearVariants(connection)
 	clearGFF(connection)
+	clearBED(connection)
 	clearTargets(connection)
 	clearBaits(connection)
+
 
 #Function to clear baits table
 def clearBaits(conn):
@@ -94,7 +96,18 @@ def clearGFF(conn):
 	''')
 	conn.commit()
 
-
+#Function to clear BED
+def clearBED(conn):
+	cursor = conn.cursor()
+	cursor.execute('''DROP TABLE IF EXISTS bed''')
+	#Table holding variant information
+	#Table holding GFF element information
+	cursor.execute('''
+		CREATE TABLE bed(bedid INTEGER PRIMARY KEY, locid INTEGER NOT NULL,
+			start INTEGER NOT NULL,stop INTEGER NOT NULL,
+			pass INTEGER NOT NULL, FOREIGN KEY (locid) REFERENCES loci(id))
+	''')
+	conn.commit()
 
 ################################################################################
 
@@ -171,6 +184,17 @@ def getNumPassedGFF(conn):
 	cur.execute("""SELECT count(gffid) FROM gff WHERE pass = 1""")
 	return(parseFetchNum(cur.fetchone()))
 
+#returns number of BED elements
+def getNumBED(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(bedid) FROM bed""")
+	return(parseFetchNum(cur.fetchone()))
+
+#returns number of BED elements
+def getNumPassedBED(conn):
+	cur = conn.cursor()
+	cur.execute("""SELECT count(bedid) FROM bed WHERE pass = 1""")
+	return(parseFetchNum(cur.fetchone()))
 
 #Function returns count of passed loci
 def getNumPassedLoci(conn):
@@ -223,11 +247,23 @@ def getNumPassedTRs(conn):
 def getPrintBaits(conn):
 	sql = '''
 		SELECT
-			locid, baits.regid, baitid, baits.sequence
+			locid, baits.regid, baitid, baits.sequence, loci.chrom, baits.start, baits.stop, regions.start as rstart, regions.stop as rstop
 		FROM
-		 	baits INNER JOIN regions ON baits.regid = regions.regid
+		 	baits
+			INNER JOIN regions ON baits.regid = regions.regid
+			INNER JOIN loci on regions.locid = loci.id
 		WHERE
 			baits.pass=1
+	'''
+	return(pd.read_sql_query(sql, conn))
+
+#Function returns pandas dataframe of regions to print
+def getPrintRegions(conn):
+	sql = '''
+		SELECT
+			regions.locid, regions.regid, regions.sequence, regions.start, regions.stop, loci.chrom, regions.pass
+		FROM
+		 	regions INNER JOIN loci ON regions.locid = loci.id
 	'''
 	return(pd.read_sql_query(sql, conn))
 
@@ -246,6 +282,10 @@ def getBaits(conn):
 #Function to return GFF table as pandas DataFrame
 def getGFF(conn):
 	return(pd.read_sql_query("""SELECT * FROM gff """, conn))
+
+#Function to return BED table as pandas DataFrame
+def getBED(conn):
+	return(pd.read_sql_query("""SELECT * FROM bed """, conn))
 
 #Function to return baits table
 def getPassedBaits(conn):
@@ -308,6 +348,24 @@ def add_gff_record(conn,seqid, gff_type, start, stop, alias):
 		cur.execute(sql, stuff)
 		conn.commit()
 
+#Code to add record to BED table
+def add_bed_record(conn, seqid, start, stop):
+	cur = conn.cursor()
+
+	#Query seqid for given chrom
+	cur.execute("SELECT id FROM loci WHERE chrom = ?;",(seqid,))
+	res = cur.fetchone()
+	if res is not None:
+		#If any match exists, fetch locid
+		locid = res[0]
+		#print("Locid for",seqid,"is:",locid)
+		#BUILT INSERT SQL
+		sql = ''' INSERT INTO bed(locid, start, stop, pass)
+					VALUES(?,?,?,1);'''
+		stuff = [int(locid), int(start), int(stop)]
+		cur.execute(sql, stuff)
+		conn.commit()
+
 """DEPRECATED"""
 # #Code to add to 'variants' table
 # def add_variant_record(conn, loc, pos, val):
@@ -358,6 +416,25 @@ def validateGFFRecords(conn):
 				gff INNER JOIN loci ON gff.locid = loci.id
 			WHERE
 				(gff.start > loci.length) AND (gff.stop > loci.length)
+			);
+	'''
+	cur.execute(sql)
+	conn.commit()
+
+#Function to FAIL any GFF elements that do not overlap with our sequence for the given locus/region
+def validateBEDRecords(conn):
+	cur = conn.cursor()
+
+	sql = '''
+		UPDATE
+			bed
+		SET
+			pass = 0
+		WHERE bedid IN
+			(SELECT bedid FROM
+				bed INNER JOIN loci ON bed.locid = loci.id
+			WHERE
+				(bed.start > loci.length) AND (bed.stop > loci.length)
 			);
 	'''
 	cur.execute(sql)
@@ -1403,6 +1480,56 @@ def baitFilterRandom(conn, num):
 		cur.execute(sql, stuff)
 		conn.commit()
 
+def regionFilterBED_include(conn, dist):
+	cur = conn.cursor()
+
+	if getNumBED(conn) > 0:
+		if getNumPassedBED(conn) > 0:
+			df = pd.DataFrame() #empty pandas DF
+
+			sql = """
+				SELECT regid, regions.start, regions.stop, regions.pass,
+					bedid, bed.start AS bed_start, bed.stop AS bed_stop
+				FROM
+					regions INNER JOIN bed ON regions.locid = bed.locid
+				WHERE
+					regions.pass = 1 AND bed.pass = 1
+			"""
+			df = pd.read_sql_query(sql, conn)
+			whitelist = parseJoinBEDTable(df, dist)
+			removeRegionsByWhitelist(conn, whitelist)
+
+			"""
+			1. Fetch INNER JOINED db matching criterion
+			2. Parse overlaps in Python (see function above)
+			3. Return list of ones to keep.
+			4. For UPDATE- Set pass to 0 if: pass NOT 1 in returned list, OR if already failed
+				This should also fail the case where NO BED RECORDS TO JOIN or bed record was failed
+			"""
+		else:
+			cur.execute("UPDATE regions SET pass = 0")
+			print("WARNING: No BED records passed quality control. Because you chose to filter target regions on proximity to BED records, no targets will be retained.")
+
+def regionFilterBED_exclude(conn, dist):
+	cur = conn.cursor()
+
+	if getNumBED(conn) > 0:
+		if getNumPassedBED(conn) > 0:
+			df = pd.DataFrame() #empty pandas DF
+
+			sql = """
+				SELECT regid, regions.start, regions.stop, regions.pass,
+					bedid, bed.start AS bed_start, bed.stop AS bed_stop
+				FROM
+					regions INNER JOIN bed ON regions.locid = bed.locid
+				WHERE
+					regions.pass = 1 AND bed.pass = 1
+			"""
+			df = pd.read_sql_query(sql, conn)
+			blacklist = parseJoinBEDTable(df, dist)
+			removeRegionsByList(conn, blacklist)
+
+
 #Function to filter targets by proximity or overlap with GFF records
 def regionFilterGFF(conn, gff_type, dist):
 	cur = conn.cursor()
@@ -1498,6 +1625,21 @@ def parseJoinGFFTable(df, dist):
 		min2 = row["gff_start"]
 		max1 = row["stop"] + dist
 		max2 = row["gff_stop"]
+		#If no overlap (overlap distance <= 0), set 'pass' to 0/FAIL
+		if utils.calcOverlap(min1, max1, min2, max2) <= 0:
+			df.loc[index, "pass"] = 0
+
+	#Get list of passed targets, pass list to FAIL all non-whitelisted targets
+	whitelist = df[df["pass"]==1].regid.unique()
+	return(whitelist)
+
+#Function to parse an INNER JOIN regions/bed table for overlapping fragments, and return whitelist
+def parseJoinBEDTable(df, dist):
+	for index, row in df.iterrows():
+		min1 = row["start"] - dist or 0
+		min2 = row["bed_start"]
+		max1 = row["stop"] + dist
+		max2 = row["bed_stop"]
 		#If no overlap (overlap distance <= 0), set 'pass' to 0/FAIL
 		if utils.calcOverlap(min1, max1, min2, max2) <= 0:
 			df.loc[index, "pass"] = 0

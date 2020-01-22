@@ -141,6 +141,28 @@ def loadGFF(conn, params):
 	#Check if all GFF records fall within bounds of
 	m.validateGFFRecords(conn)
 
+#Function to load BED file
+def loadBED(conn, params):
+
+	with open(params.bed)as f:
+		count=0
+		for line in f:
+			line = line.strip()
+			if not line:
+				continue
+			count+=1
+			if count <= params.bed_header:
+				continue
+			content = line.split()
+
+			#NOTE: This function ONLY inserts BEDRecords where record.seqid matches an existing locus in the loci table
+			m.add_bed_record(conn, content[0], content[1], content[2])
+
+	#remove BED records not falling within our loci
+	#print(m.getBED(conn))
+	m.validateBEDRecords(conn)
+	#print(m.getBED(conn))
+
 
 #Function to load VCF variants file
 def loadVCF(conn, params):
@@ -202,9 +224,10 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 		#print(seq)
 		start = 0
 		stop = 0
-		#print(params.win_width)
+		#print(params.win_shift)
 		#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
 		if params.target_all:
+			#print("target_all")
 			#submit full locus as target
 			seq_norm = s.simplifySeq(seq[2])
 			counts = s.seqCounterSimple(seq_norm)
@@ -214,9 +237,10 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 				n_mask = utils.n_lower_chars(seq[2])
 				n_gc = s.gc_counts(seq[2])
 				#NOTE: flank count set to number of variable sites in whole locus
-				#print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, flank_counts, n_mask, n_gc)
+				#print(int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
 				m.add_region_record(conn, int(seq[1]), 0, len(seq[2]), seq[2], tr_counts, tr_counts, n_mask, n_gc)
 		else:
+			#print("\nConsensus: ", seq[2], "ID is: ", seq[1], "\n")
 			generator = s.slidingWindowGenerator(seq[2], params.win_shift, params.win_width)
 			for window_seq in generator():
 
@@ -224,33 +248,28 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 				counts = s.seqCounterSimple(seq_norm)
 
 				#If window passes filters, extend current bait region
-				#print("candidate:",window_seq[0])
-				#IF window passes, move end point and go to next window
+				#print("Start is ", start, " and stop is ",stop) #debug print
 				if counts['*'] <= params.var_max and counts['N'] <= params.numN and counts['-'] <= params.numG:
-					#print("continue")
 					stop = window_seq[2]
-					#print("New stop:",stop," sequence end:",len(seq[2]))
-
 					#if this window passes BUT is the last window, evaluate it
 					if stop == len(seq[2]):
 						#print("last window")
 						if (stop - start) >= params.blen:
 							target = (seq[2])[start:stop]
 							tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+							#print("candidate:",window_seq[0])
 							n_mask = utils.n_lower_chars(target)
 							n_gc = s.gc_counts(target)
 							#Check that there aren't too many SNPs
 							#if tr_counts["*"] <= params.vmax_r:
 							#print("	Target region: ", target)
 							#Submit target region to database
+							#print("process: grabbing lock")'
 							flank_counts = s.getFlankCounts(seq[2], start, stop, params.flank_dist)
-							#print(int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
-							m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
+							m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
+							#set start of next window to end of current TR
 							generator.setI(stop)
-
-				#if window fails, check if previous endpoint is acceptable
 				else:
-					#print("end")
 					#If window fails, check if previous bait region passes to submit to DB
 					#print (stop-start)
 					if (stop - start) >= params.blen:
@@ -262,12 +281,14 @@ def targetDiscoverySlidingWindow(conn, params, loci):
 						#if tr_counts["*"] <= params.vmax_r:
 						#print("	Target region: ", target)
 						#Submit target region to database
+						#print("process: grabbing lock")'
 						flank_counts = s.getFlankCounts(seq[2], start, stop, params.flank_dist)
-						m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)					#set start of next window to end of current TR
+						m.add_region_record(conn, int(seq[1]), start, stop, target, tr_counts, flank_counts, n_mask, n_gc)
+						#set start of next window to end of current TR
 						generator.setI(stop)
-					else:
-						#If bait fails, set start to start point of next window
-						start = generator.getI()+params.win_shift
+
+					#If bait fails, set start to start point of next window
+					start = generator.getI()+params.win_shift
 	#Now update regions table to include information for flanking regions if available
 	#m.flankDistParser(conn, params.flank_dist)
 
@@ -354,6 +375,14 @@ def filterTargetRegions(conn, params):
 						m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
 				else:
 					sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
+			elif option.o1 in ("bed_x", "bed_i"):
+				if params.bed and params.assembly:
+					if option.o1 == "bed_x":
+						m.regionFilterBED_exclude(conn, params.flank_dist)
+					elif option.o1 == "bed_i":
+						m.regionFilterBED_include(conn, params.flank_dist)
+				else:
+					sys.exit("ERROR: Filtering targets on proximity to BED elements requires FASTA <-A> and BED <-B> inputs!")
 			else:
 				assert False, "Unhandled option %r"%option
 
@@ -538,6 +567,16 @@ def filterTargetRegions_verbose(conn, params):
 						m.regionFilterGFF_Alias(conn, option.o2, params.flank_dist)
 				else:
 					sys.exit("ERROR: Filtering targets on proximity to GFF elements requires FASTA <-A> and GFF <-G> inputs!")
+			elif option.o1 in ("bed_x", "bed_i"):
+				if params.bed and params.assembly:
+					if option.o1 == "bed_x":
+						print("\t\t\tFiltering criterion: Exclude by proximity to BED elements")
+						m.regionFilterBED_exclude(conn, params.flank_dist)
+					elif option.o1 == "bed_i":
+						print("\t\t\tFiltering criterion: Include by proximity to BED elements")
+						m.regionFilterBED_include(conn, params.flank_dist)
+				else:
+					sys.exit("ERROR: Filtering targets on proximity to BED elements requires FASTA <-A> and BED <-B> inputs!")
 			else:
 				assert False, "Unhandled option %r"%option
 
@@ -1293,18 +1332,14 @@ def printBaits(conn, params):
 	df = m.getPrintBaits(conn)
 	out = params.workdir + "/" + params.out + ".fasta"
 	file_object = open(out, "w")
-	rel_targ = dict() #dictionary to keep target number relative to locus
-	rel_bait = dict() # dictionary to keep bait number relative to target
 
 	for i, r in df.iterrows():
-		if r.regid in rel_bait:
-			rel_bait[r.regid] += 1
+		id=1
+		if r.chrom not in ["NULL", "NA"]:
+			id=r.chrom
 		else:
-			if r.locid in rel_targ:
-				rel_targ[r.locid] += 1
-			else:
-				rel_targ[r.locid] = 1
-			rel_bait[r.regid] = 1
+			id=r.locid
+
 		#If user wants expanded sequences:
 		if params.expand:
 			var = 1
@@ -1312,12 +1347,12 @@ def printBaits(conn, params):
 			for expanded in s.expandAmbiquousDNA(r.sequence):
 				expanded = expanded.replace("-","")
 				if params.strand in ("+", "both"):
-					header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "." + str(var) + "\n"
+					header = ">" + str(id) + ":" + str(r.rstart) + "-" + str(r.rstop) +str(r.regid) + ":" + str(r.start) + "-" + str(r.stop) + "_Bait=" +str(r.baitid) + "." + str(var) + "\n"
 					seq = expanded + "\n"
 					file_object.write(header)
 					file_object.write(seq)
 				if params.strand in ("-", "both"):
-					header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "." + str(var) + "_revcomp" + "\n"
+					header = ">" + str(id) + ":" + str(r.rstart) + "-" + str(r.rstop) +str(r.regid) + ":" + str(r.start) + "-" + str(r.stop) + "_Bait=" +str(r.baitid) + "." + str(var) + "_revcomp" + "\n"
 					seq = s.reverseComplement(expanded) + "\n"
 					file_object.write(header)
 					file_object.write(seq)
@@ -1325,12 +1360,12 @@ def printBaits(conn, params):
 		#Otherwise just print it
 		else:
 			if params.strand in ("+", "both"):
-				header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "\n"
+				header = ">" + str(id) + ":" + str(r.rstart) + "-" + str(r.rstop) + str(r.regid) + ":" + str(r.start) + "-" + str(r.stop) + "_Bait=" + str(r.baitid) + "\n"
 				seq = r.sequence + "\n"
 				file_object.write(header)
 				file_object.write(seq)
 			if params.strand in ("-", "both"):
-				header = ">Locus" + str(r.locid) + "_Target" + str(rel_targ[r.locid]) + "_Bait" + str(rel_bait[r.regid]) + "_revcomp" + "\n"
+				header = ">" + str(id) + ":" + str(r.rstart) + "-" + str(r.rstop) +str(r.regid) + ":" + str(r.start) + "-" + str(r.stop) + "_Bait=" +str(r.baitid) + "_revcomp" + "\n"
 				seq = s.reverseComplement(r.sequence) + "\n"
 				file_object.write(header)
 				file_object.write(seq)
@@ -1338,24 +1373,24 @@ def printBaits(conn, params):
 
 #Function to print targets in final output
 def printTargets(conn, params):
-	df = m.getRegions(conn)
+	df = m.getPrintRegions(conn)
 
 	out = params.workdir + "/" + params.out + "_targets.fasta"
 	file_object = open(out, "w")
 
 	rel_num = dict() #dictionary to keep target number relative to locus num
 	for i, r in df.iterrows():
-		#add locus to dict if it isn't there already
-		if r.locid in rel_num:
-			rel_num[r.locid] += 1
+		id=1
+		if r.chrom not in ["NULL", "NA"]:
+			id=r.chrom
 		else:
-			rel_num[r.locid] = 1
+			id=r.locid
 
 		#build FASTA header
 		p = "T"
 		if r["pass"]==0:
 			p="F"
-		header = ">Locus" + str(r.locid) + "_Target" + str(rel_num[r.locid]) + "_Pass=" + str(p) + "\n"
+		header = ">" + str(id) + ":" + str(r.start) + "-" + str(r.stop) +"_Target=" + str(r.regid) + "_Pass=" + str(p) + "\n"
 		seq = r.sequence + "\n"
 		file_object.write(header)
 		file_object.write(seq)
@@ -1374,7 +1409,12 @@ def printLoci(conn, params):
 		p = "T"
 		if r["pass"]==0:
 			p="F"
-		header = ">Locus" + str(r.id) + "_Pass=" + str(p) + "\n"
+		id=1
+		if r.chrom not in ["NULL", "NA"]:
+			id=r.chrom
+		else:
+			id=r.id
+		header = ">Locus" + str(id) + "_Pass=" + str(p) + "\n"
 		seq = r.consensus + "\n"
 		file_object.write(header)
 		file_object.write(seq)

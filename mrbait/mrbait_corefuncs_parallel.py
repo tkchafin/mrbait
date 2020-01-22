@@ -334,8 +334,9 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	for df_chunk in np.array_split(loci, chunks):
 		size = df_chunk.shape[0]
 		#print("size of chunk",chunk,"is:",size)
-		chunk_file = params.workdir + "/." + str(chunk) + ".chunk.hdf"
-		df_chunk.to_hdf(chunk_file, "NULL", mode="w", format="f")
+		chunk_file = params.workdir + "/." + str(chunk) + ".chunk"
+		#print(df_chunk)
+		df_chunk.to_csv(chunk_file, mode="w", index=False)
 		files.append(chunk_file)
 		chunk += 1
 
@@ -352,7 +353,7 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 	#Remove chunkfiles
 	d = os.listdir(params.workdir)
 	for item in d:
-		if item.endswith(".chunk.hdf"):
+		if item.endswith(".chunk"):
 			os.remove(os.path.join(params.workdir, item))
 
 
@@ -360,8 +361,8 @@ def targetDiscoverySlidingWindow_parallel(conn, params, loci):
 def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank_dist, target_all, chunk):
 	connection = sqlite3.connect(db)
 	#print("process: reading hdf from",chunk)
-	loci = pd.read_hdf(chunk)
-
+	loci = pd.read_csv(chunk)
+	#print(loci)
 	for seq in loci.itertuples():
 		#print(seq)
 		start = 0
@@ -399,6 +400,7 @@ def targetDiscoverySlidingWindow_worker(db, shift, width, var, n, g, blen, flank
 						if (stop - start) >= blen:
 							target = (seq[2])[start:stop]
 							tr_counts = s.seqCounterSimple(s.simplifySeq(target))
+							#print("candidate:",window_seq[0])
 							n_mask = utils.n_lower_chars(target)
 							n_gc = s.gc_counts(target)
 							#Check that there aren't too many SNPs

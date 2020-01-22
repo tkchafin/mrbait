@@ -1,0 +1,8 @@
+#bed chrom start stop
+chr1.scaffold1	1	50
+chr1.scaffold1	99	103
+chr2.scaffold1	180	480
+chr2.scaffold1	1	10
+chr2.scaffold2	40	80
+chr2.scaffold2	1287	177117
+chr7.scaffold1	10099	1992192

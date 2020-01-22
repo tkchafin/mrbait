@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.6](https://github.com/tkchafin/mrbait/releases/tag/v1.2.6)
+- Fixed bug where single-threaded sliding window target discovery hangs
+- Changed format of --print commands to reflect start/stop coordinates
+- New functionality: Added BED inputs and --filter_b --filter_r options
+- Bug fix: Replaced HDF5 files in targetDiscoverySlidingWindow_parallel to deal with numpy/pyTables version incompatibility
+- Added consens_maf param setting to output
+
 [v1.2.5](https://github.com/tkchafin/mrbait/releases/tag/v1.2.5)
 - Bug fix where loci are all lost in multithreading version
 
@@ -32,7 +39,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Bug fix with changed ipyrad .loci format
 - Bug fix with deprecated networkx.edges_iter()
 - Allow arbitrary leading dashes for flags
-- Added option to skip gaph-based conflict resolution
+- Added option to skip graph-based conflict resolution
 - Added option to do graph-based resolution unweighted
 - Added option to weight by minimizing N's
 
