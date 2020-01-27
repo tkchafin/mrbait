@@ -269,7 +269,7 @@ def loadAlignments(conn, params):
 		if params.bed:
 			print("\t\tLoading BED file:",params.bed)
 			if int(params.threads) > 1:
-				print("\t\t\tLoading BED using",str(params.threads),"parallel processes.")
+				print("\t\t\tLoading GFF using",str(params.threads),"parallel processes.")
 				pcore.loadBED_parallel(conn, params)
 			else:
 				core.loadBED(conn, params)
