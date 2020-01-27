@@ -7,6 +7,21 @@ import pandas as pd
 import re
 import operator
 
+#counts non-empty lines in file
+#if skip=True, skips commented lines (startswith #)
+def fileLength(fname, skip=False):
+	with open(fname) as f:
+		count=0
+		for l in f:
+			line = l.strip()
+			if not line:
+				continue
+			if skip:
+				if line[0] != "#":
+					count+=1
+			else:
+				count+=1
+
 #Function to calculate overlap of two 1D line segments
 #Found on StackOverflow
 #https://stackoverflow.com/questions/16691524/calculating-the-overlap-distance-of-two-1d-line-segments
@@ -29,7 +44,7 @@ def calculateUnionLengthFixed(n, l, o):
     assert isinstance(n, int)
     assert isinstance(l, int)
     assert isinstance(o, int)
-    return((l) + (n-1)*(l-o)) 
+    return((l) + (n-1)*(l-o))
     #return ((n*l)-((n-1)*o))
 
 #Function for checking if two things with start and end coordinates overlap on single axis
