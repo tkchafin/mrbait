@@ -199,6 +199,54 @@ def countXMFA(loci):
 	return(count)
 
 
+#Function split a file into chunks, skipping commented lines
+def generic_chunker(infile, chunks, wd):
+
+	chunks = int(chunks)
+	line_count = misc.fileLength(infile, skip=True)
+
+	if line_count < chunks:
+		chunks = line_count
+	chunk_size = line_count // chunks
+	removeChunks(wd)
+
+	files = list()
+	#write .loci file into chunk files
+	with open(infile) as file_object:
+		max_chunks = chunks
+		chunks = 1
+		line_number = 1
+
+		chunk_file = wd + "/." + str(chunks) + ".chunk"
+		out_object = open(chunk_file, "w")
+		files.append(chunk_file)
+
+		for l in file_object:
+			line = l.strip()
+			if not line:
+				continue
+			if chunks < max_chunks:
+				if line_number <= chunk_size:
+					line_number = line_number + 1
+					out = line + "\n"
+					out_object.write(out)
+				else:
+					line_number = 1
+					chunks = chunks + 1
+					out_object.close()
+					chunk_file = wd + "/." + str(chunks) + ".chunk"
+					out_object = open(chunk_file, "w")
+					files.append(chunk_file)
+					out = line + "\n"
+					out_object.write(out)
+			else:
+				#If last chunk, keep writing to final chunk file
+				out = line + "\n"
+				out_object.write(out)
+		out_object.close()
+		file_object.close()
+	return(files)
+
 #Function split .loci file into n chunks
 def loci_chunker(infile, chunks, wd):
 
