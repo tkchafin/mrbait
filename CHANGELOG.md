@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Releases](https://github.com/tkchafin/mrbait/releases)
 
+[v1.2.7]
+- In progress:
+- Parallel processing of BED and GFF files
+
 [v1.2.6](https://github.com/tkchafin/mrbait/releases/tag/v1.2.6)
 - Fixed bug where single-threaded sliding window target discovery hangs
 - Changed format of --print commands to reflect start/stop coordinates

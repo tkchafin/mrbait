@@ -259,12 +259,20 @@ def loadAlignments(conn, params):
 		#if GFF file
 		if params.gff:
 			print("\t\tLoading GFF file:",params.gff)
-			core.loadGFF(conn, params)
+			if int(params.threads) > 1:
+				print("\t\t\tLoading GFF using",str(params.threads),"parallel processes.")
+				pcore.loadGFF_parallel(conn, params)
+			else:
+				core.loadGFF(conn, params)
 			#print(m.getGFF(conn))
 
 		if params.bed:
 			print("\t\tLoading BED file:",params.bed)
-			core.loadBED(conn, params)
+			if int(params.threads) > 1:
+				print("\t\t\tLoading GFF using",str(params.threads),"parallel processes.")
+				pcore.loadBED_parallel(conn, params)
+			else:
+				core.loadBED(conn, params)
 			#print(m.getGFF(conn))
 	else:
 		#Option to load .loci alignment goes here!

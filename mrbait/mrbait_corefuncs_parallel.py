@@ -34,6 +34,132 @@ https://stackoverflow.com/questions/25557686/python-sharing-a-lock-between-proce
 
 """
 
+#Function to load a GFF file into database
+def loadGFF_parallel(conn, params):
+
+	t = int(params.threads)
+
+	#file chunker call
+	file_list = aln_file_tools.generic_chunker(params.gff, t, params.workdir)
+
+	#print("Files are:",file_list)
+	#Initialize multiprocessing pool
+	#if 'lock' not in globals():
+	lock = multiprocessing.Lock()
+	try:
+		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+			func = partial(loadGFF_worker, params.db, params.gff)
+			results = pool.map(func, file_list)
+	except Exception as e:
+		pool.close()
+	pool.close()
+	pool.join()
+
+	#reset_lock()
+	#Remove chunkfiles
+	aln_file_tools.removeChunks(params.workdir)
+
+#worker function version of loadGFF
+def loadGFF_worker(db, gff, chunk):
+	try:
+		connection = sqlite3.connect(db)
+
+		#For each GFF record in params.gff
+		for record in gff.read_gff(gff):
+			#Skip any records that are missing the sequence ID, or coordinates
+			if record.seqid == "NULL" or record.start == "NULL" or record.end == "NULL":
+				continue
+			if record.start > record.end:
+				temp = record.start
+				record.start = record.end
+				record.end = temp
+			#Get the alias, if it exists
+			alias = ""
+			if record.getAlias(): #returns false if no alias
+				alias = record.getAlias()
+			else:
+				alias = "NULL"
+			#NOTE: This function ONLY inserts GFFRecords where record.seqid matches an existing locus in the loci table
+			lock.acquire()
+			m.add_gff_record(connection, record.seqid, record.type.lower(), record.start, record.end, alias)
+			lock.release()
+
+		connection.close()
+	except Exception as e:
+		raise Exception(e.message)
+
+#Function to load a GFF file into database
+def loadBED_parallel(conn, params):
+
+	t = int(params.threads)
+
+	#file chunker call
+	file_list = aln_file_tools.generic_chunker(params.bed, t, params.workdir)
+
+	#print("Files are:",file_list)
+	#Initialize multiprocessing pool
+	#if 'lock' not in globals():
+	lock = multiprocessing.Lock()
+	try:
+		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
+			func = partial(loadBED_worker, params.db, params.bed, params.bed_header)
+			results = pool.map(func, file_list)
+	except Exception as e:
+		pool.close()
+	pool.close()
+	pool.join()
+
+	#reset_lock()
+	#Remove chunkfiles
+	aln_file_tools.removeChunks(params.workdir)
+
+#worker function version of loadGFF
+def loadBED_worker(db, bed, bed_header, chunk):
+	try:
+		connection = sqlite3.connect(db)
+
+		with open(bed)as f:
+			count=0
+			for line in f:
+				line = line.strip()
+				if not line:
+					continue
+				count+=1
+				if count <= bed_header:
+					continue
+				content = line.split()
+
+				#NOTE: This function ONLY inserts BEDRecords where record.seqid matches an existing locus in the loci table
+				lock.acquire()
+				m.add_bed_record(connection, content[0], content[1], content[2])
+				lock.release()
+		connection.close()
+	except Exception as e:
+		raise Exception(e.message)
+
+
+#Function to load BED file
+def loadBED(conn, params):
+
+	with open(params.bed)as f:
+		count=0
+		for line in f:
+			line = line.strip()
+			if not line:
+				continue
+			count+=1
+			if count <= params.bed_header:
+				continue
+			content = line.split()
+
+			#NOTE: This function ONLY inserts BEDRecords where record.seqid matches an existing locus in the loci table
+			m.add_bed_record(conn, content[0], content[1], content[2])
+
+	#remove BED records not falling within our loci
+	#print(m.getBED(conn))
+	m.validateBEDRecords(conn)
+	#print(m.getBED(conn))
+
 #Function to load a XMFA file into database
 def loadXMFA_parallel(conn, params):
 
