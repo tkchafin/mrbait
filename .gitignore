@@ -7,3 +7,9 @@ blastdb.*
 .DS_Store
 out.*
 mprofile_*
+build
+build/*
+*egg-info*
+*egg-info*/*
+dist
+dist/*
