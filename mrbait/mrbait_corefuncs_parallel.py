@@ -48,7 +48,7 @@ def loadGFF_parallel(conn, params):
 	lock = multiprocessing.Lock()
 	try:
 		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
-			func = partial(loadGFF_worker, params.db, params.gff)
+			func = partial(loadGFF_worker, params.db, chunk)
 			results = pool.map(func, file_list)
 	except Exception as e:
 		pool.close()
@@ -60,12 +60,12 @@ def loadGFF_parallel(conn, params):
 	aln_file_tools.removeChunks(params.workdir)
 
 #worker function version of loadGFF
-def loadGFF_worker(db, gff, chunk):
+def loadGFF_worker(db, chunk):
 	try:
 		connection = sqlite3.connect(db)
 
 		#For each GFF record in params.gff
-		for record in gff.read_gff(gff):
+		for record in gff.read_gff(chunk):
 			#Skip any records that are missing the sequence ID, or coordinates
 			if record.seqid == "NULL" or record.start == "NULL" or record.end == "NULL":
 				continue
@@ -102,7 +102,7 @@ def loadBED_parallel(conn, params):
 	lock = multiprocessing.Lock()
 	try:
 		with multiprocessing.Pool(t,initializer=init, initargs=(lock,)) as pool:
-			func = partial(loadBED_worker, params.db, params.bed, params.bed_header)
+			func = partial(loadBED_worker, params.db, params.bed_header)
 			results = pool.map(func, file_list)
 	except Exception as e:
 		pool.close()
@@ -114,11 +114,11 @@ def loadBED_parallel(conn, params):
 	aln_file_tools.removeChunks(params.workdir)
 
 #worker function version of loadGFF
-def loadBED_worker(db, bed, bed_header, chunk):
+def loadBED_worker(db, bed_header, chunk):
 	try:
 		connection = sqlite3.connect(db)
 
-		with open(bed)as f:
+		with open(chunk)as f:
 			count=0
 			for line in f:
 				line = line.strip()
@@ -131,6 +131,7 @@ def loadBED_worker(db, bed, bed_header, chunk):
 
 				#NOTE: This function ONLY inserts BEDRecords where record.seqid matches an existing locus in the loci table
 				lock.acquire()
+				print(content)
 				m.add_bed_record(connection, content[0], content[1], content[2])
 				lock.release()
 		connection.close()
