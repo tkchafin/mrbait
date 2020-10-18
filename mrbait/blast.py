@@ -41,6 +41,8 @@ def blastExcludeMatch(opts, db, fas, pid, qcov, out):
 	if (len(results) < 1):
 		return(list())
 	pid_adj = pid*100
+	#print(results)
+	#sys.exit()
 	blacklist = results[(results.pident > pid_adj) & (results.qcov > qcov)]["qseqid"].tolist()
 	blacklist = [s.replace('id_', '') for s in blacklist]
 	return(list(set(blacklist)))
@@ -77,11 +79,11 @@ def blastExcludeAmbig(opts, db, fas, pid, qcov, out):
 	if (len(results) < 1):
 		return(list())
 	pid_adj = pid*100
-	
+
 	#reduce to matches passing thresholds, and only queries with >1 hit
 	subset = results[(results.pident > pid_adj) & (results.qcov > qcov)]
 	subset = subset[subset.groupby('qseqid').qseqid.transform(len) > 1]
-	
+
 	#
 	blacklist = list()
 	unique_queries = dict(list(subset.groupby(['qseqid','sseqid'])))
@@ -98,7 +100,7 @@ def blastExcludeAmbig(opts, db, fas, pid, qcov, out):
 					#print(qseqid[0])
 					blacklist.append(qseqid[0])
 					break
-					
+
 	blacklist = [s.replace('id_', '') for s in blacklist]
 	return(list(set(blacklist)))
 

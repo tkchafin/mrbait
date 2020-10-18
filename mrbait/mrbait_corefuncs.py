@@ -1081,7 +1081,7 @@ def filterBaits_verbose(conn, params):
 					break
 				#print("BLASTDB PATH IS: ", db_path)
 				#Get targets, print to fasta
-				seqs = m.getPassedTRs(conn)
+				seqs = m.getPassedBaits(conn)
 				fas = params.workdir + "/.temp.fasta"
 				aln_file_tools.writeFasta(seqs, fas)
 				outfile = params.workdir + "/.temp.blast"
